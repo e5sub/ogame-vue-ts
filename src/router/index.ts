@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
     { path: '/', name: 'overview', component: () => import('@/views/OverviewView.vue') },
     { path: '/buildings', name: 'buildings', component: () => import('@/views/BuildingsView.vue') },
@@ -13,7 +13,20 @@ const router = createRouter({
     { path: '/battle-simulator', name: 'battle-simulator', component: () => import('@/views/BattleSimulatorView.vue') },
     { path: '/messages', name: 'messages', component: () => import('@/views/MessagesView.vue') },
     { path: '/galaxy', name: 'galaxy', component: () => import('@/views/GalaxyView.vue') },
-    { path: '/settings', name: 'settings', component: () => import('@/views/SettingsView.vue') }
+    { path: '/settings', name: 'settings', component: () => import('@/views/SettingsView.vue') },
+    {
+      path: '/gm',
+      name: 'gm',
+      component: () => import('@/views/GMView.vue'),
+      beforeEnter: (_to, _from, next) => {
+        // GM页面仅在开发模式下可访问
+        if (import.meta.env.DEV) {
+          next()
+        } else {
+          next('/')
+        }
+      }
+    }
   ]
 })
 

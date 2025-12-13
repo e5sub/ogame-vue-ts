@@ -33,9 +33,11 @@ export const useGameConfig = () => {
     [BuildingType.CrystalStorage]: 'crystalStorage',
     [BuildingType.DeuteriumTank]: 'deuteriumTank',
     [BuildingType.DarkMatterCollector]: 'darkMatterCollector',
+    [BuildingType.Terraformer]: 'terraformer',
     [BuildingType.LunarBase]: 'lunarBase',
     [BuildingType.SensorPhalanx]: 'sensorPhalanx',
-    [BuildingType.JumpGate]: 'jumpGate'
+    [BuildingType.JumpGate]: 'jumpGate',
+    [BuildingType.PlanetDestroyerFactory]: 'planetDestroyerFactory'
   }
 
   // 舰船类型枚举值到翻译键的映射
@@ -49,7 +51,8 @@ export const useGameConfig = () => {
     [ShipType.ColonyShip]: 'colonyShip',
     [ShipType.Recycler]: 'recycler',
     [ShipType.EspionageProbe]: 'espionageProbe',
-    [ShipType.DarkMatterHarvester]: 'darkMatterHarvester'
+    [ShipType.DarkMatterHarvester]: 'darkMatterHarvester',
+    [ShipType.Deathstar]: 'deathstar'
   }
 
   // 防御设施类型枚举值到翻译键的映射
@@ -61,7 +64,8 @@ export const useGameConfig = () => {
     [DefenseType.IonCannon]: 'ionCannon',
     [DefenseType.PlasmaTurret]: 'plasmaTurret',
     [DefenseType.SmallShieldDome]: 'smallShieldDome',
-    [DefenseType.LargeShieldDome]: 'largeShieldDome'
+    [DefenseType.LargeShieldDome]: 'largeShieldDome',
+    [DefenseType.PlanetaryShield]: 'planetaryShield'
   }
 
   // 科技类型枚举值到翻译键的映射
@@ -75,7 +79,9 @@ export const useGameConfig = () => {
     [TechnologyType.CombustionDrive]: 'combustionDrive',
     [TechnologyType.ImpulseDrive]: 'impulseDrive',
     [TechnologyType.HyperspaceDrive]: 'hyperspaceDrive',
-    [TechnologyType.DarkMatterTechnology]: 'darkMatterTechnology'
+    [TechnologyType.DarkMatterTechnology]: 'darkMatterTechnology',
+    [TechnologyType.TerraformingTechnology]: 'terraformingTechnology',
+    [TechnologyType.PlanetDestructionTech]: 'planetDestructionTech'
   }
 
   // 军官类型枚举值到翻译键的映射

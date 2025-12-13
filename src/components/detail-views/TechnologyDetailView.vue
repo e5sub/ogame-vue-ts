@@ -19,12 +19,21 @@
               <Badge v-if="level === currentLevel" variant="default">{{ level }}</Badge>
               <span v-else>{{ level }}</span>
             </TableCell>
-            <TableCell class="text-center text-sm">{{ formatNumber(getLevelData(level).cost.metal) }}</TableCell>
-            <TableCell class="text-center text-sm">{{ formatNumber(getLevelData(level).cost.crystal) }}</TableCell>
-            <TableCell class="text-center text-sm">{{ formatNumber(getLevelData(level).cost.deuterium) }}</TableCell>
+            <TableCell class="text-center text-sm">
+              <NumberWithTooltip :value="getLevelData(level).cost.metal" />
+            </TableCell>
+            <TableCell class="text-center text-sm">
+              <NumberWithTooltip :value="getLevelData(level).cost.crystal" />
+            </TableCell>
+            <TableCell class="text-center text-sm">
+              <NumberWithTooltip :value="getLevelData(level).cost.deuterium" />
+            </TableCell>
             <TableCell class="text-center text-sm">{{ formatTime(getLevelData(level).researchTime) }}</TableCell>
             <TableCell class="text-center text-sm">
-              <span class="text-primary font-medium">+{{ getLevelData(level).points }}</span>
+              <span class="text-primary font-medium">
+                +
+                <NumberWithTooltip :value="getLevelData(level).points" />
+              </span>
             </TableCell>
           </TableRow>
         </TableBody>
@@ -40,15 +49,21 @@
         <CardContent class="space-y-2">
           <div class="flex items-center justify-between text-sm">
             <span class="text-muted-foreground">{{ t('resources.metal') }}:</span>
-            <span class="font-medium">{{ formatNumber(totalStats.metal) }}</span>
+            <span class="font-medium">
+              <NumberWithTooltip :value="totalStats.metal" />
+            </span>
           </div>
           <div class="flex items-center justify-between text-sm">
             <span class="text-muted-foreground">{{ t('resources.crystal') }}:</span>
-            <span class="font-medium">{{ formatNumber(totalStats.crystal) }}</span>
+            <span class="font-medium">
+              <NumberWithTooltip :value="totalStats.crystal" />
+            </span>
           </div>
           <div class="flex items-center justify-between text-sm">
             <span class="text-muted-foreground">{{ t('resources.deuterium') }}:</span>
-            <span class="font-medium">{{ formatNumber(totalStats.deuterium) }}</span>
+            <span class="font-medium">
+              <NumberWithTooltip :value="totalStats.deuterium" />
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -58,7 +73,9 @@
           <CardTitle class="text-sm">{{ t('research.totalPoints') }}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div class="text-3xl font-bold text-primary">{{ formatNumber(totalStats.points) }}</div>
+          <div class="text-3xl font-bold text-primary">
+            <NumberWithTooltip :value="totalStats.points" />
+          </div>
           <p class="text-xs text-muted-foreground mt-1">
             {{ t('research.levelRange') }}: {{ Math.max(0, currentLevel - 10) }} - {{ Math.min(currentLevel + 10, currentLevel + 10) }}
           </p>
@@ -75,8 +92,10 @@
   import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
   import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
   import { Badge } from '@/components/ui/badge'
+  import NumberWithTooltip from '@/components/NumberWithTooltip.vue'
   import * as researchLogic from '@/logic/researchLogic'
   import * as pointsLogic from '@/logic/pointsLogic'
+  import { formatTime } from '@/utils/format'
 
   const { t } = useI18n()
 
@@ -85,12 +104,11 @@
     currentLevel: number
   }>()
 
-  // 等级范围：当前等级 ±10
+  // 等级范围：当前等级 +10
   const levelRange = computed(() => {
-    const start = Math.max(0, props.currentLevel - 10)
     const end = props.currentLevel + 10
     const levels = []
-    for (let i = start; i <= end; i++) {
+    for (let i = props.currentLevel; i <= end; i++) {
       levels.push(i)
     }
     return levels
@@ -137,18 +155,4 @@
 
     return { metal, crystal, deuterium, points }
   })
-
-  const formatNumber = (num: number): string => {
-    return num.toLocaleString()
-  }
-
-  const formatTime = (seconds: number): string => {
-    if (seconds < 60) return `${seconds}${t('common.timeSecond')}`
-    const minutes = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    if (minutes < 60) return `${minutes}${t('common.timeMinute')}${secs}${t('common.timeSecond')}`
-    const hours = Math.floor(minutes / 60)
-    const mins = minutes % 60
-    return `${hours}${t('common.timeHour')}${mins}${t('common.timeMinute')}`
-  }
 </script>

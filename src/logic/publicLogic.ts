@@ -4,10 +4,52 @@
  */
 
 import { BuildingType, TechnologyType } from '@/types/game'
-import type { Planet, Resources, Officer } from '@/types/game'
+import type { Planet, Resources, Officer, BuildingConfig, TechnologyConfig } from '@/types/game'
 import { OfficerType } from '@/types/game'
 import * as officerLogic from '@/logic/officerLogic'
 import * as resourceLogic from '@/logic/resourceLogic'
+
+/**
+ * 获取特定等级的升级条件
+ * 合并基础 requirements 和等级门槛 levelRequirements
+ * @param config 建筑或科技配置
+ * @param targetLevel 目标等级
+ * @returns 合并后的前置条件
+ */
+export const getLevelRequirements = (
+  config: BuildingConfig | TechnologyConfig,
+  targetLevel: number
+): Partial<Record<BuildingType | TechnologyType, number>> => {
+  const requirements: Partial<Record<BuildingType | TechnologyType, number>> = {}
+
+  // 1. 添加基础 requirements（如果存在）
+  if (config.requirements) {
+    Object.assign(requirements, config.requirements)
+  }
+
+  // 2. 添加等级门槛 requirements（如果存在）
+  if (config.levelRequirements) {
+    // 找出所有小于等于目标等级的门槛
+    const applicableLevels = Object.keys(config.levelRequirements)
+      .map(Number)
+      .filter(level => level <= targetLevel)
+      .sort((a, b) => a - b)
+
+    // 依次合并所有适用的等级要求（后面的覆盖前面的）
+    for (const level of applicableLevels) {
+      const levelReqs = config.levelRequirements[level]
+      if (levelReqs) {
+        // 合并要求，取最大值
+        for (const [key, value] of Object.entries(levelReqs)) {
+          const currentValue = requirements[key as BuildingType | TechnologyType] || 0
+          requirements[key as BuildingType | TechnologyType] = Math.max(currentValue, value)
+        }
+      }
+    }
+  }
+
+  return requirements
+}
 
 /**
  * 检查建造/研发前置条件是否满足

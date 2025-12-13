@@ -296,9 +296,10 @@
 
 <script setup lang="ts">
   import { useGameStore } from '@/stores/gameStore'
+  import { useUniverseStore } from '@/stores/universeStore'
   import { useI18n } from '@/composables/useI18n'
   import { useGameConfig } from '@/composables/useGameConfig'
-  import { computed, ref, onMounted } from 'vue'
+  import { computed, ref, onMounted, onUnmounted } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import { ShipType, MissionType, BuildingType } from '@/types/game'
   import type { Fleet, Resources } from '@/types/game'
@@ -311,7 +312,7 @@
   import ResourceIcon from '@/components/ResourceIcon.vue'
   import AlertDialog from '@/components/AlertDialog.vue'
   import UnlockRequirement from '@/components/UnlockRequirement.vue'
-  import { Sword, Package, Rocket as RocketIcon, Eye, Users } from 'lucide-vue-next'
+  import { Sword, Package, Rocket as RocketIcon, Eye, Users, Recycle, Skull } from 'lucide-vue-next'
   import { formatNumber, formatTime } from '@/utils/format'
   import * as shipValidation from '@/logic/shipValidation'
   import * as fleetLogic from '@/logic/fleetLogic'
@@ -322,10 +323,15 @@
   const route = useRoute()
   const router = useRouter()
   const gameStore = useGameStore()
+  const universeStore = useUniverseStore()
   const { t } = useI18n()
   const { SHIPS } = useGameConfig()
   const planet = computed(() => gameStore.currentPlanet)
   const alertDialog = ref<InstanceType<typeof AlertDialog> | null>(null)
+
+  // 当前时间（响应式）
+  const currentTime = ref(Date.now())
+  let timeInterval: number | null = null
 
   // 计算最大舰队任务槽位
   const maxFleetMissions = computed(() => {
@@ -345,7 +351,9 @@
     [ShipType.LargeCargo]: 0,
     [ShipType.ColonyShip]: 0,
     [ShipType.Recycler]: 0,
-    [ShipType.EspionageProbe]: 0
+    [ShipType.EspionageProbe]: 0,
+    [ShipType.DarkMatterHarvester]: 0,
+    [ShipType.Deathstar]: 0
   })
 
   // 目标坐标
@@ -359,6 +367,11 @@
 
   // 从 URL query 参数初始化
   onMounted(() => {
+    // 启动定时器更新当前时间
+    timeInterval = window.setInterval(() => {
+      currentTime.value = Date.now()
+    }, 1000) // 每秒更新一次
+
     const { galaxy, system, position, mission } = route.query
 
     // 如果有参数，填充数据
@@ -385,13 +398,22 @@
     }
   })
 
+  // 清理定时器
+  onUnmounted(() => {
+    if (timeInterval) {
+      clearInterval(timeInterval)
+    }
+  })
+
   // 可用任务类型
   const availableMissions = computed(() => [
     { type: MissionType.Attack, name: t('fleetView.attackMission'), icon: Sword },
     { type: MissionType.Transport, name: t('fleetView.transport'), icon: Package },
     { type: MissionType.Colonize, name: t('fleetView.colonize'), icon: RocketIcon },
     { type: MissionType.Spy, name: t('fleetView.spy'), icon: Eye },
-    { type: MissionType.Deploy, name: t('fleetView.deploy'), icon: Users }
+    { type: MissionType.Deploy, name: t('fleetView.deploy'), icon: Users },
+    { type: MissionType.Recycle, name: t('fleetView.recycle'), icon: Recycle },
+    { type: MissionType.Destroy, name: t('fleetView.destroy'), icon: Skull }
   ])
 
   // 获取任务名称
@@ -439,24 +461,53 @@
   }
 
   // 检查是否可以派遣
-  const canSendFleet = (): boolean => {
+  const canSendFleet = (): { valid: boolean; errorKey?: string } => {
     // 检查是否选择了舰船
     const hasShips = Object.values(selectedFleet.value).some(count => count > 0)
-    if (!hasShips) return false
+    if (!hasShips) return { valid: false, errorKey: 'fleetView.noShipsSelected' }
+
+    // 检查是否派遣到自己的星球
+    if (planet.value) {
+      const isSamePlanet =
+        targetPosition.value.galaxy === planet.value.position.galaxy &&
+        targetPosition.value.system === planet.value.position.system &&
+        targetPosition.value.position === planet.value.position.position
+      if (isSamePlanet) {
+        return { valid: false, errorKey: 'fleetView.cannotSendToOwnPlanet' }
+      }
+    }
 
     // 检查载货量
     if (selectedMission.value === MissionType.Transport) {
-      if (getTotalCargo() > getTotalCargoCapacity()) return false
+      if (getTotalCargo() > getTotalCargoCapacity()) {
+        return { valid: false, errorKey: 'fleetView.cargoExceedsCapacity' }
+      }
     }
 
     // 检查殖民船
     if (selectedMission.value === MissionType.Colonize) {
       if (!selectedFleet.value[ShipType.ColonyShip] || (selectedFleet.value[ShipType.ColonyShip] ?? 0) < 1) {
-        return false
+        return { valid: false, errorKey: 'fleetView.noColonyShip' }
       }
     }
 
-    return true
+    // 检查回收任务是否有残骸
+    if (selectedMission.value === MissionType.Recycle) {
+      const debrisId = `debris_${targetPosition.value.galaxy}_${targetPosition.value.system}_${targetPosition.value.position}`
+      const debrisField = universeStore.debrisFields[debrisId]
+      if (!debrisField || (debrisField.resources.metal === 0 && debrisField.resources.crystal === 0)) {
+        return { valid: false, errorKey: 'fleetView.noDebrisAtTarget' }
+      }
+    }
+
+    // 检查毁灭任务是否有死星
+    if (selectedMission.value === MissionType.Destroy) {
+      if (!selectedFleet.value[ShipType.Deathstar] || (selectedFleet.value[ShipType.Deathstar] ?? 0) < 1) {
+        return { valid: false, errorKey: 'fleetView.noDeathstar' }
+      }
+    }
+
+    return { valid: true }
   }
 
   const sendFleet = (
@@ -497,6 +548,16 @@
   // 派遣舰队
   const handleSendFleet = () => {
     if (!planet.value) return
+
+    // 验证是否可以派遣
+    const validation = canSendFleet()
+    if (!validation.valid) {
+      alertDialog.value?.show({
+        title: t('fleetView.sendFailed'),
+        message: validation.errorKey ? t(validation.errorKey) : t('fleetView.sendFailedMessage')
+      })
+      return
+    }
 
     // 过滤出实际选择的舰船
     const fleet: Partial<Fleet> = {}
@@ -547,23 +608,23 @@
 
   // 获取任务剩余时间
   const getRemainingTime = (mission: any): number => {
-    const now = Date.now()
+    const now = currentTime.value
     const targetTime = mission.status === 'outbound' ? mission.arrivalTime : mission.returnTime
     return Math.max(0, (targetTime - now) / 1000)
   }
 
   // 获取任务进度
   const getMissionProgress = (mission: any): number => {
-    const now = Date.now()
+    const now = currentTime.value
     if (mission.status === 'outbound') {
       const total = mission.arrivalTime - mission.departureTime
       const elapsed = now - mission.departureTime
-      return Math.min(100, (elapsed / total) * 100)
+      return Math.max(0, Math.min(100, (elapsed / total) * 100))
     } else {
       const departTime = mission.arrivalTime
       const total = mission.returnTime - departTime
       const elapsed = now - departTime
-      return Math.min(100, (elapsed / total) * 100)
+      return Math.max(0, Math.min(100, (elapsed / total) * 100))
     }
   }
 </script>

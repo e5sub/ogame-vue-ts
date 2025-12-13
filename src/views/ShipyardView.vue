@@ -5,6 +5,29 @@
 
     <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">{{ t('shipyardView.title') }}</h1>
 
+    <!-- 舰队仓储显示 -->
+    <div class="mb-4 sm:mb-6 p-3 sm:p-4 bg-muted/50 rounded-lg border">
+      <div class="flex items-center justify-between">
+        <div class="text-sm sm:text-base font-medium">{{ t('shipyardView.fleetStorage') }}:</div>
+        <div class="text-sm sm:text-base font-bold">
+          <span :class="fleetStorageUsage > maxFleetStorage ? 'text-destructive' : 'text-primary'">
+            {{ formatNumber(fleetStorageUsage) }}
+          </span>
+          <span class="text-muted-foreground mx-1">/</span>
+          <span>{{ formatNumber(maxFleetStorage) }}</span>
+        </div>
+      </div>
+      <div class="mt-2">
+        <div class="w-full bg-background rounded-full h-2.5 sm:h-3 overflow-hidden">
+          <div
+            class="h-full transition-all duration-300"
+            :class="fleetStorageUsage > maxFleetStorage ? 'bg-destructive' : 'bg-primary'"
+            :style="{ width: `${Math.min((fleetStorageUsage / maxFleetStorage) * 100, 100)}%` }"
+          ></div>
+        </div>
+      </div>
+    </div>
+
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
       <Card v-for="shipType in Object.values(ShipType)" :key="shipType" class="relative">
         <CardUnlockOverlay :requirements="SHIPS[shipType].requirements" />
@@ -151,6 +174,7 @@
   import { formatNumber, getResourceCostColor } from '@/utils/format'
   import * as shipValidation from '@/logic/shipValidation'
   import * as publicLogic from '@/logic/publicLogic'
+  import * as fleetStorageLogic from '@/logic/fleetStorageLogic'
 
   const gameStore = useGameStore()
   const detailDialog = useDetailDialogStore()
@@ -158,6 +182,18 @@
   const { SHIPS } = useGameConfig()
   const planet = computed(() => gameStore.currentPlanet)
   const alertDialog = ref<InstanceType<typeof AlertDialog> | null>(null)
+
+  // 舰队仓储使用量
+  const fleetStorageUsage = computed(() => {
+    if (!planet.value) return 0
+    return fleetStorageLogic.calculateFleetStorageUsage(planet.value.fleet)
+  })
+
+  // 舰队仓储上限
+  const maxFleetStorage = computed(() => {
+    if (!planet.value) return 0
+    return fleetStorageLogic.calculateMaxFleetStorage(planet.value, gameStore.player.technologies)
+  })
 
   // 每种舰船的建造数量
   const quantities = ref<Record<ShipType, number>>({
@@ -170,7 +206,8 @@
     [ShipType.ColonyShip]: 0,
     [ShipType.Recycler]: 0,
     [ShipType.EspionageProbe]: 0,
-    [ShipType.DarkMatterHarvester]: 0
+    [ShipType.DarkMatterHarvester]: 0,
+    [ShipType.Deathstar]: 0
   })
 
   const buildShip = (shipType: ShipType, quantity: number): boolean => {

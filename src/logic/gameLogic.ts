@@ -3,8 +3,9 @@ import { TechnologyType, OfficerType } from '@/types/game'
 import * as officerLogic from './officerLogic'
 import * as buildingLogic from './buildingLogic'
 import * as researchLogic from './researchLogic'
-import * as resourceLogic from './resourceLogic'
 import * as pointsLogic from './pointsLogic'
+import * as planetLogic from './planetLogic'
+import * as resourceLogic from './resourceLogic'
 
 /**
  * 初始化玩家数据
@@ -102,22 +103,27 @@ export const processGameUpdate = (
     pointsLogic.addPoints(player, points)
   }
 
-  // 更新所有星球
+  // 更新所有星球资源（直接同步计算，避免 Worker 通信开销）
   player.planets.forEach(planet => {
-    // 更新资源
     resourceLogic.updatePlanetResources(planet, now, bonuses)
+  })
 
+  // 更新所有星球其他状态
+  player.planets.forEach(planet => {
     // 检查建造队列
     buildingLogic.completeBuildQueue(planet, now, onPointsEarned)
+
+    // 更新星球最大空间
+    if (planet.isMoon) {
+      planet.maxSpace = planetLogic.calculateMoonMaxSpace(planet)
+    } else {
+      const terraformingTechLevel = player.technologies[TechnologyType.TerraformingTechnology] || 0
+      planet.maxSpace = planetLogic.calculatePlanetMaxSpace(planet, terraformingTechLevel)
+    }
   })
 
   // 检查研究队列
-  const updatedResearchQueue = researchLogic.completeResearchQueue(
-    player.researchQueue,
-    player.technologies,
-    now,
-    onPointsEarned
-  )
+  const updatedResearchQueue = researchLogic.completeResearchQueue(player.researchQueue, player.technologies, now, onPointsEarned)
 
   return {
     updatedResearchQueue

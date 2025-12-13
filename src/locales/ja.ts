@@ -32,11 +32,13 @@ export default {
     locked: 'ロック済み',
     viewRequirements: '必要条件を表示',
     requirementsNotMet: '必要条件が満たされていません',
-    current: '現在'
+    current: '現在',
+    level: 'レベル'
   },
   errors: {
     requirementsNotMet: '前提条件を満たしていません',
     insufficientResources: '資源が不足しています',
+    insufficientFleetStorage: '艦隊ストレージが不足しています',
     shieldDomeLimit: 'シールドドームの上限に達しました',
     fleetMissionsFull: '艦隊ミッションスロットが満杯です',
     insufficientFleet: '艦隊が不足しています',
@@ -61,7 +63,8 @@ export default {
     simulator: 'シミュレーター',
     galaxy: '銀河',
     messages: 'メッセージ',
-    settings: '設定'
+    settings: '設定',
+    gm: 'GM'
   },
   sidebar: {
     language: '言語',
@@ -77,10 +80,14 @@ export default {
     darkMatter: 'ダークマター',
     energy: 'エネルギー',
     production: '生産量',
+    consumption: '消費量',
     capacity: '容量',
     current: '現在の貯蔵量',
     max: '最大容量',
-    perHour: '時間'
+    perHour: '時間',
+    perMinute: '分',
+    hour: '時間',
+    noEnergy: 'エネルギー不足'
   },
   planet: {
     planet: '惑星',
@@ -113,9 +120,11 @@ export default {
     crystalStorage: 'クリスタル倉庫',
     deuteriumTank: '重水素タンク',
     darkMatterCollector: 'ダークマター採取装置',
+    terraformer: 'テラフォーマー',
     lunarBase: '月面基地',
     sensorPhalanx: 'センサーファランクス',
     jumpGate: 'ジャンプゲート',
+    planetDestroyerFactory: '惑星破壊工場',
     buildTime: '建設時間',
     production: '生産量',
     consumption: '消費',
@@ -129,16 +138,18 @@ export default {
     deuteriumSynthesizer: '重水素資源を合成',
     solarPlant: 'エネルギーを供給',
     roboticsFactory: '建設速度を向上',
-    naniteFactory: '建設キュー数を増加、レベル毎に+1（最大10）',
+    naniteFactory: '建設キュー数を増加、レベル毎に+1（最大10レベル）',
     shipyard: '艦船を建造',
     researchLab: '技術を研究',
     metalStorage: '金属の貯蔵上限を増加',
     crystalStorage: 'クリスタルの貯蔵上限を増加',
     deuteriumTank: '重水素の貯蔵上限を増加',
     darkMatterCollector: '希少なダークマター資源を収集',
-    lunarBase: '月の利用可能スペースを増加',
+    terraformer: '惑星地形を改造、レベル毎に利用可能スペース5増加',
+    lunarBase: '月の利用可能スペースを増加、レベル毎に+5スペース',
     sensorPhalanx: '周辺星系の艦隊活動を探知',
-    jumpGate: '他の月へ艦隊を瞬間移動'
+    jumpGate: '他の月へ艦隊を瞬間移動',
+    planetDestroyerFactory: '惑星を破壊できる究極兵器を建造'
   },
   ships: {
     lightFighter: '軽戦闘機',
@@ -150,7 +161,8 @@ export default {
     colonyShip: 'コロニーシップ',
     recycler: 'リサイクラー',
     espionageProbe: 'スパイプローブ',
-    darkMatterHarvester: 'ダークマター採取船'
+    darkMatterHarvester: 'ダークマター採取船',
+    deathstar: 'デススター'
   },
   shipDescriptions: {
     lightFighter: '基本戦闘ユニット',
@@ -162,7 +174,8 @@ export default {
     colonyShip: '新惑星の植民に使用',
     recycler: 'デブリフィールドの資源を回収',
     espionageProbe: '敵惑星を偵察',
-    darkMatterHarvester: 'ダークマター採取専用の特殊艦'
+    darkMatterHarvester: 'ダークマター採取専用の特殊艦',
+    deathstar: '惑星全体を破壊できる究極兵器'
   },
   defenses: {
     rocketLauncher: 'ロケットランチャー',
@@ -172,7 +185,8 @@ export default {
     ionCannon: 'イオンキャノン',
     plasmaTurret: 'プラズマタレット',
     smallShieldDome: '小型シールドドーム',
-    largeShieldDome: '大型シールドドーム'
+    largeShieldDome: '大型シールドドーム',
+    planetaryShield: '惑星シールド'
   },
   defenseDescriptions: {
     rocketLauncher: '基本防衛施設',
@@ -182,7 +196,8 @@ export default {
     ionCannon: 'シールド破壊に効果的',
     plasmaTurret: '強力な防衛施設',
     smallShieldDome: '惑星全体を保護する小型シールド',
-    largeShieldDome: '惑星全体を保護する大型シールド'
+    largeShieldDome: '惑星全体を保護する大型シールド',
+    planetaryShield: '破壊攻撃から惑星を保護する超級シールド'
   },
   research: {
     researchTime: '研究時間',
@@ -200,7 +215,9 @@ export default {
     combustionDrive: '燃焼ドライブ',
     impulseDrive: 'インパルスドライブ',
     hyperspaceDrive: 'ハイパースペースドライブ',
-    darkMatterTechnology: 'ダークマター技術'
+    darkMatterTechnology: 'ダークマター技術',
+    terraformingTechnology: 'テラフォーミング技術',
+    planetDestructionTech: '惑星破壊技術'
   },
   technologyDescriptions: {
     energyTechnology: 'エネルギー利用効率を向上',
@@ -208,11 +225,13 @@ export default {
     ionTechnology: 'イオン兵器技術',
     hyperspaceTechnology: 'ハイパースペースジャンプ技術',
     plasmaTechnology: 'プラズマ兵器技術',
-    computerTechnology: '研究キュー数を増加、レベル毎に+1（最大10）',
+    computerTechnology: '研究キュー数を増加、レベル毎に+1（最大10レベル）',
     combustionDrive: '基本推進技術',
     impulseDrive: '中級推進技術',
     hyperspaceDrive: '高級推進技術',
-    darkMatterTechnology: 'ダークマターの性質と応用を研究'
+    darkMatterTechnology: 'ダークマターの性質と応用を研究',
+    terraformingTechnology: '惑星地形改造技術を研究、レベル毎に全惑星の利用可能スペース3増加',
+    planetDestructionTech: '惑星全体を破壊する恐怖の技術を研究'
   },
   officers: {
     commander: '司令官',
@@ -220,7 +239,10 @@ export default {
     engineer: 'エンジニア',
     geologist: '地質学者',
     technocrat: '技術専門家',
-    darkMatterSpecialist: 'ダークマター専門家'
+    darkMatterSpecialist: 'ダークマター専門家',
+    resourceBonus: '資源生産ボーナス',
+    darkMatterBonus: 'ダークマター生産ボーナス',
+    energyBonus: 'エネルギー生産ボーナス'
   },
   officerDescriptions: {
     commander: '建設速度と管理能力を向上',
@@ -262,7 +284,14 @@ export default {
     title: '惑星概要',
     resourceOverview: '資源概要',
     fleetInfo: '艦隊',
-    currentShips: '現在の惑星の艦船数'
+    currentShips: '現在の惑星の艦船数',
+    productionSources: '生産源',
+    productionSourcesDesc: '詳細な資源生産とボーナス情報',
+    consumptionSources: '消費源',
+    consumptionSourcesDesc: '建物のエネルギー消費詳細',
+    totalProduction: '総生産量',
+    totalConsumption: '総消費量',
+    noConsumption: 'エネルギー消費なし'
   },
   buildingsView: {
     title: '建物',
@@ -272,6 +301,8 @@ export default {
     upgradeCost: 'アップグレードコスト',
     buildTime: '建設時間',
     upgrade: 'アップグレード',
+    maxLevelReached: '最大レベルに達しました',
+    requirementsNotMet: '要件が満たされていません',
     upgradeFailed: 'アップグレード失敗',
     upgradeFailedMessage: '資源が十分か、スペースが十分か、または他の建設タスクがないか確認してください。',
     demolish: '解体',
@@ -283,6 +314,7 @@ export default {
     title: '研究',
     researchCost: '研究コスト',
     research: '研究',
+    maxLevelReached: '最大レベルに達しました',
     researchFailed: '研究失敗',
     researchFailedMessage: '資源が十分か、前提条件が満たされているか、または他の研究タスクがないか確認してください。'
   },
@@ -300,6 +332,7 @@ export default {
   },
   shipyardView: {
     title: '造船所',
+    fleetStorage: '艦隊ストレージ',
     attack: '攻撃力',
     shield: 'シールド',
     speed: '速度',
@@ -358,6 +391,7 @@ export default {
     colonize: '植民',
     spy: '偵察',
     deploy: '配備',
+    recycle: '回収',
     transportResources: '資源輸送',
     totalCargoCapacity: '総積載量',
     used: '使用済み',
@@ -374,7 +408,12 @@ export default {
     recallFailed: '召還失敗',
     recallFailedMessage: 'このミッションは召還できません。',
     unknownPlanet: '未知の惑星',
-    fleetMissionSlots: '艦隊ミッションスロット'
+    fleetMissionSlots: '艦隊ミッションスロット',
+    noShipsSelected: '艦船が選択されていません',
+    cannotSendToOwnPlanet: '自分の惑星に艦隊を派遣できません',
+    cargoExceedsCapacity: '積載量が容量を超えています',
+    noColonyShip: '植民ミッションにはコロニーシップが必要です',
+    noDebrisAtTarget: '目標座標にデブリフィールドがないか、デブリフィールドが空です'
   },
   officersView: {
     title: '士官',
@@ -427,15 +466,21 @@ export default {
     attack: '攻撃',
     colonize: '植民',
     switch: '切り替え',
+    recycle: '回収',
+    debrisField: 'デブリフィールド',
     scoutPlanetTitle: '惑星偵察',
     attackPlanetTitle: '惑星攻撃',
     colonizePlanetTitle: '惑星植民',
+    recyclePlanetTitle: 'デブリ回収',
     scoutPlanetMessage: '惑星[{coordinates}]にスパイプローブを送りますか？\n\n艦隊ページに移動して艦船を選択して派遣してください。',
     attackPlanetMessage: '惑星[{coordinates}]を攻撃しますか？\n\n艦隊ページに移動して艦船を選択して派遣してください。',
-    colonizePlanetMessage: '位置[{coordinates}]を植民しますか？\n\n艦隊ページに移動してコロニーシップを派遣してください。'
+    colonizePlanetMessage: '位置[{coordinates}]を植民しますか？\n\n艦隊ページに移動してコロニーシップを派遣してください。',
+    recyclePlanetMessage: '位置[{coordinates}]のデブリを回収しますか？\n\n艦隊ページに移動してリサイクラーを派遣してください。'
   },
   messagesView: {
     title: 'メッセージセンター',
+    battles: '戦闘',
+    spy: 'スパイ',
     battleReports: '戦闘レポート',
     spyReports: 'スパイレポート',
     noBattleReports: '戦闘レポートなし',
@@ -456,7 +501,17 @@ export default {
     resources: '資源',
     fleet: '艦隊',
     defense: '防衛',
-    buildings: '建物'
+    buildings: '建物',
+    unread: '未読',
+    targetPlanet: '目標惑星',
+    attackerRemaining: '攻撃側残存',
+    defenderRemaining: '防御側残存',
+    moonChance: '月生成確率',
+    showRoundDetails: 'ラウンド詳細表示',
+    hideRoundDetails: 'ラウンド詳細非表示',
+    round: '第{round}ラウンド',
+    attackerRemainingPower: '攻撃側残存火力',
+    defenderRemainingPower: '防御側残存火力'
   },
   simulatorView: {
     title: '戦闘シミュレーター',
@@ -518,6 +573,12 @@ export default {
     clearConfirmMessage: 'すべてのゲームデータが削除され、最初からやり直します。この操作は元に戻せません。続行しますか？',
     gameSettings: 'ゲーム設定',
     gameSettingsDesc: 'ゲームパラメータと設定を調整',
+    gamePause: 'ゲーム一時停止',
+    gamePauseDesc: 'ゲーム時間と資源生産を一時停止または再開',
+    pause: '一時停止',
+    resume: '再開',
+    gamePaused: 'ゲームを一時停止しました',
+    gameResumed: 'ゲームを再開しました',
     playerName: 'プレイヤー名',
     gameSpeed: 'ゲーム速度',
     gameSpeedDesc: '現在のゲーム速度倍率',
@@ -527,5 +588,34 @@ export default {
     community: 'コミュニティ',
     github: 'GitHubリポジトリ',
     qqGroup: 'QQグループ'
+  },
+  gmView: {
+    title: 'GMコントロールパネル',
+    adminOnly: '管理者専用',
+    selectPlanet: '惑星を選択',
+    choosePlanet: '惑星を選択してください',
+    resources: '資源',
+    buildings: '建物',
+    research: '研究',
+    ships: '艦船',
+    defense: '防衛',
+    officers: '士官',
+    modifyResources: '資源を変更',
+    resourcesDesc: '惑星の資源を素早く変更',
+    modifyBuildings: '建物を変更',
+    buildingsDesc: '建物レベルを素早く設定',
+    modifyResearch: '研究を変更',
+    researchDesc: '研究レベルを素早く設定',
+    modifyShips: '艦船を変更',
+    shipsDesc: '艦船数を素早く設定',
+    modifyDefense: '防衛を変更',
+    defenseDesc: '防衛数を素早く設定',
+    modifyOfficers: '士官を変更',
+    officersDesc: '士官の有効期限を素早く設定',
+    days: '日',
+    dangerZone: '危険ゾーン',
+    dangerZoneDesc: '以下の操作は元に戻せません',
+    resetGame: 'ゲームをリセット',
+    resetGameConfirm: 'ゲームをリセットしてもよろしいですか？すべてのデータが削除されます！'
   }
 }

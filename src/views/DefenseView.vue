@@ -183,7 +183,8 @@
     [DefenseType.IonCannon]: 0,
     [DefenseType.PlasmaTurret]: 0,
     [DefenseType.SmallShieldDome]: 0,
-    [DefenseType.LargeShieldDome]: 0
+    [DefenseType.LargeShieldDome]: 0,
+    [DefenseType.PlanetaryShield]: 0
   })
 
   // 判断是否为护盾罩

@@ -1,17 +1,35 @@
-import type { FleetMission, Planet, Resources, Fleet, BattleResult, SpyReport, Player, Officer } from '@/types/game'
+import type { FleetMission, Planet, Resources, Fleet, BattleResult, SpyReport, Player, Officer, DebrisField } from '@/types/game'
 import { ShipType, DefenseType, MissionType, BuildingType, OfficerType } from '@/types/game'
+import { FLEET_STORAGE_CONFIG } from '@/config/gameConfig'
 import * as battleLogic from './battleLogic'
 import * as moonLogic from './moonLogic'
 import * as moonValidation from './moonValidation'
 
 /**
  * 计算两个星球之间的距离
+ * 使用类似 OGame 的距离计算公式
  */
 export const calculateDistance = (
   from: { galaxy: number; system: number; position: number },
   to: { galaxy: number; system: number; position: number }
 ): number => {
-  return Math.sqrt(Math.pow(to.galaxy - from.galaxy, 2) + Math.pow(to.system - from.system, 2) + Math.pow(to.position - from.position, 2))
+  // 同一位置
+  if (from.galaxy === to.galaxy && from.system === to.system && from.position === to.position) {
+    return 5
+  }
+
+  // 同星系内不同位置
+  if (from.galaxy === to.galaxy && from.system === to.system) {
+    return 1000 + Math.abs(to.position - from.position) * 5
+  }
+
+  // 同系统内不同星系
+  if (from.galaxy === to.galaxy) {
+    return 2700 + Math.abs(to.system - from.system) * 95
+  }
+
+  // 不同系统
+  return 20000 + Math.abs(to.galaxy - from.galaxy) * 20000
 }
 
 /**
@@ -66,20 +84,20 @@ export const processTransportArrival = (mission: FleetMission, targetPlanet: Pla
 /**
  * 处理攻击任务到达
  */
-export const processAttackArrival = (
+export const processAttackArrival = async (
   mission: FleetMission,
   targetPlanet: Planet | undefined,
   attacker: Player,
   defender: Player | null,
   allPlanets: Planet[]
-): { battleResult: BattleResult; moon: Planet | null } | null => {
+): Promise<{ battleResult: BattleResult; moon: Planet | null; debrisField: DebrisField | null } | null> => {
   if (!targetPlanet || targetPlanet.ownerId === attacker.id) {
     mission.status = 'returning'
     return null
   }
 
-  // 执行战斗
-  const battleResult = battleLogic.simulateBattle(
+  // 执行战斗（使用 Worker 进行异步计算）
+  const battleResult = await battleLogic.simulateBattle(
     mission.fleet,
     targetPlanet.fleet,
     targetPlanet.defense,
@@ -141,7 +159,22 @@ export const processAttackArrival = (
     }
   }
 
-  return { battleResult, moon }
+  // 创建残骸场（如果有残骸）
+  let debrisField: DebrisField | null = null
+  const totalDebris = battleResult.debrisField.metal + battleResult.debrisField.crystal
+  if (totalDebris > 0) {
+    debrisField = {
+      id: `debris_${targetPlanet.position.galaxy}_${targetPlanet.position.system}_${targetPlanet.position.position}`,
+      position: targetPlanet.position,
+      resources: {
+        metal: battleResult.debrisField.metal,
+        crystal: battleResult.debrisField.crystal
+      },
+      createdAt: Date.now()
+    }
+  }
+
+  return { battleResult, moon, debrisField }
 }
 
 /**
@@ -177,7 +210,8 @@ export const processColonizeArrival = (
       [ShipType.ColonyShip]: 0,
       [ShipType.Recycler]: 0,
       [ShipType.EspionageProbe]: 0,
-      [ShipType.DarkMatterHarvester]: 0
+      [ShipType.DarkMatterHarvester]: 0,
+      [ShipType.Deathstar]: 0
     },
     defense: {
       [DefenseType.RocketLauncher]: 0,
@@ -187,11 +221,13 @@ export const processColonizeArrival = (
       [DefenseType.IonCannon]: 0,
       [DefenseType.PlasmaTurret]: 0,
       [DefenseType.SmallShieldDome]: 0,
-      [DefenseType.LargeShieldDome]: 0
+      [DefenseType.LargeShieldDome]: 0,
+      [DefenseType.PlanetaryShield]: 0
     },
     buildQueue: [],
     lastUpdate: Date.now(),
     maxSpace: 200,
+    maxFleetStorage: FLEET_STORAGE_CONFIG.baseStorage,
     isMoon: false
   }
 
@@ -251,6 +287,156 @@ export const processDeployArrival = (mission: FleetMission, targetPlanet: Planet
 }
 
 /**
+ * 处理回收任务到达
+ */
+export const processRecycleArrival = (
+  mission: FleetMission,
+  debrisField: DebrisField | undefined
+): { collectedResources: Pick<Resources, 'metal' | 'crystal'>; remainingDebris: Pick<Resources, 'metal' | 'crystal'> | null } | null => {
+  if (!debrisField) {
+    mission.status = 'returning'
+    return null
+  }
+
+  // 计算回收船的货舱容量
+  const recyclerCount = mission.fleet[ShipType.Recycler] || 0
+  const recyclerCapacity = 20000 // 每艘回收船容量20000
+  const totalCapacity = recyclerCount * recyclerCapacity
+
+  // 计算已装载的货物
+  const currentCargo = mission.cargo.metal + mission.cargo.crystal + mission.cargo.deuterium
+
+  // 剩余容量
+  const availableCapacity = totalCapacity - currentCargo
+
+  // 计算可以收集的资源
+  const totalDebris = debrisField.resources.metal + debrisField.resources.crystal
+  const collectedAmount = Math.min(totalDebris, availableCapacity)
+
+  // 按比例收集金属和晶体
+  const metalRatio = debrisField.resources.metal / totalDebris
+  const crystalRatio = debrisField.resources.crystal / totalDebris
+
+  const collectedMetal = Math.floor(collectedAmount * metalRatio)
+  const collectedCrystal = Math.floor(collectedAmount * crystalRatio)
+
+  // 更新任务货物
+  mission.cargo.metal += collectedMetal
+  mission.cargo.crystal += collectedCrystal
+
+  // 更新残骸场
+  const remainingMetal = debrisField.resources.metal - collectedMetal
+  const remainingCrystal = debrisField.resources.crystal - collectedCrystal
+
+  mission.status = 'returning'
+
+  return {
+    collectedResources: {
+      metal: collectedMetal,
+      crystal: collectedCrystal
+    },
+    remainingDebris:
+      remainingMetal > 0 || remainingCrystal > 0
+        ? {
+            metal: remainingMetal,
+            crystal: remainingCrystal
+          }
+        : null
+  }
+}
+
+/**
+ * 计算行星毁灭概率
+ */
+export const calculateDestructionChance = (
+  deathstarCount: number,
+  planetaryShieldCount: number,
+  planetDefensePower: number
+): number => {
+  // 基础摧毁概率：每艘死星 10%
+  let baseChance = deathstarCount * 10
+
+  // 行星护盾减少概率：每个护盾 -5%
+  const shieldReduction = planetaryShieldCount * 5
+
+  // 防御力量减少概率：每 10000 防御力量 -1%
+  const defensePowerReduction = Math.floor(planetDefensePower / 10000)
+
+  // 最终概率
+  let finalChance = baseChance - shieldReduction - defensePowerReduction
+
+  // 限制在 1% - 99% 之间
+  return Math.max(1, Math.min(99, finalChance))
+}
+
+/**
+ * 计算星球总防御力量
+ */
+export const calculatePlanetDefensePower = (
+  fleet: Partial<Fleet>,
+  defense: Partial<Record<DefenseType, number>>
+): number => {
+  let totalPower = 0
+
+  // 计算舰队力量
+  Object.entries(fleet).forEach(([_shipType, count]) => {
+    if (count > 0) {
+      // 简单估算：每艘船的攻击力 + 护盾 + 装甲 / 10
+      totalPower += count * 100 // 简化计算
+    }
+  })
+
+  // 计算防御设施力量
+  Object.entries(defense).forEach(([_defenseType, count]) => {
+    if (count > 0) {
+      totalPower += count * 50 // 简化计算
+    }
+  })
+
+  return totalPower
+}
+
+/**
+ * 处理行星毁灭任务到达
+ */
+export const processDestroyArrival = (
+  mission: FleetMission,
+  targetPlanet: Planet | undefined,
+  attacker: Player
+): { success: boolean; destructionChance: number; planetId?: string } | null => {
+  if (!targetPlanet || targetPlanet.ownerId === attacker.id) {
+    mission.status = 'returning'
+    return null
+  }
+
+  // 检查是否有死星
+  const deathstarCount = mission.fleet[ShipType.Deathstar] || 0
+  if (deathstarCount === 0) {
+    mission.status = 'returning'
+    return null
+  }
+
+  // 计算目标星球的防御力量
+  const planetaryShieldCount = targetPlanet.defense[DefenseType.PlanetaryShield] || 0
+  const defensePower = calculatePlanetDefensePower(targetPlanet.fleet, targetPlanet.defense)
+
+  // 计算摧毁概率
+  const destructionChance = calculateDestructionChance(deathstarCount, planetaryShieldCount, defensePower)
+
+  // 随机判断是否成功
+  const randomValue = Math.random() * 100
+  const success = randomValue < destructionChance
+
+  mission.status = 'returning'
+
+  return {
+    success,
+    destructionChance,
+    planetId: success ? targetPlanet.id : undefined
+  }
+}
+
+/**
  * 处理舰队任务返回
  */
 export const processFleetReturn = (mission: FleetMission, originPlanet: Planet): void => {
@@ -271,29 +457,39 @@ export const processFleetReturn = (mission: FleetMission, originPlanet: Planet):
 /**
  * 更新舰队任务状态
  */
-export const updateFleetMissions = (
+export const updateFleetMissions = async (
   missions: FleetMission[],
   planets: Map<string, Planet>,
+  debrisFields: Map<string, DebrisField>,
   attacker: Player,
   defender: Player | null,
   now: number
-): {
+): Promise<{
   completedMissions: string[]
   battleReports: BattleResult[]
   spyReports: SpyReport[]
   newColonies: Planet[]
   newMoons: Planet[]
-} => {
+  newDebrisFields: DebrisField[]
+  updatedDebrisFields: DebrisField[]
+  removedDebrisFieldIds: string[]
+  destroyedPlanetIds: string[]
+}> => {
   const completedMissions: string[] = []
   const battleReports: BattleResult[] = []
   const spyReports: SpyReport[] = []
   const newColonies: Planet[] = []
   const newMoons: Planet[] = []
+  const newDebrisFields: DebrisField[] = []
+  const updatedDebrisFields: DebrisField[] = []
+  const removedDebrisFieldIds: string[] = []
+  const destroyedPlanetIds: string[] = []
 
   // 获取所有星球列表（用于月球生成检查）
   const allPlanets = Array.from(planets.values())
 
-  missions.forEach(mission => {
+  // 使用 for...of 以支持 await
+  for (const mission of missions) {
     const originPlanet = attacker.planets.find(p => p.id === mission.originPlanetId)
 
     if (mission.status === 'outbound' && now >= mission.arrivalTime) {
@@ -306,8 +502,8 @@ export const updateFleetMissions = (
           processTransportArrival(mission, targetPlanet)
           break
 
-        case MissionType.Attack:
-          const attackResult = processAttackArrival(mission, targetPlanet, attacker, defender, allPlanets)
+        case MissionType.Attack: {
+          const attackResult = await processAttackArrival(mission, targetPlanet, attacker, defender, allPlanets)
           if (attackResult) {
             battleReports.push(attackResult.battleResult)
             if (attackResult.moon) {
@@ -316,8 +512,12 @@ export const updateFleetMissions = (
               const moonKey = `${attackResult.moon.position.galaxy}:${attackResult.moon.position.system}:${attackResult.moon.position.position}`
               planets.set(moonKey, attackResult.moon)
             }
+            if (attackResult.debrisField) {
+              newDebrisFields.push(attackResult.debrisField)
+            }
           }
           break
+        }
 
         case MissionType.Colonize:
           const newColony = processColonizeArrival(mission, targetPlanet, attacker.id)
@@ -340,6 +540,36 @@ export const updateFleetMissions = (
             completedMissions.push(mission.id)
           }
           break
+
+        case MissionType.Recycle:
+          const debrisId = `debris_${mission.targetPosition.galaxy}_${mission.targetPosition.system}_${mission.targetPosition.position}`
+          const debrisField = debrisFields.get(debrisId)
+          const recycleResult = processRecycleArrival(mission, debrisField)
+          if (recycleResult) {
+            if (recycleResult.remainingDebris) {
+              // 更新残骸场
+              const updatedDebris: DebrisField = {
+                ...debrisField!,
+                resources: recycleResult.remainingDebris
+              }
+              debrisFields.set(debrisId, updatedDebris)
+              updatedDebrisFields.push(updatedDebris)
+            } else {
+              // 残骸场已被完全收集，删除
+              debrisFields.delete(debrisId)
+              removedDebrisFieldIds.push(debrisId)
+            }
+          }
+          break
+
+        case MissionType.Destroy:
+          const destroyResult = processDestroyArrival(mission, targetPlanet, attacker)
+          if (destroyResult && destroyResult.success && destroyResult.planetId) {
+            // 星球被摧毁
+            destroyedPlanetIds.push(destroyResult.planetId)
+            planets.delete(targetKey)
+          }
+          break
       }
     }
 
@@ -350,9 +580,9 @@ export const updateFleetMissions = (
       }
       completedMissions.push(mission.id)
     }
-  })
+  }
 
-  return { completedMissions, battleReports, spyReports, newColonies, newMoons }
+  return { completedMissions, battleReports, spyReports, newColonies, newMoons, newDebrisFields, updatedDebrisFields, removedDebrisFieldIds, destroyedPlanetIds }
 }
 
 /**

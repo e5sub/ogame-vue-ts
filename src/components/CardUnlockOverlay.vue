@@ -30,6 +30,7 @@
 
   interface Props {
     requirements?: Partial<Record<BuildingType | TechnologyType, number>>
+    currentLevel?: number // 当前建筑/科技等级，用于判断是否已解锁
   }
 
   const props = defineProps<Props>()
@@ -39,6 +40,8 @@
   const requirementsDialog = ref<InstanceType<typeof AlertDialog> | null>(null)
 
   const isUnlocked = computed(() => {
+    // 如果已经建造过（level > 0），则认为已解锁，不显示遮罩
+    if (props.currentLevel !== undefined && props.currentLevel > 0) return true
     if (!props.requirements || !gameStore.currentPlanet) return true
     return publicLogic.checkRequirements(gameStore.currentPlanet, gameStore.player.technologies, props.requirements)
   })

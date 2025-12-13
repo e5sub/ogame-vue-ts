@@ -32,11 +32,13 @@ export default {
     locked: '已鎖定',
     viewRequirements: '查看前置條件',
     requirementsNotMet: '前置條件未滿足',
-    current: '當前'
+    current: '當前',
+    level: '等級'
   },
   errors: {
     requirementsNotMet: '不滿足前置條件',
     insufficientResources: '資源不足',
+    insufficientFleetStorage: '艦隊倉儲空間不足',
     shieldDomeLimit: '護盾罩數量限制',
     fleetMissionsFull: '艦隊任務槽位已滿',
     insufficientFleet: '艦隊數量不足',
@@ -61,7 +63,8 @@ export default {
     simulator: '模擬',
     galaxy: '星系',
     messages: '訊息',
-    settings: '設定'
+    settings: '設定',
+    gm: 'GM'
   },
   sidebar: {
     language: '語言',
@@ -77,10 +80,14 @@ export default {
     darkMatter: '暗物質',
     energy: '能量',
     production: '產量',
+    consumption: '消耗',
     capacity: '容量',
     current: '當前儲量',
     max: '最大容量',
-    perHour: '小時'
+    perHour: '小時',
+    perMinute: '分鐘',
+    hour: '小時',
+    noEnergy: '能量不足'
   },
   planet: {
     planet: '星球',
@@ -113,9 +120,11 @@ export default {
     crystalStorage: '晶體倉庫',
     deuteriumTank: '重氫罐',
     darkMatterCollector: '暗物質收集器',
+    terraformer: '地形改造器',
     lunarBase: '月球基地',
     sensorPhalanx: '傳感器陣列',
     jumpGate: '跳躍門',
+    planetDestroyerFactory: '行星毀滅者工廠',
     buildTime: '建造時間',
     production: '產量',
     consumption: '消耗',
@@ -129,16 +138,18 @@ export default {
     deuteriumSynthesizer: '合成重氫資源',
     solarPlant: '提供能源',
     roboticsFactory: '加快建造速度',
-    naniteFactory: '增加建造佇列數量，每級+1佇列（最多10個）',
+    naniteFactory: '增加建造佇列數量，每級+1佇列（最多10級）',
     shipyard: '建造艦船',
     researchLab: '研究科技',
     metalStorage: '增加金屬儲存上限',
     crystalStorage: '增加晶體儲存上限',
     deuteriumTank: '增加重氫儲存上限',
     darkMatterCollector: '收集稀有的暗物質資源',
-    lunarBase: '增加月球可用空間',
+    terraformer: '改造行星地形，每級增加5個可用空間',
+    lunarBase: '增加月球可用空間，每級+5空間',
     sensorPhalanx: '偵測周圍星系的艦隊活動',
-    jumpGate: '瞬間傳送艦隊到其他月球'
+    jumpGate: '瞬間傳送艦隊到其他月球',
+    planetDestroyerFactory: '建造能夠摧毀行星的終極武器'
   },
   ships: {
     lightFighter: '輕型戰鬥機',
@@ -150,7 +161,8 @@ export default {
     colonyShip: '殖民船',
     recycler: '回收船',
     espionageProbe: '間諜探測器',
-    darkMatterHarvester: '暗物質採集船'
+    darkMatterHarvester: '暗物質採集船',
+    deathstar: '死星'
   },
   shipDescriptions: {
     lightFighter: '基礎戰鬥單位',
@@ -162,7 +174,8 @@ export default {
     colonyShip: '用於殖民新星球',
     recycler: '收集殘骸場資源',
     espionageProbe: '偵察敵方星球',
-    darkMatterHarvester: '專門用於採集暗物質的特殊飛船'
+    darkMatterHarvester: '專門用於採集暗物質的特殊飛船',
+    deathstar: '終極武器，能夠摧毀整個行星'
   },
   defenses: {
     rocketLauncher: '火箭發射器',
@@ -172,7 +185,8 @@ export default {
     ionCannon: '離子炮',
     plasmaTurret: '等離子炮塔',
     smallShieldDome: '小型護盾罩',
-    largeShieldDome: '大型護盾罩'
+    largeShieldDome: '大型護盾罩',
+    planetaryShield: '行星護盾'
   },
   defenseDescriptions: {
     rocketLauncher: '基礎防禦設施',
@@ -182,7 +196,8 @@ export default {
     ionCannon: '破壞護盾的利器',
     plasmaTurret: '強力防禦設施',
     smallShieldDome: '保護整個星球的小型護盾',
-    largeShieldDome: '保護整個星球的大型護盾'
+    largeShieldDome: '保護整個星球的大型護盾',
+    planetaryShield: '保護行星免受毀滅攻擊的超級護盾'
   },
   research: {
     researchTime: '研究時間',
@@ -200,7 +215,9 @@ export default {
     combustionDrive: '燃燒引擎',
     impulseDrive: '脈衝引擎',
     hyperspaceDrive: '超空間引擎',
-    darkMatterTechnology: '暗物質技術'
+    darkMatterTechnology: '暗物質技術',
+    terraformingTechnology: '地形改造技術',
+    planetDestructionTech: '行星毀滅技術'
   },
   technologyDescriptions: {
     energyTechnology: '提高能源利用效率',
@@ -208,11 +225,13 @@ export default {
     ionTechnology: '離子武器技術',
     hyperspaceTechnology: '超空間跳躍技術',
     plasmaTechnology: '等離子武器技術',
-    computerTechnology: '增加研究佇列數量，每級+1佇列（最多10個）',
+    computerTechnology: '增加研究佇列數量，每級+1佇列（最多10級）',
     combustionDrive: '基礎推進技術',
     impulseDrive: '中級推進技術',
     hyperspaceDrive: '高級推進技術',
-    darkMatterTechnology: '研究暗物質的性質和應用'
+    darkMatterTechnology: '研究暗物質的性質和應用',
+    terraformingTechnology: '研究行星地形改造技術，每級為所有行星增加3個可用空間',
+    planetDestructionTech: '研究如何摧毀整個行星的恐怖技術'
   },
   officers: {
     commander: '指揮官',
@@ -220,7 +239,10 @@ export default {
     engineer: '工程師',
     geologist: '地質學家',
     technocrat: '技術專家',
-    darkMatterSpecialist: '暗物質專家'
+    darkMatterSpecialist: '暗物質專家',
+    resourceBonus: '資源生產加成',
+    darkMatterBonus: '暗物質生產加成',
+    energyBonus: '能量生產加成'
   },
   officerDescriptions: {
     commander: '提升建築速度和管理能力',
@@ -247,7 +269,14 @@ export default {
     title: '星球總覽',
     resourceOverview: '資源概覽',
     fleetInfo: '艦隊資訊',
-    currentShips: '當前星球的艦船數量'
+    currentShips: '當前星球的艦船數量',
+    productionSources: '生產來源',
+    productionSourcesDesc: '詳細資源生產和加成資訊',
+    consumptionSources: '消耗來源',
+    consumptionSourcesDesc: '建築能量消耗詳情',
+    totalProduction: '總產量',
+    totalConsumption: '總消耗',
+    noConsumption: '無能量消耗'
   },
   buildingsView: {
     title: '建築',
@@ -257,6 +286,8 @@ export default {
     upgradeCost: '升級消耗',
     buildTime: '建造時間',
     upgrade: '升級',
+    maxLevelReached: '等級已滿',
+    requirementsNotMet: '條件不足',
     upgradeFailed: '升級失敗',
     upgradeFailedMessage: '請檢查資源是否足夠、空間是否充足或是否有其他建造任務。',
     demolish: '拆除',
@@ -268,6 +299,7 @@ export default {
     title: '研究',
     researchCost: '研究消耗',
     research: '研究',
+    maxLevelReached: '等級已滿',
     researchFailed: '研究失敗',
     researchFailedMessage: '請檢查資源是否足夠、前置條件是否滿足，或是否有其他研究任務。'
   },
@@ -288,6 +320,7 @@ export default {
   },
   shipyardView: {
     title: '船塢',
+    fleetStorage: '艦隊倉儲',
     attack: '攻擊力',
     shield: '護盾',
     speed: '速度',
@@ -358,6 +391,7 @@ export default {
     colonize: '殖民',
     spy: '偵察',
     deploy: '部署',
+    recycle: '回收',
     transportResources: '運輸資源',
     totalCargoCapacity: '總載貨量',
     used: '已用',
@@ -374,7 +408,12 @@ export default {
     recallFailed: '召回失敗',
     recallFailedMessage: '該任務無法召回。',
     unknownPlanet: '未知星球',
-    fleetMissionSlots: '艦隊任務槽位'
+    fleetMissionSlots: '艦隊任務槽位',
+    noShipsSelected: '未選擇艦船',
+    cannotSendToOwnPlanet: '無法派遣艦隊到自己的星球',
+    cargoExceedsCapacity: '載貨量超出限制',
+    noColonyShip: '需要殖民船才能執行殖民任務',
+    noDebrisAtTarget: '目標坐標沒有殘骸場或殘骸場已空'
   },
   officersView: {
     title: '軍官',
@@ -427,15 +466,21 @@ export default {
     attack: '攻擊',
     colonize: '殖民',
     switch: '切換',
+    recycle: '回收',
+    debrisField: '殘骸場',
     scoutPlanetTitle: '偵察星球',
     attackPlanetTitle: '攻擊星球',
     colonizePlanetTitle: '殖民星球',
+    recyclePlanetTitle: '回收殘骸',
     scoutPlanetMessage: '確定要派遣間諜探測器偵察星球 [{coordinates}] 嗎？\n\n請前往艦隊頁面選擇艦船並派遣。',
     attackPlanetMessage: '確定要攻擊星球 [{coordinates}] 嗎？\n\n請前往艦隊頁面選擇艦船並派遣。',
-    colonizePlanetMessage: '確定要殖民位置 [{coordinates}] 嗎？\n\n請前往艦隊頁面派遣殖民船。'
+    colonizePlanetMessage: '確定要殖民位置 [{coordinates}] 嗎？\n\n請前往艦隊頁面派遣殖民船。',
+    recyclePlanetMessage: '確定要回收位置 [{coordinates}] 的殘骸嗎？\n\n請前往艦隊頁面派遣回收船。'
   },
   messagesView: {
     title: '訊息中心',
+    battles: '戰鬥',
+    spy: '偵查',
     battleReports: '戰鬥報告',
     spyReports: '間諜報告',
     noBattleReports: '暫無戰鬥報告',
@@ -456,7 +501,17 @@ export default {
     resources: '資源',
     fleet: '艦隊',
     defense: '防禦',
-    buildings: '建築'
+    buildings: '建築',
+    unread: '未讀',
+    targetPlanet: '目標星球',
+    attackerRemaining: '攻擊方剩餘',
+    defenderRemaining: '防守方剩餘',
+    moonChance: '月球生成機率',
+    showRoundDetails: '顯示回合詳情',
+    hideRoundDetails: '隱藏回合詳情',
+    round: '第{round}回合',
+    attackerRemainingPower: '攻擊方剩餘火力',
+    defenderRemainingPower: '防守方剩餘火力'
   },
   simulatorView: {
     title: '戰鬥模擬器',
@@ -518,6 +573,12 @@ export default {
     clearConfirmMessage: '這將刪除所有遊戲資料並重新開始，此操作不可撤銷。確定要繼續嗎？',
     gameSettings: '遊戲設定',
     gameSettingsDesc: '調整遊戲參數和偏好設定',
+    gamePause: '遊戲暫停',
+    gamePauseDesc: '暫停或恢復遊戲時間和資源生產',
+    pause: '暫停',
+    resume: '恢復',
+    gamePaused: '遊戲已暫停',
+    gameResumed: '遊戲已恢復',
     playerName: '玩家名稱',
     gameSpeed: '遊戲速度',
     gameSpeedDesc: '目前遊戲速度倍率',
@@ -527,5 +588,34 @@ export default {
     community: '社群',
     github: 'GitHub 儲存庫',
     qqGroup: 'QQ 交流群'
+  },
+  gmView: {
+    title: 'GM 管理面板',
+    adminOnly: '僅管理員',
+    selectPlanet: '選擇星球',
+    choosePlanet: '選擇一個星球',
+    resources: '資源',
+    buildings: '建築',
+    research: '科技',
+    ships: '艦船',
+    defense: '防禦',
+    officers: '軍官',
+    modifyResources: '修改資源',
+    resourcesDesc: '快速修改星球資源數量',
+    modifyBuildings: '修改建築',
+    buildingsDesc: '快速設定建築等級',
+    modifyResearch: '修改科技',
+    researchDesc: '快速設定科技等級',
+    modifyShips: '修改艦船',
+    shipsDesc: '快速設定艦船數量',
+    modifyDefense: '修改防禦',
+    defenseDesc: '快速設定防禦數量',
+    modifyOfficers: '修改軍官',
+    officersDesc: '快速設定軍官到期時間',
+    days: '天',
+    dangerZone: '危險區域',
+    dangerZoneDesc: '以下操作不可撤銷，請謹慎操作',
+    resetGame: '重置遊戲',
+    resetGameConfirm: '確定要重置遊戲嗎？這將刪除所有資料！'
   }
 }

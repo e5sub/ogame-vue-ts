@@ -1,6 +1,6 @@
 import type { Planet, Resources } from '@/types/game'
 import { ShipType, DefenseType, BuildingType } from '@/types/game'
-import { MOON_CONFIG } from '@/config/gameConfig'
+import { MOON_CONFIG, PLANET_CONFIG, FLEET_STORAGE_CONFIG } from '@/config/gameConfig'
 
 /**
  * 创建初始星球
@@ -29,7 +29,8 @@ export const createInitialPlanet = (playerId: string, planetName: string = 'Home
       [ShipType.ColonyShip]: 0,
       [ShipType.Recycler]: 0,
       [ShipType.EspionageProbe]: 0,
-      [ShipType.DarkMatterHarvester]: 0
+      [ShipType.DarkMatterHarvester]: 0,
+      [ShipType.Deathstar]: 0
     },
     defense: {
       [DefenseType.RocketLauncher]: 0,
@@ -39,11 +40,13 @@ export const createInitialPlanet = (playerId: string, planetName: string = 'Home
       [DefenseType.IonCannon]: 0,
       [DefenseType.PlasmaTurret]: 0,
       [DefenseType.SmallShieldDome]: 0,
-      [DefenseType.LargeShieldDome]: 0
+      [DefenseType.LargeShieldDome]: 0,
+      [DefenseType.PlanetaryShield]: 0
     },
     buildQueue: [],
     lastUpdate: Date.now(),
     maxSpace: 200,
+    maxFleetStorage: FLEET_STORAGE_CONFIG.baseStorage,
     isMoon: false
   }
 
@@ -86,7 +89,8 @@ export const createNPCPlanet = (
       [ShipType.ColonyShip]: 0,
       [ShipType.Recycler]: 0,
       [ShipType.EspionageProbe]: 0,
-      [ShipType.DarkMatterHarvester]: 0
+      [ShipType.DarkMatterHarvester]: 0,
+      [ShipType.Deathstar]: 0
     },
     defense: {
       [DefenseType.RocketLauncher]: Math.floor(Math.random() * 100),
@@ -96,11 +100,13 @@ export const createNPCPlanet = (
       [DefenseType.IonCannon]: Math.floor(Math.random() * 10),
       [DefenseType.PlasmaTurret]: Math.floor(Math.random() * 5),
       [DefenseType.SmallShieldDome]: Math.random() > 0.5 ? 1 : 0,
-      [DefenseType.LargeShieldDome]: Math.random() > 0.8 ? 1 : 0
+      [DefenseType.LargeShieldDome]: Math.random() > 0.8 ? 1 : 0,
+      [DefenseType.PlanetaryShield]: 0
     },
     buildQueue: [],
     lastUpdate: Date.now(),
     maxSpace: 200,
+    maxFleetStorage: FLEET_STORAGE_CONFIG.baseStorage,
     isMoon: false
   }
 
@@ -156,7 +162,8 @@ export const createMoon = (
       [ShipType.ColonyShip]: 0,
       [ShipType.Recycler]: 0,
       [ShipType.EspionageProbe]: 0,
-      [ShipType.DarkMatterHarvester]: 0
+      [ShipType.DarkMatterHarvester]: 0,
+      [ShipType.Deathstar]: 0
     },
     defense: {
       [DefenseType.RocketLauncher]: 0,
@@ -166,11 +173,13 @@ export const createMoon = (
       [DefenseType.IonCannon]: 0,
       [DefenseType.PlasmaTurret]: 0,
       [DefenseType.SmallShieldDome]: 0,
-      [DefenseType.LargeShieldDome]: 0
+      [DefenseType.LargeShieldDome]: 0,
+      [DefenseType.PlanetaryShield]: 0
     },
     buildQueue: [],
     lastUpdate: Date.now(),
     maxSpace: MOON_CONFIG.baseSize,
+    maxFleetStorage: FLEET_STORAGE_CONFIG.baseStorage,
     isMoon: true,
     parentPlanetId: parentPlanet.id
   }
@@ -190,4 +199,23 @@ export const calculateMoonMaxSpace = (moon: Planet): number => {
   if (!moon.isMoon) return 0
   const lunarBaseLevel = moon.buildings[BuildingType.LunarBase] || 0
   return MOON_CONFIG.baseSize + lunarBaseLevel * MOON_CONFIG.lunarBaseSpaceBonus
+}
+
+/**
+ * 计算行星空间上限
+ */
+export const calculatePlanetMaxSpace = (planet: Planet, terraformingTechLevel: number): number => {
+  if (planet.isMoon) return 0
+
+  // 基础空间
+  let maxSpace = PLANET_CONFIG.baseSize
+
+  // 地形改造器增加的空间
+  const terraformerLevel = planet.buildings[BuildingType.Terraformer] || 0
+  maxSpace += terraformerLevel * PLANET_CONFIG.terraformerSpaceBonus
+
+  // 地形改造技术全局增加空间
+  maxSpace += terraformingTechLevel * PLANET_CONFIG.terraformingTechSpaceBonus
+
+  return maxSpace
 }

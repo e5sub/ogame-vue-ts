@@ -4,6 +4,7 @@ import * as shipLogic from './shipLogic'
 import * as resourceLogic from './resourceLogic'
 import * as officerLogic from './officerLogic'
 import * as publicLogic from './publicLogic'
+import * as fleetStorageLogic from './fleetStorageLogic'
 
 /**
  * 验证舰船建造的所有条件
@@ -27,6 +28,11 @@ export const validateShipBuild = (
   // 检查资源
   if (!resourceLogic.checkResourcesAvailable(planet.resources, totalCost)) {
     return { valid: false, reason: 'errors.insufficientResources' }
+  }
+
+  // 检查舰队仓储空间
+  if (!fleetStorageLogic.hasEnoughFleetStorage(planet, shipType, quantity, technologies as Record<TechnologyType, number>)) {
+    return { valid: false, reason: 'errors.insufficientFleetStorage' }
   }
 
   return { valid: true }

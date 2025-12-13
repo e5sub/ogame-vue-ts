@@ -10,7 +10,9 @@
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">{{ formatNumber(config.attack) }}</div>
+          <div class="text-2xl font-bold">
+            <NumberWithTooltip :value="config.attack" />
+          </div>
         </CardContent>
       </Card>
 
@@ -22,7 +24,9 @@
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">{{ formatNumber(config.shield) }}</div>
+          <div class="text-2xl font-bold">
+            <NumberWithTooltip :value="config.shield" />
+          </div>
         </CardContent>
       </Card>
 
@@ -34,7 +38,9 @@
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">{{ formatNumber(config.armor) }}</div>
+          <div class="text-2xl font-bold">
+            <NumberWithTooltip :value="config.armor" />
+          </div>
         </CardContent>
       </Card>
 
@@ -46,7 +52,9 @@
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">{{ formatNumber(config.speed) }}</div>
+          <div class="text-2xl font-bold">
+            <NumberWithTooltip :value="config.speed" />
+          </div>
         </CardContent>
       </Card>
 
@@ -58,7 +66,9 @@
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">{{ formatNumber(config.cargoCapacity) }}</div>
+          <div class="text-2xl font-bold">
+            <NumberWithTooltip :value="config.cargoCapacity" />
+          </div>
         </CardContent>
       </Card>
 
@@ -70,7 +80,9 @@
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">{{ formatNumber(config.fuelConsumption) }}</div>
+          <div class="text-2xl font-bold">
+            <NumberWithTooltip :value="config.fuelConsumption" />
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -84,19 +96,27 @@
         <CardContent class="space-y-2">
           <div v-if="config.cost.metal > 0" class="flex items-center justify-between text-sm">
             <span class="text-muted-foreground">{{ t('resources.metal') }}:</span>
-            <span class="font-medium">{{ formatNumber(config.cost.metal) }}</span>
+            <span class="font-medium">
+              <NumberWithTooltip :value="config.cost.metal" />
+            </span>
           </div>
           <div v-if="config.cost.crystal > 0" class="flex items-center justify-between text-sm">
             <span class="text-muted-foreground">{{ t('resources.crystal') }}:</span>
-            <span class="font-medium">{{ formatNumber(config.cost.crystal) }}</span>
+            <span class="font-medium">
+              <NumberWithTooltip :value="config.cost.crystal" />
+            </span>
           </div>
           <div v-if="config.cost.deuterium > 0" class="flex items-center justify-between text-sm">
             <span class="text-muted-foreground">{{ t('resources.deuterium') }}:</span>
-            <span class="font-medium">{{ formatNumber(config.cost.deuterium) }}</span>
+            <span class="font-medium">
+              <NumberWithTooltip :value="config.cost.deuterium" />
+            </span>
           </div>
           <div class="flex items-center justify-between text-sm pt-2 border-t">
             <span class="text-muted-foreground">{{ t('player.points') }}:</span>
-            <span class="font-bold text-primary">{{ pointsPerUnit }}</span>
+            <span class="font-bold text-primary">
+              <NumberWithTooltip :value="pointsPerUnit" />
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -128,22 +148,31 @@
             <div class="space-y-1 text-sm">
               <div class="flex justify-between">
                 <span>{{ t('resources.metal') }}:</span>
-                <span class="font-medium">{{ formatNumber(batchCost.metal) }}</span>
+                <span class="font-medium">
+                  <NumberWithTooltip :value="batchCost.metal" />
+                </span>
               </div>
               <div class="flex justify-between">
                 <span>{{ t('resources.crystal') }}:</span>
-                <span class="font-medium">{{ formatNumber(batchCost.crystal) }}</span>
+                <span class="font-medium">
+                  <NumberWithTooltip :value="batchCost.crystal" />
+                </span>
               </div>
               <div class="flex justify-between">
                 <span>{{ t('resources.deuterium') }}:</span>
-                <span class="font-medium">{{ formatNumber(batchCost.deuterium) }}</span>
+                <span class="font-medium">
+                  <NumberWithTooltip :value="batchCost.deuterium" />
+                </span>
               </div>
             </div>
           </div>
           <div class="space-y-2">
             <p class="text-sm text-muted-foreground">{{ t('shipyard.totalTime') }}:</p>
             <div class="text-xl font-bold">{{ formatTime(config.buildTime * quantity) }}</div>
-            <p class="text-xs text-muted-foreground">{{ t('player.points') }}: +{{ formatNumber(batchPoints) }}</p>
+            <p class="text-xs text-muted-foreground">
+              {{ t('player.points') }}: +
+              <NumberWithTooltip :value="batchPoints" />
+            </p>
           </div>
         </div>
       </CardContent>
@@ -158,9 +187,11 @@
   import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
   import { Input } from '@/components/ui/input'
   import { Label } from '@/components/ui/label'
+  import NumberWithTooltip from '@/components/NumberWithTooltip.vue'
   import { Sword, Shield, ShieldCheck, Zap, Package, Fuel } from 'lucide-vue-next'
   import * as pointsLogic from '@/logic/pointsLogic'
   import { SHIPS } from '@/config/gameConfig'
+  import { formatTime } from '@/utils/format'
 
   const { t } = useI18n()
 
@@ -187,18 +218,4 @@
   const batchPoints = computed(() => {
     return pointsLogic.calculateShipPoints(props.shipType, quantity.value)
   })
-
-  const formatNumber = (num: number): string => {
-    return num.toLocaleString()
-  }
-
-  const formatTime = (seconds: number): string => {
-    if (seconds < 60) return `${seconds}${t('common.timeSecond')}`
-    const minutes = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    if (minutes < 60) return `${minutes}${t('common.timeMinute')}${secs}${t('common.timeSecond')}`
-    const hours = Math.floor(minutes / 60)
-    const mins = minutes % 60
-    return `${hours}${t('common.timeHour')}${mins}${t('common.timeMinute')}`
-  }
 </script>

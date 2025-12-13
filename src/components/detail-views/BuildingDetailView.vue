@@ -21,24 +21,36 @@
               <Badge v-if="level === currentLevel" variant="default">{{ level }}</Badge>
               <span v-else>{{ level }}</span>
             </TableCell>
-            <TableCell class="text-center text-sm">{{ formatNumber(getLevelData(level).cost.metal) }}</TableCell>
-            <TableCell class="text-center text-sm">{{ formatNumber(getLevelData(level).cost.crystal) }}</TableCell>
-            <TableCell class="text-center text-sm">{{ formatNumber(getLevelData(level).cost.deuterium) }}</TableCell>
+            <TableCell class="text-center text-sm">
+              <NumberWithTooltip :value="getLevelData(level).cost.metal" />
+            </TableCell>
+            <TableCell class="text-center text-sm">
+              <NumberWithTooltip :value="getLevelData(level).cost.crystal" />
+            </TableCell>
+            <TableCell class="text-center text-sm">
+              <NumberWithTooltip :value="getLevelData(level).cost.deuterium" />
+            </TableCell>
             <TableCell class="text-center text-sm">{{ formatTime(getLevelData(level).buildTime) }}</TableCell>
             <TableCell class="text-center text-sm">
               <span v-if="getLevelData(level).production > 0" class="text-green-600 dark:text-green-400">
-                +{{ formatNumber(getLevelData(level).production) }}/{{ t('resources.perHour') }}
+                +
+                <NumberWithTooltip :value="getLevelData(level).production" />
+                /{{ t('resources.perHour') }}
               </span>
               <span v-else>-</span>
             </TableCell>
             <TableCell class="text-center text-sm">
               <span v-if="getLevelData(level).consumption > 0" class="text-red-600 dark:text-red-400">
-                -{{ formatNumber(getLevelData(level).consumption) }}
+                -
+                <NumberWithTooltip :value="getLevelData(level).consumption" />
               </span>
               <span v-else>-</span>
             </TableCell>
             <TableCell class="text-center text-sm">
-              <span class="text-primary font-medium">+{{ getLevelData(level).points }}</span>
+              <span class="text-primary font-medium">
+                +
+                <NumberWithTooltip :value="getLevelData(level).points" />
+              </span>
             </TableCell>
           </TableRow>
         </TableBody>
@@ -54,15 +66,21 @@
         <CardContent class="space-y-2">
           <div class="flex items-center justify-between text-sm">
             <span class="text-muted-foreground">{{ t('resources.metal') }}:</span>
-            <span class="font-medium">{{ formatNumber(totalStats.metal) }}</span>
+            <span class="font-medium">
+              <NumberWithTooltip :value="totalStats.metal" />
+            </span>
           </div>
           <div class="flex items-center justify-between text-sm">
             <span class="text-muted-foreground">{{ t('resources.crystal') }}:</span>
-            <span class="font-medium">{{ formatNumber(totalStats.crystal) }}</span>
+            <span class="font-medium">
+              <NumberWithTooltip :value="totalStats.crystal" />
+            </span>
           </div>
           <div class="flex items-center justify-between text-sm">
             <span class="text-muted-foreground">{{ t('resources.deuterium') }}:</span>
-            <span class="font-medium">{{ formatNumber(totalStats.deuterium) }}</span>
+            <span class="font-medium">
+              <NumberWithTooltip :value="totalStats.deuterium" />
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -72,7 +90,9 @@
           <CardTitle class="text-sm">{{ t('buildings.totalPoints') }}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div class="text-3xl font-bold text-primary">{{ formatNumber(totalStats.points) }}</div>
+          <div class="text-3xl font-bold text-primary">
+            <NumberWithTooltip :value="totalStats.points" />
+          </div>
           <p class="text-xs text-muted-foreground mt-1">
             {{ t('buildings.levelRange') }}: {{ Math.max(0, currentLevel - 10) }} - {{ Math.min(currentLevel + 10, currentLevel + 10) }}
           </p>
@@ -89,8 +109,10 @@
   import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
   import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
   import { Badge } from '@/components/ui/badge'
+  import NumberWithTooltip from '@/components/NumberWithTooltip.vue'
   import * as buildingLogic from '@/logic/buildingLogic'
   import * as pointsLogic from '@/logic/pointsLogic'
+  import { formatTime } from '@/utils/format'
 
   const { t } = useI18n()
 
@@ -99,12 +121,11 @@
     currentLevel: number
   }>()
 
-  // 等级范围：当前等级 ±10
+  // 等级范围：当前等级 +10
   const levelRange = computed(() => {
-    const start = Math.max(0, props.currentLevel - 10)
     const end = props.currentLevel + 10
     const levels = []
-    for (let i = start; i <= end; i++) {
+    for (let i = props.currentLevel; i <= end; i++) {
       levels.push(i)
     }
     return levels
@@ -129,18 +150,18 @@
     let production = 0
     let consumption = 0
 
-    // 资源矿产量
+    // 资源矿产量（与 resourceLogic.ts 保持一致）
     if (props.buildingType === 'metalMine') {
-      production = Math.floor(30 * level * Math.pow(1.1, level))
+      production = Math.floor(1500 * level * Math.pow(1.5, level))
     } else if (props.buildingType === 'crystalMine') {
-      production = Math.floor(20 * level * Math.pow(1.1, level))
+      production = Math.floor(1000 * level * Math.pow(1.5, level))
     } else if (props.buildingType === 'deuteriumSynthesizer') {
-      production = Math.floor(10 * level * Math.pow(1.1, level))
+      production = Math.floor(500 * level * Math.pow(1.5, level))
     }
 
-    // 能量产出
+    // 能量产出（与 resourceLogic.ts 保持一致）
     if (props.buildingType === 'solarPlant') {
-      production = Math.floor(20 * level * Math.pow(1.1, level))
+      production = Math.floor(50 * level * Math.pow(1.1, level))
     }
 
     // 能量消耗（矿场和合成器）
@@ -178,18 +199,4 @@
 
     return { metal, crystal, deuterium, points }
   })
-
-  const formatNumber = (num: number): string => {
-    return num.toLocaleString()
-  }
-
-  const formatTime = (seconds: number): string => {
-    if (seconds < 60) return `${seconds}${t('common.timeSecond')}`
-    const minutes = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    if (minutes < 60) return `${minutes}${t('common.timeMinute')}${secs}${t('common.timeSecond')}`
-    const hours = Math.floor(minutes / 60)
-    const mins = minutes % 60
-    return `${hours}${t('common.timeHour')}${mins}${t('common.timeMinute')}`
-  }
 </script>

@@ -1,6 +1,6 @@
 import type { Planet, Resources } from '@/types/game'
 import { BuildingType, ShipType, DefenseType } from '@/types/game'
-import { MOON_CONFIG } from '@/config/gameConfig'
+import { MOON_CONFIG, FLEET_STORAGE_CONFIG } from '@/config/gameConfig'
 
 /**
  * 计算月球生成概率
@@ -67,7 +67,8 @@ export const tryGenerateMoon = (
       [ShipType.ColonyShip]: 0,
       [ShipType.Recycler]: 0,
       [ShipType.EspionageProbe]: 0,
-      [ShipType.DarkMatterHarvester]: 0
+      [ShipType.DarkMatterHarvester]: 0,
+      [ShipType.Deathstar]: 0
     },
     defense: {
       [DefenseType.RocketLauncher]: 0,
@@ -77,11 +78,13 @@ export const tryGenerateMoon = (
       [DefenseType.IonCannon]: 0,
       [DefenseType.PlasmaTurret]: 0,
       [DefenseType.SmallShieldDome]: 0,
-      [DefenseType.LargeShieldDome]: 0
+      [DefenseType.LargeShieldDome]: 0,
+      [DefenseType.PlanetaryShield]: 0
     },
     buildQueue: [],
     lastUpdate: Date.now(),
     maxSpace: MOON_CONFIG.baseSize,
+    maxFleetStorage: FLEET_STORAGE_CONFIG.baseStorage,
     isMoon: true,
     parentPlanetId: planetId
   }

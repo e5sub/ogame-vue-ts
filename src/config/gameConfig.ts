@@ -10,8 +10,14 @@ export const BUILDINGS: Record<BuildingType, BuildingConfig> = {
     baseCost: { metal: 60, crystal: 15, deuterium: 0, darkMatter: 0, energy: 0 },
     baseTime: 15, // 减少建造时间：30→15秒
     costMultiplier: 1.5,
-    spaceUsage: 3,
-    planetOnly: true
+    spaceUsage: 1,
+    planetOnly: true,
+    requirements: { [BuildingType.SolarPlant]: 1 },
+    levelRequirements: {
+      10: { [BuildingType.RoboticsFactory]: 2 },
+      20: { [BuildingType.RoboticsFactory]: 5, [BuildingType.ResearchLab]: 3 },
+      30: { [BuildingType.NaniteFactory]: 1, [BuildingType.ResearchLab]: 8 }
+    }
   },
   [BuildingType.CrystalMine]: {
     id: BuildingType.CrystalMine,
@@ -20,8 +26,14 @@ export const BUILDINGS: Record<BuildingType, BuildingConfig> = {
     baseCost: { metal: 48, crystal: 24, deuterium: 0, darkMatter: 0, energy: 0 },
     baseTime: 15, // 减少建造时间：30→15秒
     costMultiplier: 1.6,
-    spaceUsage: 3,
-    planetOnly: true
+    spaceUsage: 1,
+    planetOnly: true,
+    requirements: { [BuildingType.SolarPlant]: 1 },
+    levelRequirements: {
+      10: { [BuildingType.RoboticsFactory]: 2 },
+      20: { [BuildingType.RoboticsFactory]: 5, [BuildingType.ResearchLab]: 3 },
+      30: { [BuildingType.NaniteFactory]: 1, [BuildingType.ResearchLab]: 8 }
+    }
   },
   [BuildingType.DeuteriumSynthesizer]: {
     id: BuildingType.DeuteriumSynthesizer,
@@ -30,8 +42,14 @@ export const BUILDINGS: Record<BuildingType, BuildingConfig> = {
     baseCost: { metal: 225, crystal: 75, deuterium: 0, darkMatter: 0, energy: 0 },
     baseTime: 20, // 减少建造时间：30→20秒
     costMultiplier: 1.5,
-    spaceUsage: 4,
-    planetOnly: true
+    spaceUsage: 2,
+    planetOnly: true,
+    requirements: { [BuildingType.SolarPlant]: 1 },
+    levelRequirements: {
+      10: { [BuildingType.RoboticsFactory]: 2 },
+      20: { [BuildingType.RoboticsFactory]: 5, [BuildingType.ResearchLab]: 3 },
+      30: { [BuildingType.NaniteFactory]: 1, [BuildingType.ResearchLab]: 8 }
+    }
   },
   [BuildingType.SolarPlant]: {
     id: BuildingType.SolarPlant,
@@ -40,7 +58,12 @@ export const BUILDINGS: Record<BuildingType, BuildingConfig> = {
     baseCost: { metal: 75, crystal: 30, deuterium: 0, darkMatter: 0, energy: 0 },
     baseTime: 15, // 减少建造时间：30→15秒
     costMultiplier: 1.5,
-    spaceUsage: 5
+    spaceUsage: 2,
+    levelRequirements: {
+      15: { [BuildingType.RoboticsFactory]: 3 },
+      25: { [BuildingType.RoboticsFactory]: 6, [BuildingType.ResearchLab]: 5 },
+      35: { [BuildingType.NaniteFactory]: 1, [BuildingType.ResearchLab]: 10 }
+    }
   },
   [BuildingType.RoboticsFactory]: {
     id: BuildingType.RoboticsFactory,
@@ -49,7 +72,17 @@ export const BUILDINGS: Record<BuildingType, BuildingConfig> = {
     baseCost: { metal: 400, crystal: 120, deuterium: 200, darkMatter: 0, energy: 0 },
     baseTime: 40, // 减少建造时间：60→40秒
     costMultiplier: 2,
-    spaceUsage: 6
+    spaceUsage: 4,
+    requirements: {
+      [BuildingType.MetalMine]: 2,
+      [BuildingType.CrystalMine]: 2,
+      [BuildingType.DeuteriumSynthesizer]: 2
+    },
+    levelRequirements: {
+      5: { [BuildingType.ResearchLab]: 3, [BuildingType.SolarPlant]: 8 },
+      8: { [BuildingType.ResearchLab]: 6, [BuildingType.SolarPlant]: 12, [BuildingType.MetalMine]: 12, [BuildingType.CrystalMine]: 12 },
+      10: { [BuildingType.ResearchLab]: 8, [BuildingType.NaniteFactory]: 1 }
+    }
   },
   [BuildingType.NaniteFactory]: {
     id: BuildingType.NaniteFactory,
@@ -58,8 +91,13 @@ export const BUILDINGS: Record<BuildingType, BuildingConfig> = {
     baseCost: { metal: 1000000, crystal: 500000, deuterium: 100000, darkMatter: 0, energy: 0 },
     baseTime: 240, // 减少建造时间：300→240秒
     costMultiplier: 2,
-    spaceUsage: 15,
-    requirements: { [BuildingType.RoboticsFactory]: 10 }
+    spaceUsage: 8,
+    maxLevel: 10, // 最多10级（最多11个建造队列）
+    requirements: { [BuildingType.RoboticsFactory]: 10 },
+    levelRequirements: {
+      3: { [BuildingType.ResearchLab]: 10, [BuildingType.Shipyard]: 8, [TechnologyType.ComputerTechnology]: 8 },
+      5: { [BuildingType.ResearchLab]: 12, [BuildingType.Shipyard]: 10, [TechnologyType.ComputerTechnology]: 10 }
+    }
   },
   [BuildingType.Shipyard]: {
     id: BuildingType.Shipyard,
@@ -68,7 +106,13 @@ export const BUILDINGS: Record<BuildingType, BuildingConfig> = {
     baseCost: { metal: 400, crystal: 200, deuterium: 100, darkMatter: 0, energy: 0 },
     baseTime: 30, // 减少建造时间：60→30秒
     costMultiplier: 2,
-    spaceUsage: 8
+    spaceUsage: 5,
+    fleetStorageBonus: 1000, // 每级增加100舰队仓储
+    requirements: { [BuildingType.RoboticsFactory]: 2 },
+    levelRequirements: {
+      8: { [BuildingType.RoboticsFactory]: 5, [BuildingType.ResearchLab]: 5 },
+      12: { [BuildingType.RoboticsFactory]: 8, [BuildingType.ResearchLab]: 8, [BuildingType.NaniteFactory]: 2 }
+    }
   },
   [BuildingType.ResearchLab]: {
     id: BuildingType.ResearchLab,
@@ -77,7 +121,21 @@ export const BUILDINGS: Record<BuildingType, BuildingConfig> = {
     baseCost: { metal: 200, crystal: 400, deuterium: 200, darkMatter: 0, energy: 0 },
     baseTime: 30, // 减少建造时间：60→30秒
     costMultiplier: 2,
-    spaceUsage: 5
+    spaceUsage: 3,
+    requirements: {
+      [BuildingType.MetalMine]: 3,
+      [BuildingType.CrystalMine]: 3,
+      [BuildingType.DeuteriumSynthesizer]: 3
+    },
+    levelRequirements: {
+      8: {
+        [BuildingType.RoboticsFactory]: 5,
+        [BuildingType.MetalMine]: 10,
+        [BuildingType.CrystalMine]: 10,
+        [BuildingType.DeuteriumSynthesizer]: 10
+      },
+      12: { [BuildingType.RoboticsFactory]: 8, [BuildingType.NaniteFactory]: 1, [TechnologyType.EnergyTechnology]: 5 }
+    }
   },
   [BuildingType.MetalStorage]: {
     id: BuildingType.MetalStorage,
@@ -86,7 +144,12 @@ export const BUILDINGS: Record<BuildingType, BuildingConfig> = {
     baseCost: { metal: 1000, crystal: 0, deuterium: 0, darkMatter: 0, energy: 0 },
     baseTime: 15, // 减少建造时间：30→15秒
     costMultiplier: 2,
-    spaceUsage: 2
+    spaceUsage: 1,
+    requirements: { [BuildingType.MetalMine]: 2 },
+    levelRequirements: {
+      8: { [BuildingType.MetalMine]: 15, [BuildingType.RoboticsFactory]: 3 },
+      12: { [BuildingType.MetalMine]: 25, [BuildingType.RoboticsFactory]: 6 }
+    }
   },
   [BuildingType.CrystalStorage]: {
     id: BuildingType.CrystalStorage,
@@ -95,7 +158,12 @@ export const BUILDINGS: Record<BuildingType, BuildingConfig> = {
     baseCost: { metal: 1000, crystal: 500, deuterium: 0, darkMatter: 0, energy: 0 },
     baseTime: 15, // 减少建造时间：30→15秒
     costMultiplier: 2,
-    spaceUsage: 2
+    spaceUsage: 1,
+    requirements: { [BuildingType.CrystalMine]: 2 },
+    levelRequirements: {
+      8: { [BuildingType.CrystalMine]: 15, [BuildingType.RoboticsFactory]: 3 },
+      12: { [BuildingType.CrystalMine]: 25, [BuildingType.RoboticsFactory]: 6 }
+    }
   },
   [BuildingType.DeuteriumTank]: {
     id: BuildingType.DeuteriumTank,
@@ -104,7 +172,12 @@ export const BUILDINGS: Record<BuildingType, BuildingConfig> = {
     baseCost: { metal: 1000, crystal: 1000, deuterium: 0, darkMatter: 0, energy: 0 },
     baseTime: 15, // 减少建造时间：30→15秒
     costMultiplier: 2,
-    spaceUsage: 2
+    spaceUsage: 1,
+    requirements: { [BuildingType.DeuteriumSynthesizer]: 2 },
+    levelRequirements: {
+      8: { [BuildingType.DeuteriumSynthesizer]: 15, [BuildingType.RoboticsFactory]: 3 },
+      12: { [BuildingType.DeuteriumSynthesizer]: 25, [BuildingType.RoboticsFactory]: 6 }
+    }
   },
   [BuildingType.DarkMatterCollector]: {
     id: BuildingType.DarkMatterCollector,
@@ -113,8 +186,35 @@ export const BUILDINGS: Record<BuildingType, BuildingConfig> = {
     baseCost: { metal: 50000, crystal: 100000, deuterium: 50000, darkMatter: 0, energy: 0 },
     baseTime: 90, // 减少建造时间：120→90秒
     costMultiplier: 2,
-    spaceUsage: 10,
-    planetOnly: true
+    spaceUsage: 6,
+    planetOnly: true,
+    requirements: {
+      [BuildingType.ResearchLab]: 5,
+      [TechnologyType.DarkMatterTechnology]: 1
+    },
+    levelRequirements: {
+      5: { [BuildingType.ResearchLab]: 8, [TechnologyType.DarkMatterTechnology]: 3, [BuildingType.RoboticsFactory]: 8 },
+      8: { [BuildingType.ResearchLab]: 10, [TechnologyType.DarkMatterTechnology]: 5, [BuildingType.NaniteFactory]: 2 }
+    }
+  },
+  [BuildingType.Terraformer]: {
+    id: BuildingType.Terraformer,
+    name: '地形改造器',
+    description: '改造行星地形，每级增加5个可用空间',
+    baseCost: { metal: 0, crystal: 50000, deuterium: 100000, darkMatter: 0, energy: 0 },
+    baseTime: 60,
+    costMultiplier: 2,
+    spaceUsage: 5,
+    planetOnly: true,
+    requirements: {
+      [BuildingType.ResearchLab]: 10,
+      [BuildingType.RoboticsFactory]: 8,
+      [TechnologyType.TerraformingTechnology]: 1
+    },
+    levelRequirements: {
+      5: { [BuildingType.ResearchLab]: 12, [TechnologyType.TerraformingTechnology]: 3, [BuildingType.NaniteFactory]: 1 },
+      8: { [BuildingType.ResearchLab]: 14, [TechnologyType.TerraformingTechnology]: 5, [BuildingType.NaniteFactory]: 3 }
+    }
   },
   // 月球专属建筑
   [BuildingType.LunarBase]: {
@@ -125,7 +225,11 @@ export const BUILDINGS: Record<BuildingType, BuildingConfig> = {
     baseTime: 45, // 减少建造时间：60→45秒
     costMultiplier: 2,
     spaceUsage: 0, // 月球基地本身不占用空间,反而增加空间
-    moonOnly: true
+    moonOnly: true,
+    levelRequirements: {
+      5: { [BuildingType.RoboticsFactory]: 5 },
+      8: { [BuildingType.RoboticsFactory]: 8, [BuildingType.NaniteFactory]: 1 }
+    }
   },
   [BuildingType.SensorPhalanx]: {
     id: BuildingType.SensorPhalanx,
@@ -134,8 +238,13 @@ export const BUILDINGS: Record<BuildingType, BuildingConfig> = {
     baseCost: { metal: 20000, crystal: 40000, deuterium: 20000, darkMatter: 0, energy: 0 },
     baseTime: 60, // 减少建造时间：90→60秒
     costMultiplier: 2,
-    spaceUsage: 10,
-    moonOnly: true
+    spaceUsage: 6,
+    moonOnly: true,
+    requirements: { [BuildingType.LunarBase]: 1 },
+    levelRequirements: {
+      5: { [BuildingType.LunarBase]: 5, [TechnologyType.ComputerTechnology]: 5 },
+      8: { [BuildingType.LunarBase]: 8, [TechnologyType.ComputerTechnology]: 8, [BuildingType.NaniteFactory]: 2 }
+    }
   },
   [BuildingType.JumpGate]: {
     id: BuildingType.JumpGate,
@@ -144,8 +253,42 @@ export const BUILDINGS: Record<BuildingType, BuildingConfig> = {
     baseCost: { metal: 2000000, crystal: 4000000, deuterium: 2000000, darkMatter: 0, energy: 0 },
     baseTime: 240, // 减少建造时间：300→240秒
     costMultiplier: 2,
-    spaceUsage: 20,
-    moonOnly: true
+    spaceUsage: 10,
+    moonOnly: true,
+    maxLevel: 5, // 最多5级
+    requirements: {
+      [BuildingType.LunarBase]: 1,
+      [TechnologyType.HyperspaceTechnology]: 7
+    },
+    levelRequirements: {
+      3: { [BuildingType.LunarBase]: 5, [TechnologyType.HyperspaceTechnology]: 10, [BuildingType.NaniteFactory]: 3 }
+    }
+  },
+  // 特殊建筑
+  [BuildingType.PlanetDestroyerFactory]: {
+    id: BuildingType.PlanetDestroyerFactory,
+    name: '行星毁灭者工厂',
+    description: '建造能够摧毁行星的终极武器',
+    baseCost: { metal: 5000000, crystal: 4000000, deuterium: 1000000, darkMatter: 0, energy: 0 },
+    baseTime: 300,
+    costMultiplier: 2,
+    spaceUsage: 15,
+    planetOnly: true,
+    maxLevel: 3, // 最多3级
+    requirements: {
+      [BuildingType.Shipyard]: 12,
+      [BuildingType.RoboticsFactory]: 10,
+      [BuildingType.NaniteFactory]: 5,
+      [TechnologyType.PlanetDestructionTech]: 1
+    },
+    levelRequirements: {
+      3: {
+        [BuildingType.Shipyard]: 14,
+        [BuildingType.NaniteFactory]: 8,
+        [TechnologyType.PlanetDestructionTech]: 3,
+        [TechnologyType.HyperspaceTechnology]: 10
+      }
+    }
   }
 }
 
@@ -158,7 +301,12 @@ export const TECHNOLOGIES: Record<TechnologyType, TechnologyConfig> = {
     baseCost: { metal: 0, crystal: 800, deuterium: 400, darkMatter: 0, energy: 0 },
     baseTime: 30, // 减少研究时间：60→30秒
     costMultiplier: 2,
-    requirements: { [BuildingType.ResearchLab]: 1 }
+    requirements: { [BuildingType.ResearchLab]: 1 },
+    levelRequirements: {
+      5: { [BuildingType.ResearchLab]: 3, [BuildingType.SolarPlant]: 10 },
+      8: { [BuildingType.ResearchLab]: 5, [BuildingType.SolarPlant]: 15, [BuildingType.RoboticsFactory]: 3 },
+      12: { [BuildingType.ResearchLab]: 8, [BuildingType.RoboticsFactory]: 6, [BuildingType.NaniteFactory]: 1 }
+    }
   },
   [TechnologyType.LaserTechnology]: {
     id: TechnologyType.LaserTechnology,
@@ -167,7 +315,11 @@ export const TECHNOLOGIES: Record<TechnologyType, TechnologyConfig> = {
     baseCost: { metal: 200, crystal: 100, deuterium: 0, darkMatter: 0, energy: 0 },
     baseTime: 60,
     costMultiplier: 2,
-    requirements: { [BuildingType.ResearchLab]: 1, [TechnologyType.EnergyTechnology]: 2 }
+    requirements: { [BuildingType.ResearchLab]: 1, [TechnologyType.EnergyTechnology]: 2 },
+    levelRequirements: {
+      6: { [BuildingType.ResearchLab]: 5, [TechnologyType.EnergyTechnology]: 5, [BuildingType.Shipyard]: 3 },
+      10: { [BuildingType.ResearchLab]: 8, [TechnologyType.EnergyTechnology]: 8, [BuildingType.Shipyard]: 6 }
+    }
   },
   [TechnologyType.IonTechnology]: {
     id: TechnologyType.IonTechnology,
@@ -176,7 +328,11 @@ export const TECHNOLOGIES: Record<TechnologyType, TechnologyConfig> = {
     baseCost: { metal: 1000, crystal: 300, deuterium: 100, darkMatter: 0, energy: 0 },
     baseTime: 60,
     costMultiplier: 2,
-    requirements: { [BuildingType.ResearchLab]: 4, [TechnologyType.LaserTechnology]: 5, [TechnologyType.EnergyTechnology]: 4 }
+    requirements: { [BuildingType.ResearchLab]: 4, [TechnologyType.LaserTechnology]: 5, [TechnologyType.EnergyTechnology]: 4 },
+    levelRequirements: {
+      5: { [BuildingType.ResearchLab]: 8, [TechnologyType.LaserTechnology]: 10, [TechnologyType.EnergyTechnology]: 8 },
+      8: { [BuildingType.ResearchLab]: 10, [TechnologyType.LaserTechnology]: 12, [BuildingType.NaniteFactory]: 2 }
+    }
   },
   [TechnologyType.HyperspaceTechnology]: {
     id: TechnologyType.HyperspaceTechnology,
@@ -185,7 +341,11 @@ export const TECHNOLOGIES: Record<TechnologyType, TechnologyConfig> = {
     baseCost: { metal: 0, crystal: 4000, deuterium: 2000, darkMatter: 0, energy: 0 },
     baseTime: 60,
     costMultiplier: 2,
-    requirements: { [BuildingType.ResearchLab]: 7, [TechnologyType.EnergyTechnology]: 5 }
+    requirements: { [BuildingType.ResearchLab]: 7, [TechnologyType.EnergyTechnology]: 5 },
+    levelRequirements: {
+      5: { [BuildingType.ResearchLab]: 10, [TechnologyType.EnergyTechnology]: 8, [BuildingType.Shipyard]: 5 },
+      8: { [BuildingType.ResearchLab]: 12, [TechnologyType.EnergyTechnology]: 10, [BuildingType.NaniteFactory]: 2 }
+    }
   },
   [TechnologyType.PlasmaTechnology]: {
     id: TechnologyType.PlasmaTechnology,
@@ -199,6 +359,20 @@ export const TECHNOLOGIES: Record<TechnologyType, TechnologyConfig> = {
       [TechnologyType.EnergyTechnology]: 8,
       [TechnologyType.LaserTechnology]: 10,
       [TechnologyType.IonTechnology]: 5
+    },
+    levelRequirements: {
+      5: {
+        [BuildingType.ResearchLab]: 10,
+        [TechnologyType.EnergyTechnology]: 12,
+        [TechnologyType.IonTechnology]: 8,
+        [BuildingType.NaniteFactory]: 1
+      },
+      8: {
+        [BuildingType.ResearchLab]: 12,
+        [TechnologyType.EnergyTechnology]: 15,
+        [TechnologyType.IonTechnology]: 10,
+        [BuildingType.NaniteFactory]: 3
+      }
     }
   },
   [TechnologyType.ComputerTechnology]: {
@@ -208,7 +382,14 @@ export const TECHNOLOGIES: Record<TechnologyType, TechnologyConfig> = {
     baseCost: { metal: 0, crystal: 400, deuterium: 600, darkMatter: 0, energy: 0 },
     baseTime: 60,
     costMultiplier: 2,
-    requirements: { [BuildingType.ResearchLab]: 1 }
+    fleetStorageBonus: 500, // 每级全局增加50舰队仓储
+    maxLevel: 10, // 最多10级（最多11个研究队列）
+    requirements: { [BuildingType.ResearchLab]: 1 },
+    levelRequirements: {
+      3: { [BuildingType.ResearchLab]: 5 },
+      5: { [BuildingType.ResearchLab]: 8, [BuildingType.RoboticsFactory]: 5 },
+      8: { [BuildingType.ResearchLab]: 10, [BuildingType.NaniteFactory]: 2 }
+    }
   },
   [TechnologyType.CombustionDrive]: {
     id: TechnologyType.CombustionDrive,
@@ -217,7 +398,11 @@ export const TECHNOLOGIES: Record<TechnologyType, TechnologyConfig> = {
     baseCost: { metal: 400, crystal: 0, deuterium: 600, darkMatter: 0, energy: 0 },
     baseTime: 60,
     costMultiplier: 2,
-    requirements: { [BuildingType.ResearchLab]: 1, [TechnologyType.EnergyTechnology]: 1 }
+    requirements: { [BuildingType.ResearchLab]: 1, [TechnologyType.EnergyTechnology]: 1 },
+    levelRequirements: {
+      5: { [BuildingType.ResearchLab]: 5, [TechnologyType.EnergyTechnology]: 3, [BuildingType.Shipyard]: 2 },
+      8: { [BuildingType.ResearchLab]: 8, [TechnologyType.EnergyTechnology]: 5, [BuildingType.Shipyard]: 5 }
+    }
   },
   [TechnologyType.ImpulseDrive]: {
     id: TechnologyType.ImpulseDrive,
@@ -226,7 +411,11 @@ export const TECHNOLOGIES: Record<TechnologyType, TechnologyConfig> = {
     baseCost: { metal: 2000, crystal: 4000, deuterium: 600, darkMatter: 0, energy: 0 },
     baseTime: 60,
     costMultiplier: 2,
-    requirements: { [BuildingType.ResearchLab]: 2, [TechnologyType.EnergyTechnology]: 1 }
+    requirements: { [BuildingType.ResearchLab]: 2, [TechnologyType.EnergyTechnology]: 1 },
+    levelRequirements: {
+      5: { [BuildingType.ResearchLab]: 6, [TechnologyType.EnergyTechnology]: 4, [BuildingType.Shipyard]: 3 },
+      8: { [BuildingType.ResearchLab]: 8, [TechnologyType.EnergyTechnology]: 6, [BuildingType.Shipyard]: 6 }
+    }
   },
   [TechnologyType.HyperspaceDrive]: {
     id: TechnologyType.HyperspaceDrive,
@@ -235,7 +424,11 @@ export const TECHNOLOGIES: Record<TechnologyType, TechnologyConfig> = {
     baseCost: { metal: 10000, crystal: 20000, deuterium: 6000, darkMatter: 0, energy: 0 },
     baseTime: 60,
     costMultiplier: 2,
-    requirements: { [BuildingType.ResearchLab]: 7, [TechnologyType.HyperspaceTechnology]: 3 }
+    requirements: { [BuildingType.ResearchLab]: 7, [TechnologyType.HyperspaceTechnology]: 3 },
+    levelRequirements: {
+      5: { [BuildingType.ResearchLab]: 10, [TechnologyType.HyperspaceTechnology]: 6, [BuildingType.Shipyard]: 8 },
+      8: { [BuildingType.ResearchLab]: 12, [TechnologyType.HyperspaceTechnology]: 8, [BuildingType.NaniteFactory]: 3 }
+    }
   },
   [TechnologyType.DarkMatterTechnology]: {
     id: TechnologyType.DarkMatterTechnology,
@@ -244,7 +437,58 @@ export const TECHNOLOGIES: Record<TechnologyType, TechnologyConfig> = {
     baseCost: { metal: 100000, crystal: 200000, deuterium: 100000, darkMatter: 0, energy: 0 },
     baseTime: 180,
     costMultiplier: 2,
-    requirements: { [BuildingType.ResearchLab]: 8, [TechnologyType.HyperspaceTechnology]: 5 }
+    requirements: { [BuildingType.ResearchLab]: 8, [TechnologyType.HyperspaceTechnology]: 5 },
+    levelRequirements: {
+      3: {
+        [BuildingType.ResearchLab]: 10,
+        [TechnologyType.HyperspaceTechnology]: 8,
+        [BuildingType.RoboticsFactory]: 10,
+        [TechnologyType.EnergyTechnology]: 10
+      },
+      5: {
+        [BuildingType.ResearchLab]: 12,
+        [TechnologyType.HyperspaceTechnology]: 10,
+        [BuildingType.NaniteFactory]: 2,
+        [TechnologyType.EnergyTechnology]: 12
+      }
+    }
+  },
+  [TechnologyType.TerraformingTechnology]: {
+    id: TechnologyType.TerraformingTechnology,
+    name: '地形改造技术',
+    description: '研究行星地形改造技术，每级为所有行星增加5个可用空间',
+    baseCost: { metal: 0, crystal: 20000, deuterium: 40000, darkMatter: 0, energy: 0 },
+    baseTime: 90,
+    costMultiplier: 2,
+    requirements: { [BuildingType.ResearchLab]: 8, [TechnologyType.EnergyTechnology]: 6 },
+    levelRequirements: {
+      5: { [BuildingType.ResearchLab]: 12, [TechnologyType.EnergyTechnology]: 10, [BuildingType.RoboticsFactory]: 10 },
+      8: { [BuildingType.ResearchLab]: 14, [TechnologyType.EnergyTechnology]: 12, [BuildingType.NaniteFactory]: 3 }
+    }
+  },
+  [TechnologyType.PlanetDestructionTech]: {
+    id: TechnologyType.PlanetDestructionTech,
+    name: '行星毁灭技术',
+    description: '研究如何摧毁整个行星的恐怖技术',
+    baseCost: { metal: 4000000, crystal: 8000000, deuterium: 4000000, darkMatter: 0, energy: 0 },
+    baseTime: 300,
+    costMultiplier: 2,
+    maxLevel: 5, // 最多5级
+    requirements: {
+      [BuildingType.ResearchLab]: 12,
+      [TechnologyType.HyperspaceTechnology]: 8,
+      [TechnologyType.HyperspaceDrive]: 6,
+      [TechnologyType.PlasmaTechnology]: 7
+    },
+    levelRequirements: {
+      3: {
+        [BuildingType.ResearchLab]: 14,
+        [TechnologyType.HyperspaceTechnology]: 12,
+        [TechnologyType.HyperspaceDrive]: 10,
+        [TechnologyType.PlasmaTechnology]: 10,
+        [BuildingType.NaniteFactory]: 5
+      }
+    }
   }
 }
 
@@ -262,6 +506,7 @@ export const SHIPS: Record<ShipType, ShipConfig> = {
     armor: 400,
     speed: 12500,
     fuelConsumption: 20,
+    storageUsage: 5,
     requirements: { [BuildingType.Shipyard]: 1, [TechnologyType.CombustionDrive]: 1 }
   },
   [ShipType.HeavyFighter]: {
@@ -276,6 +521,7 @@ export const SHIPS: Record<ShipType, ShipConfig> = {
     armor: 1000,
     speed: 10000,
     fuelConsumption: 75,
+    storageUsage: 10,
     requirements: { [BuildingType.Shipyard]: 3, [TechnologyType.ImpulseDrive]: 2 }
   },
   [ShipType.Cruiser]: {
@@ -290,6 +536,7 @@ export const SHIPS: Record<ShipType, ShipConfig> = {
     armor: 2700,
     speed: 15000,
     fuelConsumption: 300,
+    storageUsage: 15,
     requirements: { [BuildingType.Shipyard]: 5, [TechnologyType.ImpulseDrive]: 4, [TechnologyType.IonTechnology]: 2 }
   },
   [ShipType.Battleship]: {
@@ -304,6 +551,7 @@ export const SHIPS: Record<ShipType, ShipConfig> = {
     armor: 6000,
     speed: 10000,
     fuelConsumption: 500,
+    storageUsage: 25,
     requirements: { [BuildingType.Shipyard]: 7, [TechnologyType.HyperspaceDrive]: 4 }
   },
   [ShipType.SmallCargo]: {
@@ -318,6 +566,7 @@ export const SHIPS: Record<ShipType, ShipConfig> = {
     armor: 400,
     speed: 5000,
     fuelConsumption: 10,
+    storageUsage: 10,
     requirements: { [BuildingType.Shipyard]: 2, [TechnologyType.CombustionDrive]: 2 }
   },
   [ShipType.LargeCargo]: {
@@ -332,6 +581,7 @@ export const SHIPS: Record<ShipType, ShipConfig> = {
     armor: 1200,
     speed: 7500,
     fuelConsumption: 50,
+    storageUsage: 20,
     requirements: { [BuildingType.Shipyard]: 4, [TechnologyType.CombustionDrive]: 6 }
   },
   [ShipType.ColonyShip]: {
@@ -346,6 +596,7 @@ export const SHIPS: Record<ShipType, ShipConfig> = {
     armor: 3000,
     speed: 2500,
     fuelConsumption: 1000,
+    storageUsage: 40,
     requirements: { [BuildingType.Shipyard]: 4, [TechnologyType.ImpulseDrive]: 3 }
   },
   [ShipType.Recycler]: {
@@ -360,6 +611,7 @@ export const SHIPS: Record<ShipType, ShipConfig> = {
     armor: 1600,
     speed: 2000,
     fuelConsumption: 300,
+    storageUsage: 30,
     requirements: { [BuildingType.Shipyard]: 4, [TechnologyType.CombustionDrive]: 6 }
   },
   [ShipType.EspionageProbe]: {
@@ -374,6 +626,7 @@ export const SHIPS: Record<ShipType, ShipConfig> = {
     armor: 100,
     speed: 100000000,
     fuelConsumption: 1,
+    storageUsage: 2,
     requirements: { [BuildingType.Shipyard]: 3, [TechnologyType.CombustionDrive]: 3 }
   },
   [ShipType.DarkMatterHarvester]: {
@@ -388,10 +641,30 @@ export const SHIPS: Record<ShipType, ShipConfig> = {
     armor: 2000,
     speed: 5000,
     fuelConsumption: 500,
+    storageUsage: 50,
     requirements: {
       [BuildingType.Shipyard]: 8,
       [TechnologyType.HyperspaceDrive]: 5,
       [TechnologyType.DarkMatterTechnology]: 1
+    }
+  },
+  [ShipType.Deathstar]: {
+    id: ShipType.Deathstar,
+    name: '死星',
+    description: '终极武器，能够摧毁整个行星',
+    cost: { metal: 5000000, crystal: 4000000, deuterium: 1000000, darkMatter: 0, energy: 0 },
+    buildTime: 600,
+    cargoCapacity: 1000000,
+    attack: 200000,
+    shield: 50000,
+    armor: 900000,
+    speed: 100,
+    fuelConsumption: 1,
+    storageUsage: 100,
+    requirements: {
+      [BuildingType.PlanetDestroyerFactory]: 10,
+      [TechnologyType.PlanetDestructionTech]: 7,
+      [TechnologyType.HyperspaceDrive]: 7
     }
   }
 }
@@ -485,6 +758,21 @@ export const DEFENSES: Record<DefenseType, DefenseConfig> = {
     shield: 10000,
     armor: 10000,
     requirements: { [BuildingType.Shipyard]: 6, [TechnologyType.EnergyTechnology]: 6 }
+  },
+  [DefenseType.PlanetaryShield]: {
+    id: DefenseType.PlanetaryShield,
+    name: '行星护盾',
+    description: '保护行星免受毁灭攻击的超级护盾',
+    cost: { metal: 2000000, crystal: 2000000, deuterium: 1000000, darkMatter: 0, energy: 0 },
+    buildTime: 180,
+    attack: 1,
+    shield: 100000,
+    armor: 100000,
+    requirements: {
+      [BuildingType.Shipyard]: 10,
+      [TechnologyType.EnergyTechnology]: 10,
+      [TechnologyType.HyperspaceTechnology]: 8
+    }
   }
 }
 
@@ -565,6 +853,20 @@ export const MOON_CONFIG = {
   baseChance: 1, // 基础1%概率
   maxChance: 20, // 最大20%概率
   chancePerDebris: 100000, // 每10万资源增加1%概率
-  baseSize: 100, // 月球基础空间
-  lunarBaseSpaceBonus: 3 // 每级月球基地增加的空间
+  baseSize: 60, // 月球基础空间
+  lunarBaseSpaceBonus: 5 // 每级月球基地增加的空间
+}
+
+// 行星配置
+export const PLANET_CONFIG = {
+  baseSize: 200, // 行星基础空间
+  terraformerSpaceBonus: 5, // 每级地形改造器增加的空间
+  terraformingTechSpaceBonus: 3 // 每级地形改造技术增加的空间
+}
+
+// 舰队仓储配置
+export const FLEET_STORAGE_CONFIG = {
+  baseStorage: 1000, // 基础舰队仓储
+  shipyardBonus: 1000, // 每级造船厂增加的仓储
+  computerTechBonus: 500 // 每级计算机技术全局增加的仓储
 }

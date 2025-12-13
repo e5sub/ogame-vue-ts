@@ -5,11 +5,12 @@ import pkg from '../../package.json'
 export const encryptData = (data: any): string => {
   try {
     const jsonStr = JSON.stringify(data)
-    return CryptoJS.AES.encrypt(jsonStr, pkg.name).toString()
+    const encrypted = CryptoJS.AES.encrypt(jsonStr, pkg.name).toString()
+    return encrypted
   } catch (error) {
-    console.error('数据加密失败:', error)
-    return ''
+    console.error(error)
   }
+  return ''
 }
 
 // 数据解密
@@ -19,7 +20,7 @@ export const decryptData = (data: string): any => {
     const decryptedStr = bytes.toString(CryptoJS.enc.Utf8)
     return JSON.parse(decryptedStr)
   } catch (error) {
-    console.error('数据解密失败:', error)
+    console.error(error)
     return {}
   }
 }

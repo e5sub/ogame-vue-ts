@@ -140,242 +140,24 @@
     </div>
 
     <!-- 战斗结果对话框 -->
-    <Dialog v-model:open="showResultDialog">
-      <DialogContent class="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle class="flex items-center gap-2">
-            <Trophy class="h-5 w-5" />
-            {{ t('simulatorView.battleResult') }}
-          </DialogTitle>
-        </DialogHeader>
-        <div v-if="simulationResult" class="space-y-4">
-          <!-- 胜利者 -->
-          <div class="text-center p-4 rounded-lg" :class="getWinnerStyle(simulationResult.winner)">
-            <p class="text-lg font-bold">
-              {{
-                simulationResult.winner === 'attacker'
-                  ? t('simulatorView.attackerVictory')
-                  : simulationResult.winner === 'defender'
-                  ? t('simulatorView.defenderVictory')
-                  : t('simulatorView.draw')
-              }}
-            </p>
-            <p class="text-sm mt-1">{{ t('simulatorView.afterRounds').replace('{rounds}', String(battleRounds)) }}</p>
-          </div>
-          <!-- 损失对比 -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- 攻击方损失 -->
-            <div class="space-y-2">
-              <p class="text-sm font-medium text-red-600 dark:text-red-400">{{ t('simulatorView.attackerLosses') }}</p>
-              <div class="p-3 bg-muted rounded-lg space-y-1 text-xs">
-                <div v-for="(count, shipType) in simulationResult.attackerLosses" :key="shipType">
-                  <span class="text-muted-foreground">{{ SHIPS[shipType].name }}:</span>
-                  <span class="ml-2 font-medium">{{ count }}</span>
-                </div>
-                <p v-if="Object.keys(simulationResult.attackerLosses).length === 0" class="text-muted-foreground">
-                  {{ t('simulatorView.noLosses') }}
-                </p>
-              </div>
-            </div>
-
-            <!-- 防守方损失 -->
-            <div class="space-y-2">
-              <p class="text-sm font-medium text-red-600 dark:text-red-400">{{ t('simulatorView.defenderLosses') }}</p>
-              <div class="p-3 bg-muted rounded-lg space-y-1 text-xs">
-                <div v-for="(count, shipType) in simulationResult.defenderLosses.fleet" :key="shipType">
-                  <span class="text-muted-foreground">{{ SHIPS[shipType].name }}:</span>
-                  <span class="ml-2 font-medium">{{ count }}</span>
-                </div>
-                <div v-for="(count, defenseType) in simulationResult.defenderLosses.defense" :key="defenseType">
-                  <span class="text-muted-foreground">{{ DEFENSES[defenseType].name }}:</span>
-                  <span class="ml-2 font-medium">{{ count }}</span>
-                </div>
-                <p
-                  v-if="
-                    Object.keys(simulationResult.defenderLosses.fleet).length === 0 &&
-                    Object.keys(simulationResult.defenderLosses.defense).length === 0
-                  "
-                  class="text-muted-foreground"
-                >
-                  {{ t('simulatorView.noLosses') }}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- 剩余单位 -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- 攻击方剩余 -->
-            <div class="space-y-2">
-              <p class="text-sm font-medium text-blue-600 dark:text-blue-400">{{ t('simulatorView.attackerRemaining') }}</p>
-              <div class="p-3 bg-muted rounded-lg space-y-1 text-xs">
-                <div v-for="(count, shipType) in attackerRemaining" :key="shipType">
-                  <span class="text-muted-foreground">{{ SHIPS[shipType].name }}:</span>
-                  <span class="ml-2 font-medium">{{ count }}</span>
-                </div>
-                <p v-if="Object.keys(attackerRemaining).length === 0" class="text-muted-foreground">
-                  {{ t('simulatorView.allDestroyed') }}
-                </p>
-              </div>
-            </div>
-
-            <!-- 防守方剩余 -->
-            <div class="space-y-2">
-              <p class="text-sm font-medium text-blue-600 dark:text-blue-400">{{ t('simulatorView.defenderRemaining') }}</p>
-              <div class="p-3 bg-muted rounded-lg space-y-1 text-xs">
-                <div v-for="(count, shipType) in defenderRemaining.fleet" :key="shipType">
-                  <span class="text-muted-foreground">{{ SHIPS[shipType].name }}:</span>
-                  <span class="ml-2 font-medium">{{ count }}</span>
-                </div>
-                <div v-for="(count, defenseType) in defenderRemaining.defense" :key="defenseType">
-                  <span class="text-muted-foreground">{{ DEFENSES[defenseType].name }}:</span>
-                  <span class="ml-2 font-medium">{{ count }}</span>
-                </div>
-                <p
-                  v-if="Object.keys(defenderRemaining.fleet).length === 0 && Object.keys(defenderRemaining.defense).length === 0"
-                  class="text-muted-foreground"
-                >
-                  {{ t('simulatorView.allDestroyed') }}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- 战利品和残骸 -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- 掠夺资源 -->
-            <div
-              v-if="plunder.metal > 0 || plunder.crystal > 0 || plunder.deuterium > 0"
-              class="p-3 bg-green-50 dark:bg-green-950 rounded-lg"
-            >
-              <p class="text-sm font-medium mb-2 text-green-600 dark:text-green-400">{{ t('simulatorView.plunderableResources') }}</p>
-              <div class="flex flex-wrap gap-3 text-xs">
-                <span v-if="plunder.metal > 0" class="flex items-center gap-1">
-                  <ResourceIcon type="metal" size="sm" />
-                  {{ formatNumber(plunder.metal) }}
-                </span>
-                <span v-if="plunder.crystal > 0" class="flex items-center gap-1">
-                  <ResourceIcon type="crystal" size="sm" />
-                  {{ formatNumber(plunder.crystal) }}
-                </span>
-                <span v-if="plunder.deuterium > 0" class="flex items-center gap-1">
-                  <ResourceIcon type="deuterium" size="sm" />
-                  {{ formatNumber(plunder.deuterium) }}
-                </span>
-              </div>
-            </div>
-
-            <!-- 残骸场 -->
-            <div v-if="debrisField.metal > 0 || debrisField.crystal > 0" class="p-3 bg-muted rounded-lg">
-              <p class="text-sm font-medium mb-2">{{ t('simulatorView.debrisField') }}</p>
-              <div class="flex flex-wrap gap-3 text-xs">
-                <span v-if="debrisField.metal > 0" class="flex items-center gap-1">
-                  <ResourceIcon type="metal" size="sm" />
-                  {{ formatNumber(debrisField.metal) }}
-                </span>
-                <span v-if="debrisField.crystal > 0" class="flex items-center gap-1">
-                  <ResourceIcon type="crystal" size="sm" />
-                  {{ formatNumber(debrisField.crystal) }}
-                </span>
-              </div>
-              <!-- 月球生成概率 -->
-              <p v-if="moonChance > 0" class="text-xs text-muted-foreground mt-2">{{ t('simulatorView.moonChance') }}: {{ moonChance }}%</p>
-            </div>
-          </div>
-
-          <!-- 回合详情 -->
-          <div class="space-y-2">
-            <Button @click="showRoundDetails = !showRoundDetails" variant="outline" size="sm" class="w-full">
-              {{ showRoundDetails ? t('simulatorView.hideRoundDetails') : t('simulatorView.showRoundDetails') }}
-            </Button>
-
-            <div v-if="showRoundDetails" class="relative pl-6 space-y-4">
-              <!-- 时间线 -->
-              <div class="absolute left-2 top-0 bottom-0 w-0.5 bg-border" />
-
-              <div v-for="detail in roundDetails" :key="detail.round" class="relative">
-                <!-- 时间线节点 -->
-                <div class="absolute -left-6 top-3 w-4 h-4 rounded-full bg-primary border-2 border-background" />
-
-                <!-- 回合内容卡片 -->
-                <div class="border rounded-lg p-3 bg-card hover:shadow-md transition-shadow">
-                  <div class="flex items-center justify-between mb-3">
-                    <p class="text-sm font-semibold">{{ t('simulatorView.round').replace('{round}', String(detail.round)) }}</p>
-                    <div class="flex gap-3 text-xs text-muted-foreground">
-                      <span class="flex items-center gap-1" :title="t('simulatorView.attackerRemainingPower')">
-                        <Sword class="h-3 w-3" />
-                        {{ formatNumber(detail.attackerRemainingPower) }}
-                      </span>
-                      <span class="flex items-center gap-1" :title="t('simulatorView.defenderRemainingPower')">
-                        <Shield class="h-3 w-3" />
-                        {{ formatNumber(detail.defenderRemainingPower) }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <!-- 攻击方本回合损失 -->
-                    <div class="bg-red-50 dark:bg-red-950/20 rounded p-2">
-                      <p class="text-xs font-medium text-red-600 dark:text-red-400 mb-1.5">{{ t('simulatorView.attackerLosses') }}</p>
-                      <div class="text-xs space-y-0.5">
-                        <div v-for="(count, shipType) in detail.attackerLosses" :key="shipType" class="flex justify-between">
-                          <span class="text-muted-foreground">{{ SHIPS[shipType].name }}</span>
-                          <span class="font-medium">-{{ count }}</span>
-                        </div>
-                        <p v-if="Object.keys(detail.attackerLosses).length === 0" class="text-muted-foreground italic">
-                          {{ t('simulatorView.noLosses') }}
-                        </p>
-                      </div>
-                    </div>
-
-                    <!-- 防守方本回合损失 -->
-                    <div class="bg-blue-50 dark:bg-blue-950/20 rounded p-2">
-                      <p class="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1.5">{{ t('simulatorView.defenderLosses') }}</p>
-                      <div class="text-xs space-y-0.5">
-                        <div v-for="(count, shipType) in detail.defenderLosses.fleet" :key="shipType" class="flex justify-between">
-                          <span class="text-muted-foreground">{{ SHIPS[shipType].name }}</span>
-                          <span class="font-medium">-{{ count }}</span>
-                        </div>
-                        <div v-for="(count, defenseType) in detail.defenderLosses.defense" :key="defenseType" class="flex justify-between">
-                          <span class="text-muted-foreground">{{ DEFENSES[defenseType].name }}</span>
-                          <span class="font-medium">-{{ count }}</span>
-                        </div>
-                        <p
-                          v-if="
-                            Object.keys(detail.defenderLosses.fleet).length === 0 && Object.keys(detail.defenderLosses.defense).length === 0
-                          "
-                          class="text-muted-foreground italic"
-                        >
-                          {{ t('simulatorView.noLosses') }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <BattleReportDialog v-model:open="showResultDialog" :report="simulationResult" />
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref, computed } from 'vue'
+  import { ref, toRaw } from 'vue'
   import { useI18n } from '@/composables/useI18n'
   import { useGameConfig } from '@/composables/useGameConfig'
   import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-  import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
   import { Button } from '@/components/ui/button'
   import { Input } from '@/components/ui/input'
   import { Label } from '@/components/ui/label'
   import { ShipType, DefenseType } from '@/types/game'
-  import type { Fleet, BattleResult, Resources } from '@/types/game'
-  import { simulateBattle, calculatePlunder, calculateDebrisField } from '@/utils/battleSimulator'
+  import type { Fleet, BattleResult } from '@/types/game'
+  import { workerManager } from '@/workers/workerManager'
   import ResourceIcon from '@/components/ResourceIcon.vue'
-  import { formatNumber } from '@/utils/format'
-  import { Sword, Shield, Zap, RotateCcw, Trophy } from 'lucide-vue-next'
+  import BattleReportDialog from '@/components/BattleReportDialog.vue'
+  import { Sword, Shield, Zap, RotateCcw } from 'lucide-vue-next'
   import * as planetLogic from '@/logic/planetLogic'
 
   const { t } = useI18n()
@@ -444,78 +226,45 @@
 
   // 模拟结果
   const simulationResult = ref<BattleResult | null>(null)
-  const battleRounds = ref<number>(0)
-  const attackerRemaining = ref<Partial<Fleet>>({})
-  const defenderRemaining = ref<{ fleet: Partial<Fleet>; defense: Partial<Record<DefenseType, number>> }>({
-    fleet: {},
-    defense: {}
-  })
-  const roundDetails = ref<
-    Array<{
-      round: number
-      attackerLosses: Partial<Fleet>
-      defenderLosses: {
-        fleet: Partial<Fleet>
-        defense: Partial<Record<DefenseType, number>>
-      }
-      attackerRemainingPower: number
-      defenderRemainingPower: number
-    }>
-  >([])
-  const showRoundDetails = ref<boolean>(false)
   const showResultDialog = ref<boolean>(false)
 
-  // 计算掠夺资源
-  const plunder = computed(() => {
-    if (!simulationResult.value || simulationResult.value.winner !== 'attacker') {
-      return { metal: 0, crystal: 0, deuterium: 0, darkMatter: 0, energy: 0 }
-    }
-    return calculatePlunder(defenderResources.value, attackerFleet.value)
-  })
-
-  // 计算残骸场
-  const debrisField = computed(() => {
-    if (!simulationResult.value) {
-      return { metal: 0, crystal: 0, deuterium: 0, darkMatter: 0, energy: 0 }
-    }
-    return calculateDebrisField(simulationResult.value.attackerLosses, simulationResult.value.defenderLosses)
-  })
-
-  const calculateMoonChance = (debrisField: Resources): number => {
-    return planetLogic.calculateMoonChance(debrisField)
-  }
-
-  // 计算月球生成概率
-  const moonChance = computed(() => {
-    if (!debrisField.value) return 0
-    return calculateMoonChance(debrisField.value)
-  })
-
-  // 运行模拟
-  const runSimulation = () => {
+  // 运行模拟（使用 Web Worker 进行计算）
+  const runSimulation = async () => {
+    // 使用 toRaw 将 Vue 响应式对象转换为普通对象，以便传递给 Worker
     const attackerSide = {
-      ships: attackerFleet.value,
+      ships: toRaw(attackerFleet.value),
       weaponTech: attackerTech.value.weapon,
       shieldTech: attackerTech.value.shield,
       armorTech: attackerTech.value.armor
     }
 
     const defenderSide = {
-      ships: defenderFleet.value,
-      defense: defenderDefense.value,
+      ships: toRaw(defenderFleet.value),
+      defense: toRaw(defenderDefense.value),
       weaponTech: defenderTech.value.weapon,
       shieldTech: defenderTech.value.shield,
       armorTech: defenderTech.value.armor
     }
 
-    const result = simulateBattle(attackerSide, defenderSide)
+    // 使用 Worker 执行战斗模拟
+    const result = await workerManager.simulateBattle({
+      attacker: attackerSide,
+      defender: defenderSide
+    })
 
-    // 保存回合数和剩余单位
-    battleRounds.value = result.rounds
-    attackerRemaining.value = result.attackerRemaining
-    defenderRemaining.value = result.defenderRemaining
-    roundDetails.value = result.roundDetails
-    showRoundDetails.value = false
+    // 计算掠夺和残骸场
+    const plunder =
+      result.winner === 'attacker'
+        ? await workerManager.calculatePlunder({
+            defenderResources: toRaw(defenderResources.value),
+            attackerFleet: result.attackerRemaining
+          })
+        : { metal: 0, crystal: 0, deuterium: 0, darkMatter: 0, energy: 0 }
+    const debrisField = await workerManager.calculateDebris({
+      attackerLosses: result.attackerLosses,
+      defenderLosses: result.defenderLosses
+    })
+    const moonChance = planetLogic.calculateMoonChance(debrisField) / 100 // 转换为 0-1 范围
 
     simulationResult.value = {
       id: `sim_${Date.now()}`,
@@ -530,8 +279,13 @@
       attackerLosses: result.attackerLosses,
       defenderLosses: result.defenderLosses,
       winner: result.winner,
-      plunder: plunder.value,
-      debrisField: debrisField.value
+      plunder,
+      debrisField,
+      rounds: result.rounds,
+      attackerRemaining: result.attackerRemaining,
+      defenderRemaining: result.defenderRemaining,
+      roundDetails: result.roundDetails,
+      moonChance
     }
 
     // 显示结果对话框
@@ -552,18 +306,6 @@
     attackerTech.value = { weapon: 0, shield: 0, armor: 0 }
     defenderTech.value = { weapon: 0, shield: 0, armor: 0 }
     simulationResult.value = null
-    battleRounds.value = 0
-    attackerRemaining.value = {}
-    defenderRemaining.value = { fleet: {}, defense: {} }
-    roundDetails.value = []
-    showRoundDetails.value = false
     showResultDialog.value = false
-  }
-
-  // 获取胜利者样式
-  const getWinnerStyle = (winner: string) => {
-    if (winner === 'attacker') return 'bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300'
-    if (winner === 'defender') return 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300'
-    return 'bg-gray-50 dark:bg-gray-950 text-gray-700 dark:text-gray-300'
   }
 </script>

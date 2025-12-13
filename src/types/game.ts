@@ -21,10 +21,13 @@ export const BuildingType = {
   CrystalStorage: 'crystalStorage',
   DeuteriumTank: 'deuteriumTank',
   DarkMatterCollector: 'darkMatterCollector', // 暗物质收集器
+  Terraformer: 'terraformer', // 地形改造器
   // 月球专属建筑
   LunarBase: 'lunarBase', // 月球基地
   SensorPhalanx: 'sensorPhalanx', // 传感器阵列
-  JumpGate: 'jumpGate' // 跳跃门
+  JumpGate: 'jumpGate', // 跳跃门
+  // 特殊建筑
+  PlanetDestroyerFactory: 'planetDestroyerFactory' // 行星毁灭者工厂
 } as const
 
 export type BuildingType = (typeof BuildingType)[keyof typeof BuildingType]
@@ -38,9 +41,12 @@ export interface BuildingConfig {
   baseTime: number // 基础建造时间(秒)
   costMultiplier: number // 升级成本倍数
   spaceUsage: number // 占用空间
+  fleetStorageBonus?: number // 每级增加的舰队仓储（可选）
   planetOnly?: boolean // 仅行星可建造
   moonOnly?: boolean // 仅月球可建造
-  requirements?: Partial<Record<BuildingType | TechnologyType, number>> // 前置条件
+  maxLevel?: number // 最大等级（可选，不设置则无上限）
+  requirements?: Partial<Record<BuildingType | TechnologyType, number>> // 前置条件（初始解锁）
+  levelRequirements?: Record<number, Partial<Record<BuildingType | TechnologyType, number>>> // 等级升级条件
 }
 
 // 建筑实例
@@ -60,7 +66,9 @@ export const TechnologyType = {
   CombustionDrive: 'combustionDrive',
   ImpulseDrive: 'impulseDrive',
   HyperspaceDrive: 'hyperspaceDrive',
-  DarkMatterTechnology: 'darkMatterTechnology' // 暗物质技术
+  DarkMatterTechnology: 'darkMatterTechnology', // 暗物质技术
+  TerraformingTechnology: 'terraformingTechnology', // 地形改造技术
+  PlanetDestructionTech: 'planetDestructionTech' // 行星毁灭技术
 } as const
 
 export type TechnologyType = (typeof TechnologyType)[keyof typeof TechnologyType]
@@ -73,7 +81,10 @@ export interface TechnologyConfig {
   baseCost: Resources
   baseTime: number
   costMultiplier: number
-  requirements?: Partial<Record<BuildingType | TechnologyType, number>>
+  fleetStorageBonus?: number // 每级增加的舰队仓储（全局，可选）
+  maxLevel?: number // 最大等级（可选，不设置则无上限）
+  requirements?: Partial<Record<BuildingType | TechnologyType, number>> // 前置条件（初始解锁）
+  levelRequirements?: Record<number, Partial<Record<BuildingType | TechnologyType, number>>> // 等级升级条件
 }
 
 // 科技实例
@@ -91,7 +102,8 @@ export const DefenseType = {
   IonCannon: 'ionCannon',
   PlasmaTurret: 'plasmaTurret',
   SmallShieldDome: 'smallShieldDome',
-  LargeShieldDome: 'largeShieldDome'
+  LargeShieldDome: 'largeShieldDome',
+  PlanetaryShield: 'planetaryShield' // 行星护盾
 } as const
 
 export type DefenseType = (typeof DefenseType)[keyof typeof DefenseType]
@@ -120,7 +132,8 @@ export const ShipType = {
   ColonyShip: 'colonyShip',
   Recycler: 'recycler',
   EspionageProbe: 'espionageProbe',
-  DarkMatterHarvester: 'darkMatterHarvester' // 暗物质采集船
+  DarkMatterHarvester: 'darkMatterHarvester', // 暗物质采集船
+  Deathstar: 'deathstar' // 死星
 } as const
 
 export type ShipType = (typeof ShipType)[keyof typeof ShipType]
@@ -138,6 +151,7 @@ export interface ShipConfig {
   armor: number
   speed: number
   fuelConsumption: number
+  storageUsage: number // 占用舰队仓储
   requirements?: Partial<Record<BuildingType | TechnologyType, number>>
 }
 
@@ -153,6 +167,7 @@ export interface Fleet {
   [ShipType.Recycler]: number
   [ShipType.EspionageProbe]: number
   [ShipType.DarkMatterHarvester]: number
+  [ShipType.Deathstar]: number
 }
 
 // 舰队任务类型
@@ -163,7 +178,9 @@ export const MissionType = {
   Spy: 'spy',
   Deploy: 'deploy',
   Expedition: 'expedition',
-  HarvestDarkMatter: 'harvestDarkMatter' // 暗物质采集
+  HarvestDarkMatter: 'harvestDarkMatter', // 暗物质采集
+  Recycle: 'recycle', // 回收残骸
+  Destroy: 'destroy' // 行星毁灭
 } as const
 
 export type MissionType = (typeof MissionType)[keyof typeof MissionType]
@@ -201,8 +218,27 @@ export interface BattleResult {
     defense: Partial<Record<DefenseType, number>>
   }
   winner: 'attacker' | 'defender' | 'draw'
+  read?: boolean // 已读状态
   plunder: Resources
   debrisField: Resources
+  // 新增详细信息
+  rounds?: number
+  attackerRemaining?: Partial<Fleet>
+  defenderRemaining?: {
+    fleet: Partial<Fleet>
+    defense: Partial<Record<DefenseType, number>>
+  }
+  roundDetails?: Array<{
+    round: number
+    attackerLosses: Partial<Fleet>
+    defenderLosses: {
+      fleet: Partial<Fleet>
+      defense: Partial<Record<DefenseType, number>>
+    }
+    attackerRemainingPower: number
+    defenderRemainingPower: number
+  }>
+  moonChance?: number // 月球生成概率
 }
 
 // 间谍报告
@@ -218,6 +254,16 @@ export interface SpyReport {
   buildings?: Partial<Record<BuildingType, number>>
   technologies?: Partial<Record<TechnologyType, number>>
   detectionChance: number
+  read?: boolean // 已读状态
+}
+
+// 残骸场
+export interface DebrisField {
+  id: string
+  position: { galaxy: number; system: number; position: number }
+  resources: Pick<Resources, 'metal' | 'crystal'> // 残骸场只包含金属和晶体
+  createdAt: number
+  expiresAt?: number // 可选的过期时间
 }
 
 // 建造队列项
@@ -244,6 +290,7 @@ export interface Planet {
   buildQueue: BuildQueueItem[]
   lastUpdate: number
   maxSpace: number // 最大空间
+  maxFleetStorage: number // 舰队仓储上限
   isMoon: boolean // 是否为月球
   parentPlanetId?: string // 如果是月球,指向母星的ID
 }

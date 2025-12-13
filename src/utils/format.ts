@@ -29,15 +29,19 @@ export const getResourceColor = (current: number, max: number): string => {
 }
 
 /**
- * 格式化时间（秒转为时分秒）
+ * 格式化时间（秒转为天时分秒）
  * @param seconds 秒数
- * @param units 时间单位 {hour, minute, second}
- * @returns 格式化后的时间字符串（双位数格式，例如 00:05:08）
+ * @returns 格式化后的时间字符串（例如 2d 05:30:15 或 05:30:15）
  */
 export const formatTime = (seconds: number): string => {
-  const hours = Math.floor(seconds / 3600)
+  const days = Math.floor(seconds / 86400)
+  const hours = Math.floor((seconds % 86400) / 3600)
   const minutes = Math.floor((seconds % 3600) / 60)
   const secs = Math.floor(seconds % 60)
+
+  if (days > 0) {
+    return `${days}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 }
 

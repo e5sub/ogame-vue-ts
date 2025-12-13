@@ -32,11 +32,13 @@ export default {
     locked: '잠김',
     viewRequirements: '요구사항 보기',
     requirementsNotMet: '요구사항 미충족',
-    current: '현재'
+    current: '현재',
+    level: '레벨'
   },
   errors: {
     requirementsNotMet: '전제 조건 미충족',
     insufficientResources: '자원 부족',
+    insufficientFleetStorage: '함대 저장소 부족',
     shieldDomeLimit: '실드 돔 한도 도달',
     fleetMissionsFull: '함대 임무 슬롯 가득 참',
     insufficientFleet: '함대 부족',
@@ -61,7 +63,8 @@ export default {
     simulator: '시뮬레이터',
     galaxy: '은하계',
     messages: '메시지',
-    settings: '설정'
+    settings: '설정',
+    gm: 'GM'
   },
   sidebar: {
     language: '언어',
@@ -77,10 +80,14 @@ export default {
     darkMatter: '암흑 물질',
     energy: '에너지',
     production: '생산량',
+    consumption: '소비량',
     capacity: '용량',
     current: '현재 저장량',
     max: '최대 용량',
-    perHour: '시간'
+    perHour: '시간',
+    perMinute: '분',
+    hour: '시간',
+    noEnergy: '에너지 부족'
   },
   planet: {
     planet: '행성',
@@ -113,9 +120,11 @@ export default {
     crystalStorage: '크리스탈 창고',
     deuteriumTank: '중수소 탱크',
     darkMatterCollector: '암흑 물질 수집기',
+    terraformer: '지형 변환기',
     lunarBase: '달 기지',
     sensorPhalanx: '센서 팔랑크스',
     jumpGate: '점프 게이트',
+    planetDestroyerFactory: '행성 파괴 공장',
     buildTime: '건설 시간',
     production: '생산량',
     consumption: '소비',
@@ -129,16 +138,18 @@ export default {
     deuteriumSynthesizer: '중수소 자원 합성',
     solarPlant: '에너지 제공',
     roboticsFactory: '건설 속도 향상',
-    naniteFactory: '건설 대기열 수 증가, 레벨당 +1 (최대 10개)',
+    naniteFactory: '건설 대기열 수 증가, 레벨당 +1 (최대 10레벨)',
     shipyard: '함선 건조',
     researchLab: '기술 연구',
     metalStorage: '금속 저장 용량 증가',
     crystalStorage: '크리스탈 저장 용량 증가',
     deuteriumTank: '중수소 저장 용량 증가',
     darkMatterCollector: '희귀한 암흑 물질 자원 수집',
-    lunarBase: '달 가용 공간 증가',
+    terraformer: '행성 지형 개조, 레벨당 가용 공간 5 증가',
+    lunarBase: '달 가용 공간 증가, 레벨당 +5 공간',
     sensorPhalanx: '주변 행성계의 함대 활동 감지',
-    jumpGate: '다른 위성으로 함대 순간 이동'
+    jumpGate: '다른 위성으로 함대 순간 이동',
+    planetDestroyerFactory: '행성을 파괴할 수 있는 궁극 병기 건조'
   },
   ships: {
     lightFighter: '경전투기',
@@ -150,7 +161,8 @@ export default {
     colonyShip: '식민선',
     recycler: '재활용선',
     espionageProbe: '정찰기',
-    darkMatterHarvester: '암흑 물질 채취선'
+    darkMatterHarvester: '암흑 물질 채취선',
+    deathstar: '데스스타'
   },
   shipDescriptions: {
     lightFighter: '기본 전투 유닛',
@@ -162,7 +174,8 @@ export default {
     colonyShip: '새로운 행성 식민에 사용',
     recycler: '잔해장 자원 수집',
     espionageProbe: '적 행성 정찰',
-    darkMatterHarvester: '암흑 물질 채취 전용 특수 함선'
+    darkMatterHarvester: '암흑 물질 채취 전용 특수 함선',
+    deathstar: '행성 전체를 파괴할 수 있는 궁극 병기'
   },
   defenses: {
     rocketLauncher: '로켓 발사대',
@@ -172,7 +185,8 @@ export default {
     ionCannon: '이온 캐논',
     plasmaTurret: '플라즈마 포탑',
     smallShieldDome: '소형 실드 돔',
-    largeShieldDome: '대형 실드 돔'
+    largeShieldDome: '대형 실드 돔',
+    planetaryShield: '행성 실드'
   },
   defenseDescriptions: {
     rocketLauncher: '기본 방어 시설',
@@ -182,7 +196,8 @@ export default {
     ionCannon: '실드 파괴의 이기',
     plasmaTurret: '강력한 방어 시설',
     smallShieldDome: '행성 전체를 보호하는 소형 실드',
-    largeShieldDome: '행성 전체를 보호하는 대형 실드'
+    largeShieldDome: '행성 전체를 보호하는 대형 실드',
+    planetaryShield: '파괴 공격으로부터 행성을 보호하는 초급 실드'
   },
   research: {
     researchTime: '연구 시간',
@@ -200,7 +215,9 @@ export default {
     combustionDrive: '연소 엔진',
     impulseDrive: '임펄스 엔진',
     hyperspaceDrive: '초공간 엔진',
-    darkMatterTechnology: '암흑 물질 기술'
+    darkMatterTechnology: '암흑 물질 기술',
+    terraformingTechnology: '지형 변환 기술',
+    planetDestructionTech: '행성 파괴 기술'
   },
   technologyDescriptions: {
     energyTechnology: '에너지 이용 효율 향상',
@@ -208,11 +225,13 @@ export default {
     ionTechnology: '이온 무기 기술',
     hyperspaceTechnology: '초공간 점프 기술',
     plasmaTechnology: '플라즈마 무기 기술',
-    computerTechnology: '연구 대기열 수 증가, 레벨당 +1 (최대 10개)',
+    computerTechnology: '연구 대기열 수 증가, 레벨당 +1 (최대 10레벨)',
     combustionDrive: '기본 추진 기술',
     impulseDrive: '중급 추진 기술',
     hyperspaceDrive: '고급 추진 기술',
-    darkMatterTechnology: '암흑 물질의 성질과 응용 연구'
+    darkMatterTechnology: '암흑 물질의 성질과 응용 연구',
+    terraformingTechnology: '행성 지형 개조 기술 연구, 레벨당 모든 행성의 가용 공간 3 증가',
+    planetDestructionTech: '행성 전체를 파괴하는 공포의 기술 연구'
   },
   officers: {
     commander: '사령관',
@@ -220,7 +239,10 @@ export default {
     engineer: '엔지니어',
     geologist: '지질학자',
     technocrat: '기술 전문가',
-    darkMatterSpecialist: '암흑 물질 전문가'
+    darkMatterSpecialist: '암흑 물질 전문가',
+    resourceBonus: '자원 생산 보너스',
+    darkMatterBonus: '암흑 물질 생산 보너스',
+    energyBonus: '에너지 생산 보너스'
   },
   officerDescriptions: {
     commander: '건설 속도 및 관리 능력 향상',
@@ -247,7 +269,14 @@ export default {
     title: '행성 개요',
     resourceOverview: '자원 개요',
     fleetInfo: '함대',
-    currentShips: '현재 행성의 함선 수'
+    currentShips: '현재 행성의 함선 수',
+    productionSources: '생산 소스',
+    productionSourcesDesc: '상세 자원 생산 및 보너스 정보',
+    consumptionSources: '소비 소스',
+    consumptionSourcesDesc: '건물 에너지 소비 세부 정보',
+    totalProduction: '총 생산량',
+    totalConsumption: '총 소비량',
+    noConsumption: '에너지 소비 없음'
   },
   buildingsView: {
     title: '건물',
@@ -257,6 +286,8 @@ export default {
     upgradeCost: '업그레이드 비용',
     buildTime: '건설 시간',
     upgrade: '업그레이드',
+    maxLevelReached: '최대 레벨 도달',
+    requirementsNotMet: '요구 사항 미충족',
     upgradeFailed: '업그레이드 실패',
     upgradeFailedMessage: '자원이 충분한지, 공간이 충분한지, 또는 다른 건설 작업이 있는지 확인하세요.',
     demolish: '철거',
@@ -268,6 +299,7 @@ export default {
     title: '연구',
     researchCost: '연구 비용',
     research: '연구',
+    maxLevelReached: '최대 레벨 도달',
     researchFailed: '연구 실패',
     researchFailedMessage: '자원이 충분한지, 전제 조건이 충족되었는지, 또는 다른 연구 작업이 있는지 확인하세요.'
   },
@@ -288,6 +320,7 @@ export default {
   },
   shipyardView: {
     title: '조선소',
+    fleetStorage: '함대 저장소',
     attack: '공격력',
     shield: '실드',
     speed: '속도',
@@ -358,6 +391,7 @@ export default {
     colonize: '식민',
     spy: '정찰',
     deploy: '배치',
+    recycle: '회수',
     transportResources: '자원 수송',
     totalCargoCapacity: '총 적재량',
     used: '사용됨',
@@ -374,7 +408,12 @@ export default {
     recallFailed: '소환 실패',
     recallFailedMessage: '이 임무는 소환할 수 없습니다.',
     unknownPlanet: '알 수 없는 행성',
-    fleetMissionSlots: '함대 임무 슬롯'
+    fleetMissionSlots: '함대 임무 슬롯',
+    noShipsSelected: '선택된 함선 없음',
+    cannotSendToOwnPlanet: '자신의 행성으로 함대를 파견할 수 없습니다',
+    cargoExceedsCapacity: '적재량이 용량을 초과합니다',
+    noColonyShip: '식민 임무를 위해 식민선이 필요합니다',
+    noDebrisAtTarget: '대상 좌표에 잔해장이 없거나 잔해장이 비어 있습니다'
   },
   officersView: {
     title: '장교',
@@ -427,16 +466,22 @@ export default {
     attack: '공격',
     colonize: '식민',
     switch: '전환',
+    recycle: '회수',
+    debrisField: '잔해 필드',
     scoutPlanetTitle: '행성 정찰',
     attackPlanetTitle: '행성 공격',
     colonizePlanetTitle: '행성 식민',
+    recyclePlanetTitle: '잔해 회수',
     scoutPlanetMessage:
       '행성 [{coordinates}]을(를) 정찰하기 위해 정찰기를 보내시겠습니까?\n\n함대 페이지로 이동하여 함선을 선택하고 파견하세요.',
     attackPlanetMessage: '행성 [{coordinates}]을(를) 공격하시겠습니까?\n\n함대 페이지로 이동하여 함선을 선택하고 파견하세요.',
-    colonizePlanetMessage: '위치 [{coordinates}]을(를) 식민하시겠습니까?\n\n함대 페이지로 이동하여 식민선을 파견하세요.'
+    colonizePlanetMessage: '위치 [{coordinates}]을(를) 식민하시겠습니까?\n\n함대 페이지로 이동하여 식민선을 파견하세요.',
+    recyclePlanetMessage: '위치 [{coordinates}]의 잔해를 회수하시겠습니까?\n\n함대 페이지로 이동하여 회수선을 파견하세요.'
   },
   messagesView: {
     title: '메시지 센터',
+    battles: '전투',
+    spy: '정찰',
     battleReports: '전투 보고서',
     spyReports: '정찰 보고서',
     noBattleReports: '전투 보고서 없음',
@@ -457,7 +502,17 @@ export default {
     resources: '자원',
     fleet: '함대',
     defense: '방어',
-    buildings: '건물'
+    buildings: '건물',
+    unread: '읽지 않음',
+    targetPlanet: '목표 행성',
+    attackerRemaining: '공격자 잔여',
+    defenderRemaining: '방어자 잔여',
+    moonChance: '위성 생성 확률',
+    showRoundDetails: '라운드 상세 표시',
+    hideRoundDetails: '라운드 상세 숨기기',
+    round: '제{round}라운드',
+    attackerRemainingPower: '공격자 잔여 화력',
+    defenderRemainingPower: '방어자 잔여 화력'
   },
   simulatorView: {
     title: '전투 시뮬레이터',
@@ -519,6 +574,12 @@ export default {
     clearConfirmMessage: '모든 게임 데이터가 삭제되고 처음부터 시작됩니다. 이 작업은 되돌릴 수 없습니다. 계속하시겠습니까?',
     gameSettings: '게임 설정',
     gameSettingsDesc: '게임 매개변수 및 설정 조정',
+    gamePause: '게임 일시정지',
+    gamePauseDesc: '게임 시간 및 자원 생산 일시정지 또는 재개',
+    pause: '일시정지',
+    resume: '재개',
+    gamePaused: '게임이 일시정지되었습니다',
+    gameResumed: '게임이 재개되었습니다',
     playerName: '플레이어 이름',
     gameSpeed: '게임 속도',
     gameSpeedDesc: '현재 게임 속도 배율',
@@ -528,5 +589,34 @@ export default {
     community: '커뮤니티',
     github: 'GitHub 저장소',
     qqGroup: 'QQ 그룹'
+  },
+  gmView: {
+    title: 'GM 제어판',
+    adminOnly: '관리자 전용',
+    selectPlanet: '행성 선택',
+    choosePlanet: '행성을 선택하세요',
+    resources: '자원',
+    buildings: '건물',
+    research: '연구',
+    ships: '함선',
+    defense: '방어',
+    officers: '장교',
+    modifyResources: '자원 수정',
+    resourcesDesc: '행성 자원을 빠르게 수정',
+    modifyBuildings: '건물 수정',
+    buildingsDesc: '건물 레벨을 빠르게 설정',
+    modifyResearch: '연구 수정',
+    researchDesc: '연구 레벨을 빠르게 설정',
+    modifyShips: '함선 수정',
+    shipsDesc: '함선 수량을 빠르게 설정',
+    modifyDefense: '방어 수정',
+    defenseDesc: '방어 수량을 빠르게 설정',
+    modifyOfficers: '장교 수정',
+    officersDesc: '장교 만료 시간을 빠르게 설정',
+    days: '일',
+    dangerZone: '위험 구역',
+    dangerZoneDesc: '다음 작업은 되돌릴 수 없습니다',
+    resetGame: '게임 초기화',
+    resetGameConfirm: '게임을 초기화하시겠습니까? 모든 데이터가 삭제됩니다!'
   }
 }

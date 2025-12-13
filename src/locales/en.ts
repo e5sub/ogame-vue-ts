@@ -32,11 +32,13 @@ export default {
     locked: 'Locked',
     viewRequirements: 'View Requirements',
     requirementsNotMet: 'Requirements Not Met',
-    current: 'Current'
+    current: 'Current',
+    level: 'Level'
   },
   errors: {
     requirementsNotMet: 'Requirements not met',
     insufficientResources: 'Insufficient resources',
+    insufficientFleetStorage: 'Insufficient fleet storage',
     shieldDomeLimit: 'Shield dome limit reached',
     fleetMissionsFull: 'Fleet mission slots full',
     insufficientFleet: 'Insufficient fleet',
@@ -61,7 +63,8 @@ export default {
     simulator: 'Simulator',
     galaxy: 'Galaxy',
     messages: 'Messages',
-    settings: 'Settings'
+    settings: 'Settings',
+    gm: 'GM'
   },
   sidebar: {
     language: 'Language',
@@ -77,10 +80,14 @@ export default {
     darkMatter: 'Dark Matter',
     energy: 'Energy',
     production: 'Production',
+    consumption: 'Consumption',
     capacity: 'Capacity',
     current: 'Current',
     max: 'Max Capacity',
-    perHour: 'hour'
+    perHour: 'hour',
+    perMinute: 'min',
+    hour: 'hour',
+    noEnergy: 'No Energy'
   },
   planet: {
     planet: 'Planet',
@@ -113,9 +120,11 @@ export default {
     crystalStorage: 'Crystal Storage',
     deuteriumTank: 'Deuterium Tank',
     darkMatterCollector: 'Dark Matter Collector',
+    terraformer: 'Terraformer',
     lunarBase: 'Lunar Base',
     sensorPhalanx: 'Sensor Phalanx',
     jumpGate: 'Jump Gate',
+    planetDestroyerFactory: 'Planet Destroyer Factory',
     buildTime: 'Build Time',
     production: 'Production',
     consumption: 'Consumption',
@@ -129,16 +138,18 @@ export default {
     deuteriumSynthesizer: 'Synthesizes deuterium resources',
     solarPlant: 'Provides energy',
     roboticsFactory: 'Accelerates construction speed',
-    naniteFactory: 'Increases build queue capacity, +1 per level (max 10)',
+    naniteFactory: 'Increases build queue capacity, +1 per level (max 10 levels)',
     shipyard: 'Constructs ships',
     researchLab: 'Researches technologies',
     metalStorage: 'Increases metal storage capacity',
     crystalStorage: 'Increases crystal storage capacity',
     deuteriumTank: 'Increases deuterium storage capacity',
     darkMatterCollector: 'Collects rare dark matter resources',
-    lunarBase: 'Increases available space on the moon',
+    terraformer: 'Terraforms planet surface, adds 5 available space per level',
+    lunarBase: 'Increases available space on the moon, +5 space per level',
     sensorPhalanx: 'Detects fleet activities in surrounding systems',
-    jumpGate: 'Instantly transfers fleets to other moons'
+    jumpGate: 'Instantly transfers fleets to other moons',
+    planetDestroyerFactory: 'Constructs ultimate weapons capable of destroying planets'
   },
   ships: {
     lightFighter: 'Light Fighter',
@@ -150,7 +161,8 @@ export default {
     colonyShip: 'Colony Ship',
     recycler: 'Recycler',
     espionageProbe: 'Espionage Probe',
-    darkMatterHarvester: 'Dark Matter Harvester'
+    darkMatterHarvester: 'Dark Matter Harvester',
+    deathstar: 'Deathstar'
   },
   shipDescriptions: {
     lightFighter: 'Basic combat unit',
@@ -162,7 +174,8 @@ export default {
     colonyShip: 'Used to colonize new planets',
     recycler: 'Collects debris field resources',
     espionageProbe: 'Scouts enemy planets',
-    darkMatterHarvester: 'Special ship for harvesting dark matter'
+    darkMatterHarvester: 'Special ship for harvesting dark matter',
+    deathstar: 'Ultimate weapon capable of destroying entire planets'
   },
   defenses: {
     rocketLauncher: 'Rocket Launcher',
@@ -172,7 +185,8 @@ export default {
     ionCannon: 'Ion Cannon',
     plasmaTurret: 'Plasma Turret',
     smallShieldDome: 'Small Shield Dome',
-    largeShieldDome: 'Large Shield Dome'
+    largeShieldDome: 'Large Shield Dome',
+    planetaryShield: 'Planetary Shield'
   },
   defenseDescriptions: {
     rocketLauncher: 'Basic defense facility',
@@ -182,7 +196,8 @@ export default {
     ionCannon: 'Effective against shields',
     plasmaTurret: 'Powerful defense facility',
     smallShieldDome: 'Small shield protecting the entire planet',
-    largeShieldDome: 'Large shield protecting the entire planet'
+    largeShieldDome: 'Large shield protecting the entire planet',
+    planetaryShield: 'Super shield protecting planet from destruction attacks'
   },
   research: {
     researchTime: 'Research Time',
@@ -200,7 +215,9 @@ export default {
     combustionDrive: 'Combustion Drive',
     impulseDrive: 'Impulse Drive',
     hyperspaceDrive: 'Hyperspace Drive',
-    darkMatterTechnology: 'Dark Matter Technology'
+    darkMatterTechnology: 'Dark Matter Technology',
+    terraformingTechnology: 'Terraforming Technology',
+    planetDestructionTech: 'Planet Destruction Technology'
   },
   technologyDescriptions: {
     energyTechnology: 'Improves energy efficiency',
@@ -208,11 +225,13 @@ export default {
     ionTechnology: 'Ion weapon technology',
     hyperspaceTechnology: 'Hyperspace jump technology',
     plasmaTechnology: 'Plasma weapon technology',
-    computerTechnology: 'Increases research queue capacity, +1 per level (max 10)',
+    computerTechnology: 'Increases research queue capacity, +1 per level (max 10 levels)',
     combustionDrive: 'Basic propulsion technology',
     impulseDrive: 'Intermediate propulsion technology',
     hyperspaceDrive: 'Advanced propulsion technology',
-    darkMatterTechnology: 'Research into dark matter properties and applications'
+    darkMatterTechnology: 'Research into dark matter properties and applications',
+    terraformingTechnology: 'Research planet terraforming technology, adds 3 available space to all planets per level',
+    planetDestructionTech: 'Terrifying technology for destroying entire planets'
   },
   officers: {
     commander: 'Commander',
@@ -220,7 +239,10 @@ export default {
     engineer: 'Engineer',
     geologist: 'Geologist',
     technocrat: 'Technocrat',
-    darkMatterSpecialist: 'Dark Matter Specialist'
+    darkMatterSpecialist: 'Dark Matter Specialist',
+    resourceBonus: 'Resource Production Bonus',
+    darkMatterBonus: 'Dark Matter Production Bonus',
+    energyBonus: 'Energy Production Bonus'
   },
   officerDescriptions: {
     commander: 'Improves building speed and management',
@@ -241,13 +263,21 @@ export default {
     cancelResearch: 'Cancel Research',
     confirmCancel: 'Are you sure you want to cancel? 50% of resources will be refunded.',
     level: 'Level',
+    quantity: 'Quantity',
     upgradeToLevel: 'Upgrade to Level'
   },
   overview: {
     title: 'Planet Overview',
     resourceOverview: 'Resources',
     fleetInfo: 'Fleet',
-    currentShips: 'Ships on this planet'
+    currentShips: 'Ships on this planet',
+    productionSources: 'Production Sources',
+    productionSourcesDesc: 'Detailed resource production and bonus information',
+    consumptionSources: 'Consumption Sources',
+    consumptionSourcesDesc: 'Energy consumption details for buildings',
+    totalProduction: 'Total Production',
+    totalConsumption: 'Total Consumption',
+    noConsumption: 'No energy consumption'
   },
   buildingsView: {
     title: 'Buildings',
@@ -257,6 +287,8 @@ export default {
     upgradeCost: 'Upgrade Cost',
     buildTime: 'Build Time',
     upgrade: 'Upgrade',
+    maxLevelReached: 'Max Level Reached',
+    requirementsNotMet: 'Requirements Not Met',
     upgradeFailed: 'Upgrade Failed',
     upgradeFailedMessage: 'Please check if you have enough resources, space, or if there are other build tasks.',
     demolish: 'Demolish',
@@ -268,6 +300,7 @@ export default {
     title: 'Research',
     researchCost: 'Research Cost',
     research: 'Research',
+    maxLevelReached: 'Max Level Reached',
     researchFailed: 'Research Failed',
     researchFailedMessage: 'Please check if you have enough resources, prerequisites are met, or if there are other research tasks.'
   },
@@ -288,6 +321,7 @@ export default {
   },
   shipyardView: {
     title: 'Shipyard',
+    fleetStorage: 'Fleet Storage',
     attack: 'Attack',
     shield: 'Shield',
     speed: 'Speed',
@@ -358,6 +392,8 @@ export default {
     colonize: 'Colonize',
     spy: 'Spy',
     deploy: 'Deploy',
+    recycle: 'Recycle',
+    destroy: 'Planet Destruction',
     transportResources: 'Transport Resources',
     totalCargoCapacity: 'Total Cargo Capacity',
     used: 'Used',
@@ -374,7 +410,13 @@ export default {
     recallFailed: 'Recall Failed',
     recallFailedMessage: 'This mission cannot be recalled.',
     unknownPlanet: 'Unknown Planet',
-    fleetMissionSlots: 'Fleet Mission Slots'
+    fleetMissionSlots: 'Fleet Mission Slots',
+    noShipsSelected: 'No ships selected',
+    cannotSendToOwnPlanet: 'Cannot send fleet to your own planet',
+    cargoExceedsCapacity: 'Cargo exceeds capacity',
+    noColonyShip: 'Colony ship required for colonization mission',
+    noDebrisAtTarget: 'No debris field at target coordinates or debris field is empty',
+    noDeathstar: 'Deathstar required for destruction mission'
   },
   officersView: {
     title: 'Officers',
@@ -427,17 +469,23 @@ export default {
     attack: 'Attack',
     colonize: 'Colonize',
     switch: 'Switch',
+    recycle: 'Recycle',
+    debrisField: 'Debris Field',
     scoutPlanetTitle: 'Scout Planet',
     attackPlanetTitle: 'Attack Planet',
     colonizePlanetTitle: 'Colonize Planet',
+    recyclePlanetTitle: 'Recycle Debris',
     scoutPlanetMessage:
       'Are you sure you want to send espionage probes to scout planet [{coordinates}]?\n\nPlease go to the fleet page to select ships and send.',
     attackPlanetMessage: 'Are you sure you want to attack planet [{coordinates}]?\n\nPlease go to the fleet page to select ships and send.',
     colonizePlanetMessage:
-      'Are you sure you want to colonize position [{coordinates}]?\n\nPlease go to the fleet page to send a colony ship.'
+      'Are you sure you want to colonize position [{coordinates}]?\n\nPlease go to the fleet page to send a colony ship.',
+    recyclePlanetMessage: 'Are you sure you want to recycle debris at position [{coordinates}]?\n\nPlease go to the fleet page to send recycler ships.'
   },
   messagesView: {
     title: 'Messages',
+    battles: 'Battles',
+    spy: 'Spy',
     battleReports: 'Battle Reports',
     spyReports: 'Spy Reports',
     noBattleReports: 'No battle reports',
@@ -458,7 +506,9 @@ export default {
     resources: 'Resources',
     fleet: 'Fleet',
     defense: 'Defense',
-    buildings: 'Buildings'
+    buildings: 'Buildings',
+    unread: 'Unread',
+    targetPlanet: 'Target Planet'
   },
   simulatorView: {
     title: 'Battle Simulator',
@@ -520,6 +570,12 @@ export default {
     clearConfirmMessage: 'This will delete all game data and start over. This action cannot be undone. Continue?',
     gameSettings: 'Game Settings',
     gameSettingsDesc: 'Adjust game parameters and preferences',
+    gamePause: 'Game Pause',
+    gamePauseDesc: 'Pause or resume game time and resource production',
+    pause: 'Pause',
+    resume: 'Resume',
+    gamePaused: 'Game paused',
+    gameResumed: 'Game resumed',
     playerName: 'Player Name',
     gameSpeed: 'Game Speed',
     gameSpeedDesc: 'Current game speed multiplier',
@@ -529,5 +585,34 @@ export default {
     community: 'Community',
     github: 'GitHub Repository',
     qqGroup: 'QQ Group'
+  },
+  gmView: {
+    title: 'GM Control Panel',
+    adminOnly: 'Admin Only',
+    selectPlanet: 'Select Planet',
+    choosePlanet: 'Choose a planet',
+    resources: 'Resources',
+    buildings: 'Buildings',
+    research: 'Research',
+    ships: 'Ships',
+    defense: 'Defense',
+    officers: 'Officers',
+    modifyResources: 'Modify Resources',
+    resourcesDesc: 'Quickly modify planet resources',
+    modifyBuildings: 'Modify Buildings',
+    buildingsDesc: 'Quickly set building levels',
+    modifyResearch: 'Modify Research',
+    researchDesc: 'Quickly set research levels',
+    modifyShips: 'Modify Ships',
+    shipsDesc: 'Quickly set ship counts',
+    modifyDefense: 'Modify Defense',
+    defenseDesc: 'Quickly set defense counts',
+    modifyOfficers: 'Modify Officers',
+    officersDesc: 'Quickly set officer expiration time',
+    days: 'd',
+    dangerZone: 'Danger Zone',
+    dangerZoneDesc: 'The following operations are irreversible',
+    resetGame: 'Reset Game',
+    resetGameConfirm: 'Are you sure you want to reset the game? This will delete all data!'
   }
 }

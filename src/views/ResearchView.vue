@@ -7,7 +7,7 @@
 
     <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
       <Card v-for="techType in Object.values(TechnologyType)" :key="techType" class="relative">
-        <CardUnlockOverlay :requirements="TECHNOLOGIES[techType].requirements" />
+        <CardUnlockOverlay :requirements="TECHNOLOGIES[techType].requirements" :currentLevel="getTechLevel(techType)" />
         <CardHeader>
           <div class="flex justify-between items-start gap-2">
             <div class="min-w-0 flex-1">
@@ -63,7 +63,7 @@
             </div>
 
             <Button @click="handleResearch(techType)" :disabled="!canResearch(techType)" class="w-full">
-              {{ t('researchView.research') }}
+              {{ getResearchButtonText(techType) }}
             </Button>
           </div>
         </CardContent>
@@ -98,7 +98,7 @@
   const gameStore = useGameStore()
   const detailDialog = useDetailDialogStore()
   const { t } = useI18n()
-  const { TECHNOLOGIES } = useGameConfig()
+  const { TECHNOLOGIES, BUILDINGS } = useGameConfig()
   const planet = computed(() => gameStore.currentPlanet)
   const player = computed(() => gameStore.player)
   const alertDialog = ref<InstanceType<typeof AlertDialog> | null>(null)
@@ -123,8 +123,86 @@
     return true
   }
 
+  // 检查升级前置条件是否满足
+  const checkUpgradeRequirements = (techType: TechnologyType): boolean => {
+    if (!planet.value) return false
+    const config = TECHNOLOGIES.value[techType]
+    const currentLevel = getTechLevel(techType)
+    const targetLevel = currentLevel + 1
+
+    // 获取目标等级的所有前置条件（包括等级门槛）
+    const requirements = publicLogic.getLevelRequirements(config, targetLevel)
+
+    if (!requirements || Object.keys(requirements).length === 0) return true
+    return publicLogic.checkRequirements(planet.value, gameStore.player.technologies, requirements)
+  }
+
+  // 获取研究按钮文本
+  const getResearchButtonText = (techType: TechnologyType): string => {
+    if (!planet.value) return t('researchView.research')
+
+    const config = TECHNOLOGIES.value[techType]
+    const currentLevel = getTechLevel(techType)
+
+    // 检查是否达到等级上限
+    if (config.maxLevel !== undefined && currentLevel >= config.maxLevel) {
+      return t('researchView.maxLevelReached') // "等级已满"
+    }
+
+    if (player.value.researchQueue.length > 0) return t('researchView.research')
+
+    // 检查前置条件
+    if (!checkUpgradeRequirements(techType)) {
+      return t('buildingsView.requirementsNotMet') // "条件不足"
+    }
+
+    return t('researchView.research') // "研究"
+  }
+
+  // 获取前置条件列表文本
+  const getRequirementsList = (techType: TechnologyType): string => {
+    const config = TECHNOLOGIES.value[techType]
+    const currentLevel = getTechLevel(techType)
+    const targetLevel = currentLevel + 1
+
+    // 获取目标等级的所有前置条件（包括等级门槛）
+    const requirements = publicLogic.getLevelRequirements(config, targetLevel)
+
+    if (!requirements || !planet.value) return ''
+
+    const lines: string[] = []
+    for (const [key, requiredLevel] of Object.entries(requirements)) {
+      // 检查是否为建筑类型
+      if (Object.values(BuildingType).includes(key as BuildingType)) {
+        const bt = key as BuildingType
+        const currentLevel = planet.value.buildings[bt] || 0
+        const name = BUILDINGS.value[bt]?.name || bt
+        const status = currentLevel >= requiredLevel ? '✓' : '✗'
+        lines.push(`${status} ${name}: Lv ${requiredLevel} (${t('common.current')}: Lv ${currentLevel})`)
+      }
+      // 检查是否为科技类型
+      else if (Object.values(TechnologyType).includes(key as TechnologyType)) {
+        const tt = key as TechnologyType
+        const currentLevel = gameStore.player.technologies[tt] || 0
+        const name = TECHNOLOGIES.value[tt]?.name || tt
+        const status = currentLevel >= requiredLevel ? '✓' : '✗'
+        lines.push(`${status} ${name}: Lv ${requiredLevel} (${t('common.current')}: Lv ${currentLevel})`)
+      }
+    }
+    return lines.join('\n')
+  }
+
   // 研究科技
   const handleResearch = (techType: TechnologyType) => {
+    // 检查前置条件
+    if (!checkUpgradeRequirements(techType)) {
+      alertDialog.value?.show({
+        title: t('common.requirementsNotMet'),
+        message: getRequirementsList(techType)
+      })
+      return
+    }
+
     const success = researchTechnology(techType)
     if (!success) {
       alertDialog.value?.show({
@@ -141,10 +219,18 @@
 
   // 检查是否可以研究
   const canResearch = (techType: TechnologyType): boolean => {
-    if (!planet.value || player.value.researchQueue.length > 0) return false
+    if (!planet.value) return false
 
     const config = TECHNOLOGIES.value[techType]
     const currentLevel = getTechLevel(techType)
+
+    // 检查是否达到等级上限
+    if (config.maxLevel !== undefined && currentLevel >= config.maxLevel) {
+      return false
+    }
+
+    if (player.value.researchQueue.length > 0) return false
+
     const cost = getTechnologyCost(techType, currentLevel + 1)
 
     return (

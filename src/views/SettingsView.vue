@@ -59,19 +59,16 @@
         <CardDescription>{{ t('settings.gameSettingsDesc') }}</CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
-        <!-- 玩家名称 -->
-        <div class="flex items-center justify-between">
-          <Label for="player-name">{{ t('settings.playerName') }}</Label>
-          <Input id="player-name" v-model="playerName" @blur="updatePlayerName" class="max-w-xs" />
-        </div>
-
-        <!-- 游戏速度 -->
-        <div class="flex items-center justify-between">
+        <!-- 游戏暂停 -->
+        <div class="flex items-center justify-between p-4 border rounded-lg">
           <div class="space-y-1">
-            <Label>{{ t('settings.gameSpeed') }}</Label>
-            <p class="text-sm text-muted-foreground">{{ t('settings.gameSpeedDesc') }}</p>
+            <h3 class="font-medium">{{ t('settings.gamePause') }}</h3>
+            <p class="text-sm text-muted-foreground">{{ t('settings.gamePauseDesc') }}</p>
           </div>
-          <div class="text-2xl font-bold">1x</div>
+          <Button @click="togglePause" :variant="gameStore.isPaused ? 'default' : 'outline'">
+            <component :is="gameStore.isPaused ? Play : Pause" class="mr-2 h-4 w-4" />
+            {{ gameStore.isPaused ? t('settings.resume') : t('settings.pause') }}
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -89,7 +86,7 @@
           </div>
           <div class="flex items-center justify-between text-sm">
             <span class="text-muted-foreground">{{ t('settings.buildDate') }}:</span>
-            <span class="font-medium">{{ new Date().toLocaleDateString() }}</span>
+            <span class="font-medium">{{ pkg.buildDate }}</span>
           </div>
         </div>
 
@@ -139,8 +136,6 @@
   import { useI18n } from '@/composables/useI18n'
   import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
   import { Button } from '@/components/ui/button'
-  import { Input } from '@/components/ui/input'
-  import { Label } from '@/components/ui/label'
   import {
     AlertDialog,
     AlertDialogAction,
@@ -151,17 +146,17 @@
     AlertDialogHeader,
     AlertDialogTitle
   } from '@/components/ui/alert-dialog'
-  import { Download, Upload, Trash2, ExternalLink, MessagesSquare } from 'lucide-vue-next'
+  import { Download, Upload, Trash2, ExternalLink, MessagesSquare, Play, Pause } from 'lucide-vue-next'
   import { saveAs } from 'file-saver'
   import { toast } from 'vue-sonner'
   import pkg from '../../package.json'
+  import 'vue-sonner/style.css'
 
   const { t } = useI18n()
   const gameStore = useGameStore()
 
   const fileInputRef = ref<HTMLInputElement>()
   const isExporting = ref(false)
-  const playerName = ref(gameStore.player.name)
 
   const showConfirmDialog = ref(false)
   const confirmTitle = ref('')
@@ -176,17 +171,30 @@
     window.open(`https://qm.qq.com/q/${pkg.id}`, '_blank')
   }
 
-  // 导出数据
+  // 导出数据（包含游戏数据和地图数据）
   const handleExport = async () => {
     try {
       isExporting.value = true
-      const data = localStorage.getItem(pkg.name)
-      if (!data) {
+
+      // 获取游戏数据
+      const gameData = localStorage.getItem(pkg.name)
+      // 获取地图数据
+      const universeData = localStorage.getItem(`${pkg.name}-universe`)
+
+      if (!gameData) {
         toast.error(t('settings.exportFailed'))
         return
       }
+
+      // 合并数据
+      const exportData = {
+        game: gameData,
+        universe: universeData || null
+      }
+
       const fileName = `${pkg.name}-${new Date().toISOString().slice(0, 10)}-${Date.now()}.json`
-      saveAs(new Blob([data], { type: 'application/json' }), fileName)
+      const jsonString = JSON.stringify(exportData, null, 2)
+      saveAs(new Blob([jsonString], { type: 'application/json' }), fileName)
       toast.success(t('settings.exportSuccess'))
     } catch (error) {
       console.error('Export failed:', error)
@@ -205,14 +213,14 @@
   const handleFileSelect = (event: Event) => {
     const file = (event.target as HTMLInputElement).files?.[0]
     if (!file) return
-
     confirmTitle.value = t('settings.importConfirmTitle')
     confirmMessage.value = t('settings.importConfirmMessage')
     showConfirmDialog.value = true
+    gameStore.isPaused = true
     confirmCallback = () => importData(file)
   }
 
-  // 导入数据
+  // 导入数据（包含游戏数据和地图数据）
   const importData = async (file: File) => {
     try {
       const reader = new FileReader()
@@ -220,9 +228,28 @@
         try {
           const result = e.target?.result
           if (typeof result === 'string') {
-            localStorage.setItem(pkg.name, result)
+            const importData = JSON.parse(result)
+
+            // 兼容旧版本：如果是旧格式（直接是字符串），只导入游戏数据
+            if (typeof importData === 'string' || !importData.game) {
+              localStorage.setItem(pkg.name, result)
+              toast.success(t('settings.importSuccess'))
+              setTimeout(() => window.location.reload(), 1000)
+              return
+            }
+
+            // 新格式：分别导入游戏数据和地图数据
+            if (importData.game) {
+              localStorage.setItem(pkg.name, importData.game)
+            }
+
+            if (importData.universe) {
+              localStorage.setItem(`${pkg.name}-universe`, importData.universe)
+            }
+
             toast.success(t('settings.importSuccess'))
-            setTimeout(() => location.reload(), 500)
+            // 延迟刷新页面以让toast显示
+            setTimeout(() => window.location.reload(), 1000)
           } else {
             toast.error(t('settings.importFailed'))
           }
@@ -253,10 +280,13 @@
     window.location.reload()
   }
 
-  // 更新玩家名称
-  const updatePlayerName = () => {
-    if (playerName.value.trim()) {
-      gameStore.player.name = playerName.value.trim()
+  // 切换游戏暂停状态
+  const togglePause = () => {
+    gameStore.isPaused = !gameStore.isPaused
+    if (gameStore.isPaused) {
+      toast.info(t('settings.gamePaused'))
+    } else {
+      toast.success(t('settings.gameResumed'))
     }
   }
 
@@ -271,6 +301,7 @@
 
   // 取消操作
   const cancelAction = () => {
+    gameStore.isPaused = false
     confirmCallback = null
     showConfirmDialog.value = false
     // 重置文件输入

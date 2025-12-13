@@ -32,11 +32,13 @@ export default {
     locked: 'Gesperrt',
     viewRequirements: 'Anforderungen anzeigen',
     requirementsNotMet: 'Anforderungen nicht erfüllt',
-    current: 'Aktuell'
+    current: 'Aktuell',
+    level: 'Stufe'
   },
   errors: {
     requirementsNotMet: 'Anforderungen nicht erfüllt',
     insufficientResources: 'Unzureichende Ressourcen',
+    insufficientFleetStorage: 'Unzureichender Flottenspeicher',
     shieldDomeLimit: 'Schildkuppel-Limit erreicht',
     fleetMissionsFull: 'Flottenmissionsplätze voll',
     insufficientFleet: 'Unzureichende Flotte',
@@ -61,7 +63,8 @@ export default {
     simulator: 'Simulator',
     galaxy: 'Galaxie',
     messages: 'Nachrichten',
-    settings: 'Einstellungen'
+    settings: 'Einstellungen',
+    gm: 'GM'
   },
   sidebar: {
     language: 'Sprache',
@@ -77,10 +80,14 @@ export default {
     darkMatter: 'Dunkle Materie',
     energy: 'Energie',
     production: 'Produktion',
+    consumption: 'Verbrauch',
     capacity: 'Kapazität',
     current: 'Aktuell',
     max: 'Max. Kapazität',
-    perHour: 'Stunde'
+    perHour: 'Stunde',
+    perMinute: 'Min',
+    hour: 'Stunde',
+    noEnergy: 'Keine Energie'
   },
   planet: {
     planet: 'Planet',
@@ -113,9 +120,11 @@ export default {
     crystalStorage: 'Kristallspeicher',
     deuteriumTank: 'Deuteriumtank',
     darkMatterCollector: 'Dunkle-Materie-Kollektor',
+    terraformer: 'Terraformer',
     lunarBase: 'Mondbasis',
     sensorPhalanx: 'Sensorphalanx',
     jumpGate: 'Sprungtor',
+    planetDestroyerFactory: 'Planetenzerstörer-Fabrik',
     buildTime: 'Bauzeit',
     production: 'Produktion',
     consumption: 'Verbrauch',
@@ -129,16 +138,18 @@ export default {
     deuteriumSynthesizer: 'Synthesiert Deuteriumressourcen',
     solarPlant: 'Liefert Energie',
     roboticsFactory: 'Beschleunigt Baugeschwindigkeit',
-    naniteFactory: 'Erhöht Bauauftragskapazität, +1 pro Stufe (max 10)',
+    naniteFactory: 'Erhöht Bauauftragskapazität, +1 pro Stufe (max 10 Stufen)',
     shipyard: 'Baut Schiffe',
     researchLab: 'Erforscht Technologien',
     metalStorage: 'Erhöht Metallspeicherkapazität',
     crystalStorage: 'Erhöht Kristallspeicherkapazität',
     deuteriumTank: 'Erhöht Deuteriumspeicherkapazität',
     darkMatterCollector: 'Sammelt seltene Dunkle-Materie-Ressourcen',
-    lunarBase: 'Erhöht verfügbaren Platz auf dem Mond',
+    terraformer: 'Terraformt Planetenoberfläche, erhöht verfügbaren Platz um 5 pro Stufe',
+    lunarBase: 'Erhöht verfügbaren Platz auf dem Mond, +5 Platz pro Stufe',
     sensorPhalanx: 'Erkennt Flottenaktivitäten in umliegenden Systemen',
-    jumpGate: 'Überträgt Flotten sofort zu anderen Monden'
+    jumpGate: 'Überträgt Flotten sofort zu anderen Monden',
+    planetDestroyerFactory: 'Konstruiert ultimative Waffen zur Zerstörung von Planeten'
   },
   ships: {
     lightFighter: 'Leichter Jäger',
@@ -150,7 +161,8 @@ export default {
     colonyShip: 'Kolonieschiff',
     recycler: 'Recycler',
     espionageProbe: 'Spionagesonde',
-    darkMatterHarvester: 'Dunkle-Materie-Ernter'
+    darkMatterHarvester: 'Dunkle-Materie-Ernter',
+    deathstar: 'Todesstern'
   },
   shipDescriptions: {
     lightFighter: 'Grundlegende Kampfeinheit',
@@ -162,7 +174,8 @@ export default {
     colonyShip: 'Zur Kolonisierung neuer Planeten',
     recycler: 'Sammelt Trümmerfeld-Ressourcen',
     espionageProbe: 'Späht feindliche Planeten aus',
-    darkMatterHarvester: 'Spezielles Schiff zum Ernten von Dunkler Materie'
+    darkMatterHarvester: 'Spezielles Schiff zum Ernten von Dunkler Materie',
+    deathstar: 'Ultimative Waffe, die ganze Planeten zerstören kann'
   },
   defenses: {
     rocketLauncher: 'Raketenwerfer',
@@ -172,7 +185,8 @@ export default {
     ionCannon: 'Ionengeschütz',
     plasmaTurret: 'Plasmawerfer',
     smallShieldDome: 'Kleine Schildkuppel',
-    largeShieldDome: 'Große Schildkuppel'
+    largeShieldDome: 'Große Schildkuppel',
+    planetaryShield: 'Planetarschild'
   },
   defenseDescriptions: {
     rocketLauncher: 'Grundlegende Verteidigungsanlage',
@@ -182,7 +196,8 @@ export default {
     ionCannon: 'Effektiv gegen Schilde',
     plasmaTurret: 'Mächtige Verteidigungsanlage',
     smallShieldDome: 'Kleiner Schild zum Schutz des gesamten Planeten',
-    largeShieldDome: 'Großer Schild zum Schutz des gesamten Planeten'
+    largeShieldDome: 'Großer Schild zum Schutz des gesamten Planeten',
+    planetaryShield: 'Superschild zum Schutz des Planeten vor Vernichtungsangriffen'
   },
   research: {
     researchTime: 'Forschungszeit',
@@ -200,7 +215,9 @@ export default {
     combustionDrive: 'Verbrennungsantrieb',
     impulseDrive: 'Impulsantrieb',
     hyperspaceDrive: 'Hyperraumantrieb',
-    darkMatterTechnology: 'Dunkle-Materie-Technologie'
+    darkMatterTechnology: 'Dunkle-Materie-Technologie',
+    terraformingTechnology: 'Terraforming-Technologie',
+    planetDestructionTech: 'Planetenzerstörungstechnologie'
   },
   technologyDescriptions: {
     energyTechnology: 'Verbessert Energieeffizienz',
@@ -208,11 +225,13 @@ export default {
     ionTechnology: 'Ionenwaffentechnologie',
     hyperspaceTechnology: 'Hyperraumsprung-Technologie',
     plasmaTechnology: 'Plasmawaffentechnologie',
-    computerTechnology: 'Erhöht Forschungsauftragskapazität, +1 pro Stufe (max 10)',
+    computerTechnology: 'Erhöht Forschungsauftragskapazität, +1 pro Stufe (max 10 Stufen)',
     combustionDrive: 'Grundlegende Antriebstechnologie',
     impulseDrive: 'Mittlere Antriebstechnologie',
     hyperspaceDrive: 'Fortgeschrittene Antriebstechnologie',
-    darkMatterTechnology: 'Forschung zu Eigenschaften und Anwendungen von Dunkler Materie'
+    darkMatterTechnology: 'Forschung zu Eigenschaften und Anwendungen von Dunkler Materie',
+    terraformingTechnology: 'Forschung zur Planeten-Terraforming-Technologie, erhöht verfügbaren Platz aller Planeten um 3 pro Stufe',
+    planetDestructionTech: 'Schreckliche Technologie zur Zerstörung ganzer Planeten'
   },
   officers: {
     commander: 'Kommandant',
@@ -220,7 +239,10 @@ export default {
     engineer: 'Ingenieur',
     geologist: 'Geologe',
     technocrat: 'Technokrat',
-    darkMatterSpecialist: 'Dunkle-Materie-Spezialist'
+    darkMatterSpecialist: 'Dunkle-Materie-Spezialist',
+    resourceBonus: 'Ressourcenproduktionsbonus',
+    darkMatterBonus: 'Dunkle-Materie-Produktionsbonus',
+    energyBonus: 'Energieproduktionsbonus'
   },
   officerDescriptions: {
     commander: 'Verbessert Baugeschwindigkeit und Management',
@@ -247,7 +269,14 @@ export default {
     title: 'Planetenübersicht',
     resourceOverview: 'Ressourcen',
     fleetInfo: 'Flotte',
-    currentShips: 'Schiffe auf diesem Planeten'
+    currentShips: 'Schiffe auf diesem Planeten',
+    productionSources: 'Produktionsquellen',
+    productionSourcesDesc: 'Detaillierte Ressourcenproduktion und Bonusinformationen',
+    consumptionSources: 'Verbrauchsquellen',
+    consumptionSourcesDesc: 'Energieverbrauchsdetails für Gebäude',
+    totalProduction: 'Gesamtproduktion',
+    totalConsumption: 'Gesamtverbrauch',
+    noConsumption: 'Kein Energieverbrauch'
   },
   buildingsView: {
     title: 'Gebäude',
@@ -257,6 +286,8 @@ export default {
     upgradeCost: 'Ausbaukosten',
     buildTime: 'Bauzeit',
     upgrade: 'Ausbauen',
+    maxLevelReached: 'Maximale Stufe erreicht',
+    requirementsNotMet: 'Anforderungen nicht erfüllt',
     upgradeFailed: 'Ausbau fehlgeschlagen',
     upgradeFailedMessage: 'Bitte überprüfen Sie, ob Sie genügend Ressourcen, Platz oder keine anderen Bauaufträge haben.',
     demolish: 'Abreißen',
@@ -268,6 +299,7 @@ export default {
     title: 'Forschung',
     researchCost: 'Forschungskosten',
     research: 'Forschen',
+    maxLevelReached: 'Maximale Stufe erreicht',
     researchFailed: 'Forschung fehlgeschlagen',
     researchFailedMessage:
       'Bitte überprüfen Sie, ob Sie genügend Ressourcen haben, die Voraussetzungen erfüllt sind oder keine anderen Forschungsaufträge vorhanden sind.'
@@ -289,6 +321,7 @@ export default {
   },
   shipyardView: {
     title: 'Raumschiffwerft',
+    fleetStorage: 'Flottenspeicher',
     attack: 'Angriff',
     shield: 'Schild',
     speed: 'Geschwindigkeit',
@@ -360,6 +393,7 @@ export default {
     colonize: 'Kolonisieren',
     spy: 'Spionage',
     deploy: 'Stationieren',
+    recycle: 'Recyceln',
     transportResources: 'Ressourcen transportieren',
     totalCargoCapacity: 'Gesamtladekapazität',
     used: 'Verwendet',
@@ -376,7 +410,12 @@ export default {
     recallFailed: 'Zurückrufen fehlgeschlagen',
     recallFailedMessage: 'Diese Mission kann nicht zurückgerufen werden.',
     unknownPlanet: 'Unbekannter Planet',
-    fleetMissionSlots: 'Flottenmissionsplätze'
+    fleetMissionSlots: 'Flottenmissionsplätze',
+    noShipsSelected: 'Keine Schiffe ausgewählt',
+    cannotSendToOwnPlanet: 'Flotte kann nicht zu eigenem Planeten gesendet werden',
+    cargoExceedsCapacity: 'Fracht überschreitet Kapazität',
+    noColonyShip: 'Kolonieschiff für Kolonisierungsmission erforderlich',
+    noDebrisAtTarget: 'Kein Trümmerfeld an Zielkoordinaten oder Trümmerfeld ist leer'
   },
   officersView: {
     title: 'Offiziere',
@@ -429,18 +468,25 @@ export default {
     attack: 'Angriff',
     colonize: 'Kolonisieren',
     switch: 'Wechseln',
+    recycle: 'Recyceln',
+    debrisField: 'Trümmerfeld',
     scoutPlanetTitle: 'Planet ausspionieren',
     attackPlanetTitle: 'Planet angreifen',
     colonizePlanetTitle: 'Planet kolonisieren',
+    recyclePlanetTitle: 'Trümmer recyceln',
     scoutPlanetMessage:
       'Möchten Sie wirklich Spionagesonden senden, um Planet [{coordinates}] auszuspionieren?\n\nBitte gehen Sie zur Flottenseite, um Schiffe auszuwählen und zu senden.',
     attackPlanetMessage:
       'Möchten Sie wirklich Planet [{coordinates}] angreifen?\n\nBitte gehen Sie zur Flottenseite, um Schiffe auszuwählen und zu senden.',
     colonizePlanetMessage:
-      'Möchten Sie wirklich Position [{coordinates}] kolonisieren?\n\nBitte gehen Sie zur Flottenseite, um ein Kolonieschiff zu senden.'
+      'Möchten Sie wirklich Position [{coordinates}] kolonisieren?\n\nBitte gehen Sie zur Flottenseite, um ein Kolonieschiff zu senden.',
+    recyclePlanetMessage:
+      'Möchten Sie wirklich Trümmer bei Position [{coordinates}] recyceln?\n\nBitte gehen Sie zur Flottenseite, um Recycler zu senden.'
   },
   messagesView: {
     title: 'Nachrichten',
+    battles: 'Kämpfe',
+    spy: 'Spionage',
     battleReports: 'Kampfberichte',
     spyReports: 'Spionageberichte',
     noBattleReports: 'Keine Kampfberichte',
@@ -461,7 +507,17 @@ export default {
     resources: 'Ressourcen',
     fleet: 'Flotte',
     defense: 'Verteidigung',
-    buildings: 'Gebäude'
+    buildings: 'Gebäude',
+    unread: 'Ungelesen',
+    targetPlanet: 'Zielplanet',
+    attackerRemaining: 'Angreifer verblieben',
+    defenderRemaining: 'Verteidiger verblieben',
+    moonChance: 'Mondchance',
+    showRoundDetails: 'Rundendetails anzeigen',
+    hideRoundDetails: 'Rundendetails ausblenden',
+    round: 'Runde {round}',
+    attackerRemainingPower: 'Verbleibende Angreiferkraft',
+    defenderRemainingPower: 'Verbleibende Verteidigerkraft'
   },
   simulatorView: {
     title: 'Kampfsimulator',
@@ -523,6 +579,12 @@ export default {
     clearConfirmMessage: 'Alle Spieldaten werden gelöscht und von vorne begonnen. Diese Aktion kann nicht rückgängig gemacht werden. Fortfahren?',
     gameSettings: 'Spieleinstellungen',
     gameSettingsDesc: 'Spielparameter und Einstellungen anpassen',
+    gamePause: 'Spielpause',
+    gamePauseDesc: 'Spielzeit und Ressourcenproduktion pausieren oder fortsetzen',
+    pause: 'Pausieren',
+    resume: 'Fortsetzen',
+    gamePaused: 'Spiel pausiert',
+    gameResumed: 'Spiel fortgesetzt',
     playerName: 'Spielername',
     gameSpeed: 'Spielgeschwindigkeit',
     gameSpeedDesc: 'Aktueller Spielgeschwindigkeitsmultiplikator',
@@ -532,5 +594,34 @@ export default {
     community: 'Community',
     github: 'GitHub-Repository',
     qqGroup: 'QQ-Gruppe'
+  },
+  gmView: {
+    title: 'GM-Kontrollpanel',
+    adminOnly: 'Nur Admin',
+    selectPlanet: 'Planet auswählen',
+    choosePlanet: 'Einen Planeten auswählen',
+    resources: 'Ressourcen',
+    buildings: 'Gebäude',
+    research: 'Forschung',
+    ships: 'Schiffe',
+    defense: 'Verteidigung',
+    officers: 'Offiziere',
+    modifyResources: 'Ressourcen ändern',
+    resourcesDesc: 'Planetenressourcen schnell ändern',
+    modifyBuildings: 'Gebäude ändern',
+    buildingsDesc: 'Gebäudelevel schnell festlegen',
+    modifyResearch: 'Forschung ändern',
+    researchDesc: 'Forschungslevel schnell festlegen',
+    modifyShips: 'Schiffe ändern',
+    shipsDesc: 'Schiffsanzahl schnell festlegen',
+    modifyDefense: 'Verteidigung ändern',
+    defenseDesc: 'Verteidigungsanzahl schnell festlegen',
+    modifyOfficers: 'Offiziere ändern',
+    officersDesc: 'Offiziersablaufzeit schnell festlegen',
+    days: 'T',
+    dangerZone: 'Gefahrenzone',
+    dangerZoneDesc: 'Die folgenden Vorgänge sind irreversibel',
+    resetGame: 'Spiel zurücksetzen',
+    resetGameConfirm: 'Möchten Sie das Spiel wirklich zurücksetzen? Alle Daten werden gelöscht!'
   }
 }

@@ -32,11 +32,13 @@ export default {
     locked: 'Заблокировано',
     viewRequirements: 'Просмотр требований',
     requirementsNotMet: 'Требования не выполнены',
-    current: 'Текущий'
+    current: 'Текущий',
+    level: 'Уровень'
   },
   errors: {
     requirementsNotMet: 'Требования не выполнены',
     insufficientResources: 'Недостаточно ресурсов',
+    insufficientFleetStorage: 'Недостаточно места для флота',
     shieldDomeLimit: 'Достигнут лимит щитовых куполов',
     fleetMissionsFull: 'Слоты миссий флота заполнены',
     insufficientFleet: 'Недостаточно флота',
@@ -61,7 +63,8 @@ export default {
     simulator: 'Симулятор',
     galaxy: 'Галактика',
     messages: 'Сообщения',
-    settings: 'Настройки'
+    settings: 'Настройки',
+    gm: 'GM'
   },
   sidebar: {
     language: 'Язык',
@@ -77,10 +80,14 @@ export default {
     darkMatter: 'Тёмная материя',
     energy: 'Энергия',
     production: 'Производство',
+    consumption: 'Потребление',
     capacity: 'Вместимость',
     current: 'Текущий',
     max: 'Макс. вместимость',
-    perHour: 'час'
+    perHour: 'час',
+    perMinute: 'мин',
+    hour: 'час',
+    noEnergy: 'Нет энергии'
   },
   planet: {
     planet: 'Планета',
@@ -113,9 +120,11 @@ export default {
     crystalStorage: 'Хранилище кристалла',
     deuteriumTank: 'Цистерна дейтерия',
     darkMatterCollector: 'Коллектор тёмной материи',
+    terraformer: 'Терраформер',
     lunarBase: 'Лунная база',
     sensorPhalanx: 'Сенсорная фаланга',
     jumpGate: 'Прыжковые ворота',
+    planetDestroyerFactory: 'Фабрика разрушителей планет',
     buildTime: 'Время строительства',
     production: 'Производство',
     consumption: 'Потребление',
@@ -129,16 +138,18 @@ export default {
     deuteriumSynthesizer: 'Синтезирует дейтериевые ресурсы',
     solarPlant: 'Обеспечивает энергией',
     roboticsFactory: 'Ускоряет скорость строительства',
-    naniteFactory: 'Увеличивает вместимость очереди строительства, +1 за уровень (макс 10)',
+    naniteFactory: 'Увеличивает вместимость очереди строительства, +1 за уровень (макс 10 уровней)',
     shipyard: 'Строит корабли',
     researchLab: 'Исследует технологии',
     metalStorage: 'Увеличивает ёмкость хранилища металла',
     crystalStorage: 'Увеличивает ёмкость хранилища кристалла',
     deuteriumTank: 'Увеличивает ёмкость хранилища дейтерия',
     darkMatterCollector: 'Собирает редкие ресурсы тёмной материи',
-    lunarBase: 'Увеличивает доступное пространство на луне',
+    terraformer: 'Терраформирует поверхность планеты, увеличивает доступное пространство на 5 за уровень',
+    lunarBase: 'Увеличивает доступное пространство на луне, +5 пространства за уровень',
     sensorPhalanx: 'Обнаруживает активность флота в окружающих системах',
-    jumpGate: 'Мгновенно переносит флоты на другие луны'
+    jumpGate: 'Мгновенно переносит флоты на другие луны',
+    planetDestroyerFactory: 'Производит абсолютное оружие, способное уничтожать планеты'
   },
   ships: {
     lightFighter: 'Лёгкий истребитель',
@@ -150,7 +161,8 @@ export default {
     colonyShip: 'Колонизатор',
     recycler: 'Переработчик',
     espionageProbe: 'Шпионский зонд',
-    darkMatterHarvester: 'Сборщик тёмной материи'
+    darkMatterHarvester: 'Сборщик тёмной материи',
+    deathstar: 'Звезда Смерти'
   },
   shipDescriptions: {
     lightFighter: 'Базовая боевая единица',
@@ -162,7 +174,8 @@ export default {
     colonyShip: 'Используется для колонизации новых планет',
     recycler: 'Собирает ресурсы с поля обломков',
     espionageProbe: 'Разведывает вражеские планеты',
-    darkMatterHarvester: 'Специальный корабль для сбора тёмной материи'
+    darkMatterHarvester: 'Специальный корабль для сбора тёмной материи',
+    deathstar: 'Абсолютное оружие, способное уничтожать целые планеты'
   },
   defenses: {
     rocketLauncher: 'Ракетная установка',
@@ -172,7 +185,8 @@ export default {
     ionCannon: 'Ионное орудие',
     plasmaTurret: 'Плазменная турель',
     smallShieldDome: 'Малый щитовой купол',
-    largeShieldDome: 'Большой щитовой купол'
+    largeShieldDome: 'Большой щитовой купол',
+    planetaryShield: 'Планетарный щит'
   },
   defenseDescriptions: {
     rocketLauncher: 'Базовое оборонительное сооружение',
@@ -182,7 +196,8 @@ export default {
     ionCannon: 'Эффективно против щитов',
     plasmaTurret: 'Мощное оборонительное сооружение',
     smallShieldDome: 'Малый щит, защищающий всю планету',
-    largeShieldDome: 'Большой щит, защищающий всю планету'
+    largeShieldDome: 'Большой щит, защищающий всю планету',
+    planetaryShield: 'Суперщит, защищающий планету от атак уничтожения'
   },
   research: {
     researchTime: 'Время исследования',
@@ -200,7 +215,9 @@ export default {
     combustionDrive: 'Реактивный двигатель',
     impulseDrive: 'Импульсный двигатель',
     hyperspaceDrive: 'Гиперпространственный двигатель',
-    darkMatterTechnology: 'Технология тёмной материи'
+    darkMatterTechnology: 'Технология тёмной материи',
+    terraformingTechnology: 'Технология терраформирования',
+    planetDestructionTech: 'Технология уничтожения планет'
   },
   technologyDescriptions: {
     energyTechnology: 'Улучшает энергоэффективность',
@@ -208,11 +225,13 @@ export default {
     ionTechnology: 'Технология ионного оружия',
     hyperspaceTechnology: 'Технология гиперпространственных прыжков',
     plasmaTechnology: 'Технология плазменного оружия',
-    computerTechnology: 'Увеличивает вместимость очереди исследований, +1 за уровень (макс 10)',
+    computerTechnology: 'Увеличивает вместимость очереди исследований, +1 за уровень (макс 10 уровней)',
     combustionDrive: 'Базовая технология двигателей',
     impulseDrive: 'Средняя технология двигателей',
     hyperspaceDrive: 'Продвинутая технология двигателей',
-    darkMatterTechnology: 'Исследование свойств и применения тёмной материи'
+    darkMatterTechnology: 'Исследование свойств и применения тёмной материи',
+    terraformingTechnology: 'Исследование технологии терраформирования планет, увеличивает доступное пространство всех планет на 3 за уровень',
+    planetDestructionTech: 'Исследование ужасающей технологии уничтожения целых планет'
   },
   officers: {
     commander: 'Командир',
@@ -220,7 +239,10 @@ export default {
     engineer: 'Инженер',
     geologist: 'Геолог',
     technocrat: 'Технократ',
-    darkMatterSpecialist: 'Специалист по тёмной материи'
+    darkMatterSpecialist: 'Специалист по тёмной материи',
+    resourceBonus: 'Бонус производства ресурсов',
+    darkMatterBonus: 'Бонус производства тёмной материи',
+    energyBonus: 'Бонус производства энергии'
   },
   officerDescriptions: {
     commander: 'Улучшает скорость строительства и управление',
@@ -247,7 +269,14 @@ export default {
     title: 'Обзор планеты',
     resourceOverview: 'Ресурсы',
     fleetInfo: 'Флот',
-    currentShips: 'Корабли на этой планете'
+    currentShips: 'Корабли на этой планете',
+    productionSources: 'Источники производства',
+    productionSourcesDesc: 'Подробная информация о производстве ресурсов и бонусах',
+    consumptionSources: 'Источники потребления',
+    consumptionSourcesDesc: 'Детали потребления энергии зданиями',
+    totalProduction: 'Общее производство',
+    totalConsumption: 'Общее потребление',
+    noConsumption: 'Нет потребления энергии'
   },
   buildingsView: {
     title: 'Здания',
@@ -257,6 +286,8 @@ export default {
     upgradeCost: 'Стоимость улучшения',
     buildTime: 'Время строительства',
     upgrade: 'Улучшить',
+    maxLevelReached: 'Достигнут максимальный уровень',
+    requirementsNotMet: 'Требования не выполнены',
     upgradeFailed: 'Улучшение не удалось',
     upgradeFailedMessage: 'Пожалуйста, проверьте, достаточно ли у вас ресурсов, места или нет других задач строительства.',
     demolish: 'Снести',
@@ -268,6 +299,7 @@ export default {
     title: 'Исследования',
     researchCost: 'Стоимость исследования',
     research: 'Исследовать',
+    maxLevelReached: 'Достигнут максимальный уровень',
     researchFailed: 'Исследование не удалось',
     researchFailedMessage:
       'Пожалуйста, проверьте, достаточно ли у вас ресурсов, выполнены ли предварительные условия или нет других исследовательских задач.'
@@ -289,6 +321,7 @@ export default {
   },
   shipyardView: {
     title: 'Верфь',
+    fleetStorage: 'Хранилище флота',
     attack: 'Атака',
     shield: 'Щит',
     speed: 'Скорость',
@@ -360,6 +393,7 @@ export default {
     colonize: 'Колонизация',
     spy: 'Разведка',
     deploy: 'Размещение',
+    recycle: 'Переработка',
     transportResources: 'Транспортировка ресурсов',
     totalCargoCapacity: 'Общая грузоподъёмность',
     used: 'Использовано',
@@ -376,7 +410,12 @@ export default {
     recallFailed: 'Отзыв не удался',
     recallFailedMessage: 'Эта миссия не может быть отозвана.',
     unknownPlanet: 'Неизвестная планета',
-    fleetMissionSlots: 'Слоты миссий флота'
+    fleetMissionSlots: 'Слоты миссий флота',
+    noShipsSelected: 'Корабли не выбраны',
+    cannotSendToOwnPlanet: 'Невозможно отправить флот на свою планету',
+    cargoExceedsCapacity: 'Груз превышает вместимость',
+    noColonyShip: 'Для колонизационной миссии требуется колониальный корабль',
+    noDebrisAtTarget: 'Нет поля обломков по целевым координатам или поле обломков пусто'
   },
   officersView: {
     title: 'Офицеры',
@@ -429,18 +468,25 @@ export default {
     attack: 'Атака',
     colonize: 'Колонизация',
     switch: 'Переключить',
+    recycle: 'Переработка',
+    debrisField: 'Поле обломков',
     scoutPlanetTitle: 'Разведать планету',
     attackPlanetTitle: 'Атаковать планету',
     colonizePlanetTitle: 'Колонизировать планету',
+    recyclePlanetTitle: 'Переработать обломки',
     scoutPlanetMessage:
       'Вы уверены, что хотите отправить шпионские зонды для разведки планеты [{coordinates}]?\n\nПерейдите на страницу флота, чтобы выбрать корабли и отправить.',
     attackPlanetMessage:
       'Вы уверены, что хотите атаковать планету [{coordinates}]?\n\nПерейдите на страницу флота, чтобы выбрать корабли и отправить.',
     colonizePlanetMessage:
-      'Вы уверены, что хотите колонизировать позицию [{coordinates}]?\n\nПерейдите на страницу флота, чтобы отправить колонизационный корабль.'
+      'Вы уверены, что хотите колонизировать позицию [{coordinates}]?\n\nПерейдите на страницу флота, чтобы отправить колонизационный корабль.',
+    recyclePlanetMessage:
+      'Вы уверены, что хотите переработать обломки в позиции [{coordinates}]?\n\nПерейдите на страницу флота, чтобы отправить переработчики.'
   },
   messagesView: {
     title: 'Сообщения',
+    battles: 'Битвы',
+    spy: 'Разведка',
     battleReports: 'Отчёты о боях',
     spyReports: 'Отчёты разведки',
     noBattleReports: 'Нет отчётов о боях',
@@ -461,7 +507,17 @@ export default {
     resources: 'Ресурсы',
     fleet: 'Флот',
     defense: 'Оборона',
-    buildings: 'Здания'
+    buildings: 'Здания',
+    unread: 'Непрочитано',
+    targetPlanet: 'Целевая планета',
+    attackerRemaining: 'Осталось у нападающего',
+    defenderRemaining: 'Осталось у защитника',
+    moonChance: 'Шанс появления луны',
+    showRoundDetails: 'Показать детали раундов',
+    hideRoundDetails: 'Скрыть детали раундов',
+    round: 'Раунд {round}',
+    attackerRemainingPower: 'Оставшаяся мощь нападающего',
+    defenderRemainingPower: 'Оставшаяся мощь защитника'
   },
   simulatorView: {
     title: 'Симулятор боя',
@@ -523,6 +579,12 @@ export default {
     clearConfirmMessage: 'Все игровые данные будут удалены и игра начнется заново. Это действие невозможно отменить. Продолжить?',
     gameSettings: 'Настройки игры',
     gameSettingsDesc: 'Настроить параметры и предпочтения игры',
+    gamePause: 'Пауза игры',
+    gamePauseDesc: 'Приостановить или возобновить игровое время и производство ресурсов',
+    pause: 'Пауза',
+    resume: 'Возобновить',
+    gamePaused: 'Игра приостановлена',
+    gameResumed: 'Игра возобновлена',
     playerName: 'Имя игрока',
     gameSpeed: 'Скорость игры',
     gameSpeedDesc: 'Текущий множитель скорости игры',
@@ -532,5 +594,34 @@ export default {
     community: 'Сообщество',
     github: 'Репозиторий GitHub',
     qqGroup: 'Группа QQ'
+  },
+  gmView: {
+    title: 'Панель управления GM',
+    adminOnly: 'Только для администратора',
+    selectPlanet: 'Выбрать планету',
+    choosePlanet: 'Выберите планету',
+    resources: 'Ресурсы',
+    buildings: 'Здания',
+    research: 'Исследования',
+    ships: 'Корабли',
+    defense: 'Оборона',
+    officers: 'Офицеры',
+    modifyResources: 'Изменить ресурсы',
+    resourcesDesc: 'Быстрое изменение ресурсов планеты',
+    modifyBuildings: 'Изменить здания',
+    buildingsDesc: 'Быстрая установка уровней зданий',
+    modifyResearch: 'Изменить исследования',
+    researchDesc: 'Быстрая установка уровней исследований',
+    modifyShips: 'Изменить корабли',
+    shipsDesc: 'Быстрая установка количества кораблей',
+    modifyDefense: 'Изменить оборону',
+    defenseDesc: 'Быстрая установка количества обороны',
+    modifyOfficers: 'Изменить офицеров',
+    officersDesc: 'Быстрая установка времени истечения офицеров',
+    days: 'д',
+    dangerZone: 'Опасная зона',
+    dangerZoneDesc: 'Следующие операции необратимы',
+    resetGame: 'Сбросить игру',
+    resetGameConfirm: 'Вы уверены, что хотите сбросить игру? Все данные будут удалены!'
   }
 }

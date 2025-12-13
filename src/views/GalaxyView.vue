@@ -94,50 +94,79 @@
                 </p>
               </div>
               <div v-else class="text-sm text-muted-foreground">{{ t('galaxyView.emptySlot') }}</div>
+
+              <!-- 残骸场信息 -->
+              <div v-if="getDebrisFieldAt(currentGalaxy, currentSystem, slot.position)" class="mt-2 p-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded text-xs">
+                <div class="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-medium mb-1">
+                  <span>{{ t('galaxyView.debrisField') }}</span>
+                </div>
+                <div class="flex gap-3 text-xs">
+                  <span class="flex items-center gap-1">
+                    <span class="text-muted-foreground">{{ t('resources.metal') }}:</span>
+                    <span class="font-medium">{{ formatNumber(getDebrisFieldAt(currentGalaxy, currentSystem, slot.position)!.resources.metal) }}</span>
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <span class="text-muted-foreground">{{ t('resources.crystal') }}:</span>
+                    <span class="font-medium">{{ formatNumber(getDebrisFieldAt(currentGalaxy, currentSystem, slot.position)!.resources.crystal) }}</span>
+                  </span>
+                </div>
+              </div>
             </div>
 
             <!-- 操作按钮 -->
             <div class="flex gap-1 sm:gap-2 flex-shrink-0">
-              <Button
-                v-if="slot.planet && !isMyPlanet(slot.planet)"
-                @click="showPlanetActions(slot.planet, 'spy')"
-                variant="outline"
-                size="sm"
-                class="h-8 w-8 p-0"
-                :title="t('galaxyView.scout')"
-              >
-                <Eye class="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-              <Button
-                v-if="slot.planet && !isMyPlanet(slot.planet)"
-                @click="showPlanetActions(slot.planet, 'attack')"
-                variant="outline"
-                size="sm"
-                class="h-8 w-8 p-0"
-                :title="t('galaxyView.attack')"
-              >
-                <Sword class="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-              <Button
-                v-if="!slot.planet"
-                @click="showPlanetActions(null, 'colonize', slot.position)"
-                variant="outline"
-                size="sm"
-                class="h-8 w-8 p-0"
-                :title="t('galaxyView.colonize')"
-              >
-                <Rocket class="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-              <Button
-                v-if="slot.planet && isMyPlanet(slot.planet)"
-                @click="switchToPlanet(slot.planet.id)"
-                variant="outline"
-                size="sm"
-                class="h-8 w-8 p-0"
-                :title="t('galaxyView.switch')"
-              >
-                <Home class="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
+              <TooltipProvider :delay-duration="300">
+                <Tooltip v-if="slot.planet && !isMyPlanet(slot.planet)">
+                  <TooltipTrigger as-child>
+                    <Button @click="showPlanetActions(slot.planet, 'spy')" variant="outline" size="sm" class="h-8 w-8 p-0">
+                      <Eye class="h-3 w-3 sm:h-4 sm:w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{{ t('galaxyView.scout') }}</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip v-if="slot.planet && !isMyPlanet(slot.planet)">
+                  <TooltipTrigger as-child>
+                    <Button @click="showPlanetActions(slot.planet, 'attack')" variant="outline" size="sm" class="h-8 w-8 p-0">
+                      <Sword class="h-3 w-3 sm:h-4 sm:w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{{ t('galaxyView.attack') }}</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip v-if="!slot.planet">
+                  <TooltipTrigger as-child>
+                    <Button @click="showPlanetActions(null, 'colonize', slot.position)" variant="outline" size="sm" class="h-8 w-8 p-0">
+                      <Rocket class="h-3 w-3 sm:h-4 sm:w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{{ t('galaxyView.colonize') }}</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip v-if="slot.planet && isMyPlanet(slot.planet)">
+                  <TooltipTrigger as-child>
+                    <Button @click="switchToPlanet(slot.planet.id)" variant="outline" size="sm" class="h-8 w-8 p-0">
+                      <Home class="h-3 w-3 sm:h-4 sm:w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{{ t('galaxyView.switch') }}</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip v-if="getDebrisFieldAt(currentGalaxy, currentSystem, slot.position)">
+                  <TooltipTrigger as-child>
+                    <Button @click="showPlanetActions(slot.planet, 'recycle', slot.position)" variant="outline" size="sm" class="h-8 w-8 p-0">
+                      <Recycle class="h-3 w-3 sm:h-4 sm:w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{{ t('galaxyView.recycle') }}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
         </div>
@@ -151,20 +180,24 @@
 
 <script setup lang="ts">
   import { useGameStore } from '@/stores/gameStore'
+  import { useUniverseStore } from '@/stores/universeStore'
   import { useI18n } from '@/composables/useI18n'
   import { ref, onMounted } from 'vue'
-  import type { Planet } from '@/types/game'
+  import type { Planet, DebrisField } from '@/types/game'
   import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
   import { Button } from '@/components/ui/button'
   import { Label } from '@/components/ui/label'
   import { Badge } from '@/components/ui/badge'
   import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
+  import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
   import AlertDialog from '@/components/AlertDialog.vue'
-  import { Home, Eye, Sword, Rocket } from 'lucide-vue-next'
+  import { Home, Eye, Sword, Rocket, Recycle } from 'lucide-vue-next'
   import { useRouter } from 'vue-router'
   import * as gameLogic from '@/logic/gameLogic'
+  import { formatNumber } from '@/utils/format'
 
   const gameStore = useGameStore()
+  const universeStore = useUniverseStore()
   const router = useRouter()
   const { t } = useI18n()
   const actionDialog = ref<InstanceType<typeof AlertDialog> | null>(null)
@@ -191,9 +224,20 @@
     const positions = gameLogic.generateSystemPositions(galaxy, system)
     return positions.map(pos => {
       const key = gameLogic.generatePositionKey(galaxy, system, pos.position)
-      const planet = gameStore.universePlanets[key] || null
+      // 先从玩家星球中查找，再从宇宙地图中查找
+      const planet = gameStore.player.planets.find(p =>
+        p.position.galaxy === galaxy &&
+        p.position.system === system &&
+        p.position.position === pos.position
+      ) || universeStore.planets[key] || null
       return { position: pos.position, planet }
     })
+  }
+
+  // 获取指定位置的残骸场
+  const getDebrisFieldAt = (galaxy: number, system: number, position: number): DebrisField | null => {
+    const debrisId = `debris_${galaxy}_${system}_${position}`
+    return universeStore.debrisFields[debrisId] || null
   }
 
   // 加载星系
@@ -223,11 +267,11 @@
   // 切换到指定星球
   const switchToPlanet = (planetId: string) => {
     gameStore.currentPlanetId = planetId
-    router.push('/overview')
+    router.push('/')
   }
 
   // 显示星球操作
-  const showPlanetActions = (planet: Planet | null, action: 'spy' | 'attack' | 'colonize', position?: number) => {
+  const showPlanetActions = (planet: Planet | null, action: 'spy' | 'attack' | 'colonize' | 'recycle', position?: number) => {
     const targetPos = planet ? planet.position : { galaxy: currentGalaxy.value, system: currentSystem.value, position: position! }
     const coordinates = `${targetPos.galaxy}:${targetPos.system}:${targetPos.position}`
 
@@ -242,6 +286,9 @@
     } else if (action === 'colonize') {
       title = t('galaxyView.colonizePlanetTitle')
       message = t('galaxyView.colonizePlanetMessage').replace('{coordinates}', coordinates)
+    } else if (action === 'recycle') {
+      title = t('galaxyView.recyclePlanetTitle')
+      message = t('galaxyView.recyclePlanetMessage').replace('{coordinates}', coordinates)
     }
 
     actionDialog.value?.show({
