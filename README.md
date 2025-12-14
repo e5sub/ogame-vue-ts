@@ -9,6 +9,7 @@
   [![Vue 3](https://img.shields.io/badge/Vue-3.5-brightgreen.svg)](https://vuejs.org/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
   [![Vite](https://img.shields.io/badge/Vite-7.2-646CFF.svg)](https://vitejs.dev/)
+  [![Go](https://img.shields.io/badge/Go-1.25-79D4FD.svg)](https://golang.org/)
 
   [English](README-EN.md) | 简体中文
 
@@ -63,6 +64,7 @@ OGame Vue TS 是一款受经典 OGame 游戏启发的单机版、基于浏览器
 
 - [Node.js](https://nodejs.org/) (推荐 18 或更高版本)
 - [pnpm](https://pnpm.io/) (版本 10.13.1 或更高)
+- [Go](https://golang.org/) (版本 1.21 或更高版本)(可选)
 
 ### 安装
 
