@@ -336,19 +336,26 @@
                   star-color="#fff"
                   class="h-full"
               >
-                <RouterView class="h-full" />
+                <div class="relative z-10 h-full">
+                  <RouterView />
+                </div>
               </StarsBackground>
-              <div v-else class="h-full">
+
+              <div v-else class="relative h-full w-full overflow-hidden">
+                <div class="relative z-10 h-full">
+                  <RouterView />
+                </div>
+
                 <ParticlesBg
-                    class="absolute inset-0"
+                    class="absolute inset-0 z-0"
                     :quantity="100"
                     :ease="100"
-                    :color="isDark ? '#FFF' : '#000'"
+                    color="#000"
                     :staticity="10"
                     refresh
                 />
-                <RouterView class="h-full" />
               </div>
+
             </div>
           </Transition>
         </main>
