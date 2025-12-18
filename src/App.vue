@@ -424,7 +424,7 @@
   import UpdateDialog from '@/components/UpdateDialog.vue'
   import TutorialOverlay from '@/components/TutorialOverlay.vue'
   import Sonner from '@/components/ui/sonner/Sonner.vue'
-  import { MissionType, BuildingType, DiplomaticEventType } from '@/types/game'
+  import { MissionType, BuildingType, TechnologyType, DiplomaticEventType } from '@/types/game'
   import type { FleetMission, NPC, IncomingFleetAlert, MissileAttack } from '@/types/game'
   import { DIPLOMATIC_CONFIG } from '@/config/gameConfig'
   import type { VersionInfo } from '@/utils/versionCheck'
@@ -480,7 +480,7 @@
   const npcStore = useNPCStore()
   const { isDark } = useTheme()
   const { t } = useI18n()
-  const { BUILDINGS } = useGameConfig()
+  const { BUILDINGS, TECHNOLOGIES } = useGameConfig()
   const { startTutorial, tutorialState, currentStep } = useTutorial()
 
   // ConfirmDialog 状态
@@ -493,6 +493,50 @@
   // 更新弹窗状态
   const showUpdateDialog = ref(false)
   const updateInfo = ref<VersionInfo | null>(null)
+
+  const handleNotification = (type: string, itemType: string, level?: number) => {
+    const settings = gameStore.notificationSettings
+    if (!settings) return
+
+    // 检查主开关
+    if (!settings.browser && !settings.inApp) return
+
+    // 检查具体类型开关
+    let typeKey = ''
+    let title = ''
+    let body = ''
+
+    if (type === 'building') {
+      typeKey = 'construction'
+      const buildingType = itemType as BuildingType
+      const name = BUILDINGS.value[buildingType]?.name || itemType
+      title = t('notifications.constructionComplete')
+      body = `${name} Lv ${level}`
+    } else if (type === 'technology') {
+      typeKey = 'research'
+      const technologyType = itemType as TechnologyType
+      const name = TECHNOLOGIES.value[technologyType]?.name || itemType
+      title = t('notifications.researchComplete')
+      body = `${name} Lv ${level}`
+    } else {
+      return
+    }
+
+    if (!settings.types[typeKey]) return
+
+    // browser
+    if (settings.browser && 'Notification' in window && Notification.permission === 'granted') {
+      const shouldSuppress = settings.suppressInFocus && document.hasFocus()
+      if (!shouldSuppress) {
+        new Notification(title, { body, icon: '/favicon.ico' })
+      }
+    }
+
+    // toast
+    if (settings.inApp) {
+      toast.success(title, { description: body })
+    }
+  }
 
   const handleConfirmDialogConfirm = () => {
     if (confirmDialogAction.value) {
@@ -560,7 +604,7 @@
     // 检查军官过期
     gameLogic.checkOfficersExpiration(gameStore.player.officers, now)
     // 处理游戏更新（建造队列、研究队列等）
-    const result = gameLogic.processGameUpdate(gameStore.player, now, gameStore.gameSpeed)
+    const result = gameLogic.processGameUpdate(gameStore.player, now, gameStore.gameSpeed, handleNotification)
     gameStore.player.researchQueue = result.updatedResearchQueue
     // 处理舰队任务
     gameStore.player.fleetMissions.forEach(mission => {

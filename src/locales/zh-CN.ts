@@ -782,7 +782,26 @@ export default {
     buildDate: '构建日期',
     community: '社区',
     github: 'GitHub 仓库',
-    qqGroup: 'QQ 交流群'
+    qqGroup: 'QQ 交流群',
+    notifications: '通知设置',
+    notificationsDesc: '管理游戏内的通知提醒',
+    notificationTypes: '通知类型',
+    browserNotifications: '浏览器通知',
+    inAppNotifications: '页面内通知',
+    constructionComplete: '建筑完成',
+    researchComplete: '研究完成',
+    browserPermission: '启用浏览器通知',
+    permissionGranted: '已获得权限',
+    permissionDenied: '权限被拒绝/未获得',
+    inAppNotificationsDesc: '通过页面弹窗显示',
+    notificationsDisabled: '启用上方任一开关以配置具体通知',
+    suppressInFocus: '页面聚焦时不发送浏览器通知',
+    expandTypes: '展开详细设置',
+    collapseTypes: '收起详细设置'
+  },
+  notifications: {
+    constructionComplete: '建造完成',
+    researchComplete: '研究完成'
   },
   gmView: {
     title: 'GM 管理面板',

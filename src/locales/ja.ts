@@ -786,7 +786,26 @@ export default {
     buildDate: 'ビルド日',
     community: 'コミュニティ',
     github: 'GitHubリポジトリ',
-    qqGroup: 'QQグループ'
+    qqGroup: 'QQグループ',
+    notifications: '通知設定',
+    notificationsDesc: 'ゲーム内の通知アラートを管理',
+    notificationTypes: '通知タイプ',
+    browserNotifications: 'ブラウザ通知',
+    inAppNotifications: 'アプリ内通知',
+    constructionComplete: '建設完了',
+    researchComplete: '研究完了',
+    browserPermission: 'ブラウザ通知を有効にする',
+    permissionGranted: '許可されました',
+    permissionDenied: '許可が拒否されたか、付与されていません',
+    inAppNotificationsDesc: 'ページ内ポップアップで表示',
+    notificationsDisabled: '特定の通知を設定するには、上記のスイッチを有効にしてください',
+    suppressInFocus: 'ページにフォーカスがある場合、ブラウザ通知を抑制する',
+    expandTypes: '詳細を展開',
+    collapseTypes: '詳細を折りたたむ'
+  },
+  notifications: {
+    constructionComplete: '建設完了',
+    researchComplete: '研究完了'
   },
   gmView: {
     title: 'GMコントロールパネル',

@@ -89,6 +89,85 @@
       </CardContent>
     </Card>
 
+    <!-- 通知设置 -->
+    <Card>
+      <CardHeader>
+        <CardTitle>{{ t('settings.notifications') }}</CardTitle>
+        <CardDescription>{{ t('settings.notificationsDesc') }}</CardDescription>
+      </CardHeader>
+      <CardContent class="space-y-4">
+        <!-- 浏览器通知 -->
+        <div class="flex flex-col gap-4 p-4 border rounded-lg">
+          <div class="flex items-center justify-between">
+            <div class="space-y-1">
+              <h3 class="font-medium">{{ t('settings.browserNotifications') }}</h3>
+              <p class="text-sm text-muted-foreground">{{ t('settings.browserPermission') }}</p>
+            </div>
+            <Switch :checked="gameStore.notificationSettings?.browser" @update:checked="handleBrowserSwitch" />
+          </div>
+
+          <!-- 页面聚焦时不发送 -->
+          <div class="flex items-center justify-between pl-4 border-l-2" :class="{ 'opacity-50 pointer-events-none': !gameStore.notificationSettings?.browser }">
+            <Label class="font-normal">{{ t('settings.suppressInFocus') }}</Label>
+             <Switch
+              :checked="gameStore.notificationSettings?.suppressInFocus"
+              @update:checked="updateSuppressSetting"
+              :disabled="!gameStore.notificationSettings?.browser"
+            />
+          </div>
+        </div>
+
+        <!-- 页面内通知 -->
+        <div class="flex items-center justify-between p-4 border rounded-lg">
+          <div class="space-y-1">
+            <h3 class="font-medium">{{ t('settings.inAppNotifications') }}</h3>
+            <p class="text-sm text-muted-foreground">{{ t('settings.inAppNotificationsDesc') || t('settings.inAppNotifications') }}</p>
+          </div>
+          <Switch
+            :checked="gameStore.notificationSettings?.inApp"
+            @update:checked="(val: boolean) => updateInAppSetting(val)"
+          />
+        </div>
+
+        <!-- 具体通知类型 -->
+        <div class="border rounded-lg overflow-hidden" :class="{ 'opacity-50 pointer-events-none': areMainSwitchesOff }">
+           <div
+            class="flex items-center justify-between p-4 bg-muted/50 cursor-pointer select-none"
+            @click="!areMainSwitchesOff && (isTypesExpanded = !isTypesExpanded)"
+          >
+            <div class="space-y-1">
+              <h3 class="font-medium">{{ t('settings.notificationTypes') }}</h3>
+              <p class="text-sm text-muted-foreground">
+                {{ areMainSwitchesOff ? t('settings.notificationsDisabled') : (isTypesExpanded ? t('settings.collapseTypes') : t('settings.expandTypes')) }}
+              </p>
+            </div>
+            <Button variant="ghost" size="sm" class="h-8 w-8 p-0">
+               <component :is="isTypesExpanded ? ChevronUp : ChevronDown" class="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div v-if="isTypesExpanded && !areMainSwitchesOff" class="p-4 space-y-4 border-t bg-card">
+            <!-- 建造完成 -->
+            <div class="flex items-center justify-between">
+              <Label class="font-normal cursor-pointer" @click="toggleType('construction')">{{ t('settings.constructionComplete') }}</Label>
+              <Switch
+                :checked="gameStore.notificationSettings?.types.construction"
+                @update:checked="(val: boolean) => updateTypeSetting('construction', val)"
+              />
+            </div>
+            <!-- 研究完成 -->
+            <div class="flex items-center justify-between">
+               <Label class="font-normal cursor-pointer" @click="toggleType('research')">{{ t('settings.researchComplete') }}</Label>
+               <Switch
+                :checked="gameStore.notificationSettings?.types.research"
+                @update:checked="(val: boolean) => updateTypeSetting('research', val)"
+              />
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+
     <!-- 关于 -->
     <Card>
       <CardHeader>
@@ -164,6 +243,8 @@
   import { useI18n } from '@/composables/useI18n'
   import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
   import { Button } from '@/components/ui/button'
+  import { Switch } from '@/components/ui/switch'
+  import { Label } from '@/components/ui/label'
   import {
     AlertDialog,
     AlertDialogAction,
@@ -174,7 +255,7 @@
     AlertDialogHeader,
     AlertDialogTitle
   } from '@/components/ui/alert-dialog'
-  import { Download, Upload, Trash2, ExternalLink, MessagesSquare, Play, Pause, RefreshCw } from 'lucide-vue-next'
+  import { Download, Upload, Trash2, ExternalLink, MessagesSquare, Play, Pause, RefreshCw, ChevronDown, ChevronUp } from 'lucide-vue-next'
   import { saveAs } from 'file-saver'
   import { toast } from 'vue-sonner'
   import pkg from '../../package.json'
@@ -194,6 +275,70 @@
   const confirmTitle = ref('')
   const confirmMessage = ref('')
   let confirmCallback: (() => void) | null = null
+
+  const isTypesExpanded = ref(false)
+
+  // Ensure notification settings exist
+  if (!gameStore.notificationSettings) {
+    gameStore.notificationSettings = {
+      browser: false,
+      inApp: true,
+      suppressInFocus: false,
+      types: { construction: true, research: true }
+    }
+  }
+
+  const areMainSwitchesOff = computed(() => {
+    const s = gameStore.notificationSettings
+    return !s?.browser && !s?.inApp
+  })
+
+  // Auto-collapse if main switches are off
+  // watch(areMainSwitchesOff, (val) => {
+  //   if (val) isTypesExpanded.value = false
+  // })
+
+  const updateInAppSetting = (val: boolean) => {
+    if (gameStore.notificationSettings) {
+      gameStore.notificationSettings.inApp = val
+    }
+  }
+
+  const updateSuppressSetting = (val: boolean) => {
+    if (gameStore.notificationSettings) {
+      gameStore.notificationSettings.suppressInFocus = val
+    }
+  }
+
+  const updateTypeSetting = (key: string, val: boolean) => {
+    if (gameStore.notificationSettings) {
+      gameStore.notificationSettings.types[key] = val
+    }
+  }
+
+  const toggleType = (key: string) => {
+    if (gameStore.notificationSettings) {
+      const current = gameStore.notificationSettings.types[key]
+      gameStore.notificationSettings.types[key] = !current
+    }
+  }
+
+  const handleBrowserSwitch = async (checked: boolean) => {
+    if (!gameStore.notificationSettings) return
+
+    if (checked) {
+      const granted = await gameStore.requestBrowserPermission()
+      if (granted) {
+        gameStore.notificationSettings.browser = true
+        toast.success(t('settings.permissionGranted'))
+      } else {
+        gameStore.notificationSettings.browser = false
+        toast.error(t('settings.permissionDenied'))
+      }
+    } else {
+      gameStore.notificationSettings.browser = false
+    }
+  }
 
   // 计算是否可以检查版本（主动检测：5分钟内不能重复检查）
   const canCheck = computed(() => canCheckVersion(gameStore.player.lastManualUpdateCheck || 0))

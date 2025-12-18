@@ -122,7 +122,8 @@ export const createBuildQueueItem = (buildingType: BuildingType, targetLevel: nu
 export const completeBuildQueue = (
   planet: Planet,
   now: number,
-  onPointsEarned?: (points: number, type: 'building' | 'ship' | 'defense', itemType: string, level?: number, quantity?: number) => void
+  onPointsEarned?: (points: number, type: 'building' | 'ship' | 'defense', itemType: string, level?: number, quantity?: number) => void,
+  onCompleted?: (type: 'building' | 'ship' | 'defense' | 'demolish', itemType: string, level?: number, quantity?: number) => void
 ): void => {
   planet.buildQueue = planet.buildQueue.filter(item => {
     if (now >= item.endTime) {
@@ -136,6 +137,10 @@ export const completeBuildQueue = (
         if (onPointsEarned && newLevel > oldLevel) {
           const points = pointsLogic.calculateBuildingPoints(item.itemType as BuildingType, oldLevel, newLevel)
           onPointsEarned(points, 'building', item.itemType, newLevel)
+        }
+
+        if (onCompleted) {
+          onCompleted('building', item.itemType, newLevel)
         }
       } else if (item.type === 'ship') {
         const shipType = item.itemType as ShipType

@@ -787,7 +787,26 @@ export default {
     buildDate: '빌드 날짜',
     community: '커뮤니티',
     github: 'GitHub 저장소',
-    qqGroup: 'QQ 그룹'
+    qqGroup: 'QQ 그룹',
+    notifications: '알림 설정',
+    notificationsDesc: '게임 내 알림 관리',
+    notificationTypes: '알림 유형',
+    browserNotifications: '브라우저 알림',
+    inAppNotifications: '인앱 알림',
+    constructionComplete: '건설 완료',
+    researchComplete: '연구 완료',
+    browserPermission: '브라우저 알림 활성화',
+    permissionGranted: '권한 허용됨',
+    permissionDenied: '권한 거부됨/허용되지 않음',
+    inAppNotificationsDesc: '페이지 내 팝업으로 표시',
+    notificationsDisabled: '특정 알림을 설정하려면 위의 스위치 중 하나를 활성화하세요',
+    suppressInFocus: '페이지가 포커스될 때 브라우저 알림 숨기기',
+    expandTypes: '세부 정보 펼치기',
+    collapseTypes: '세부 정보 접기'
+  },
+  notifications: {
+    constructionComplete: '건설 완료',
+    researchComplete: '연구 완료'
   },
   gmView: {
     title: 'GM 제어판',

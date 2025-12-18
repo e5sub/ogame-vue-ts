@@ -98,7 +98,8 @@ export const completeResearchQueue = (
   researchQueue: BuildQueueItem[],
   technologies: Partial<Record<TechnologyType, number>>,
   now: number,
-  onPointsEarned?: (points: number, type: 'technology', itemType: string, level: number) => void
+  onPointsEarned?: (points: number, type: 'technology', itemType: string, level: number) => void,
+  onCompleted?: (type: 'technology', itemType: string, level: number) => void
 ): BuildQueueItem[] => {
   return researchQueue.filter(item => {
     if (now >= item.endTime) {
@@ -112,6 +113,12 @@ export const completeResearchQueue = (
         const points = pointsLogic.calculateTechnologyPoints(item.itemType as TechnologyType, oldLevel, newLevel)
         onPointsEarned(points, 'technology', item.itemType, newLevel)
       }
+
+      // 通知完成
+      if (onCompleted) {
+        onCompleted('technology', item.itemType, newLevel)
+      }
+
       return false
     }
     return true

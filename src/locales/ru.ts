@@ -794,7 +794,26 @@ export default {
     buildDate: 'Дата сборки',
     community: 'Сообщество',
     github: 'Репозиторий GitHub',
-    qqGroup: 'Группа QQ'
+    qqGroup: 'Группа QQ',
+    notifications: 'Настройки уведомлений',
+    notificationsDesc: 'Управление внутриигровыми уведомлениями',
+    notificationTypes: 'Типы уведомлений',
+    browserNotifications: 'Уведомления браузера',
+    inAppNotifications: 'Внутриигровые уведомления',
+    constructionComplete: 'Строительство завершено',
+    researchComplete: 'Исследование завершено',
+    browserPermission: 'Включить уведомления браузера',
+    permissionGranted: 'Разрешение получено',
+    permissionDenied: 'Разрешение отклонено/не получено',
+    inAppNotificationsDesc: 'Показывать через всплывающие окна',
+    notificationsDisabled: 'Включите любой переключатель выше для настройки конкретных уведомлений',
+    suppressInFocus: 'Не отправлять уведомления браузера, когда страница в фокусе',
+    expandTypes: 'Развернуть детали',
+    collapseTypes: 'Свернуть детали'
+  },
+  notifications: {
+    constructionComplete: 'Строительство завершено',
+    researchComplete: 'Исследование завершено'
   },
   gmView: {
     title: 'Панель управления GM',

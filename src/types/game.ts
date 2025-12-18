@@ -576,6 +576,17 @@ export interface Player {
   tutorialProgress?: TutorialProgress // 新手引导进度
 }
 
+export interface NotificationSettings {
+  browser: boolean
+  inApp: boolean
+  suppressInFocus: boolean // 当页面聚焦时是否浏览器通知
+  types: {
+    construction: boolean
+    research: boolean
+    [key: string]: boolean
+  }
+}
+
 // 游戏状态
 export interface GameState {
   player: Player

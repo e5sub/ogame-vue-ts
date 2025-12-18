@@ -45,8 +45,27 @@ export const useGameStore = defineStore('game', {
     } as Player,
     currentPlanetId: '',
     isDark: '',
-    locale: 'zh-CN' as Locale
+    locale: 'zh-CN' as Locale,
+    notificationSettings: {
+      browser: false,
+      inApp: true,
+      suppressInFocus: false,
+      types: {
+        construction: true,
+        research: true
+      }
+    }
   }),
+  actions: {
+    async requestBrowserPermission(): Promise<boolean> {
+      if (!('Notification' in window)) return false
+
+      if (Notification.permission === 'granted') return true
+
+      const permission = await Notification.requestPermission()
+      return permission === 'granted'
+    }
+  },
   getters: {
     currentPlanet(): Planet | undefined {
       return this.player.planets.find(p => p.id === this.currentPlanetId)
