@@ -1204,9 +1204,9 @@ export const DIPLOMATIC_CONFIG = {
 export const ORE_DEPOSIT_CONFIG = {
   // 基础储量（单位：资源量）
   BASE_DEPOSITS: {
-    metal: 50_000_000, // 5000万金属
-    crystal: 30_000_000, // 3000万晶体
-    deuterium: 15_000_000 // 1500万重氢
+    metal: 500_000_000, // 5000万金属
+    crystal: 300_000_000, // 3000万晶体
+    deuterium: 150_000_000 // 1500万重氢
   },
   // 位置系数（位置1-15），影响资源分布
   // 内圈(1-4)晶体多，中圈(5-10)均衡，外圈(11-15)重氢多
