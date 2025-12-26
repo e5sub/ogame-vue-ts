@@ -1206,7 +1206,7 @@ export const OFFICERS: Record<OfficerType, OfficerConfig> = {
     weeklyMaintenance: { metal: 5000, crystal: 2500, deuterium: 0, darkMatter: 900, energy: 0 },
     benefits: {
       additionalFleetSlots: 2, // 额外2个舰队槽位
-      fleetSpeedBonus: 10, // 舰队速度 +10%
+      fleetSpeedBonus: 1000000, // 舰队速度 +10%
       fuelConsumptionReduction: 10 // 燃料消耗 -10%
     }
   },
