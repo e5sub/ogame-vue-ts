@@ -12,8 +12,8 @@ const config: CapacitorConfig = {
       keystorePath: undefined,
       keystoreAlias: undefined
     },
-    // 禁用 WebView 文本缩放，防止系统字体设置影响布局
-    webContentsDebuggingEnabled: false,
+    // 启用 WebView 调试，方便排查问题
+    webContentsDebuggingEnabled: true,
     allowMixedContent: false
   },
   plugins: {

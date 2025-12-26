@@ -34,11 +34,17 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onStart() {
         super.onStart();
-        // 禁用 WebView 文本缩放，防止系统字体大小设置影响布局
         WebView webView = getBridge().getWebView();
         if (webView != null) {
             WebSettings settings = webView.getSettings();
-            settings.setTextZoom(100); // 固定为 100%，忽略系统字体缩放设置
+            // 禁用 WebView 文本缩放，防止系统字体大小设置影响布局
+            settings.setTextZoom(100);
+            // 优化 WebView 性能
+            settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+            settings.setDomStorageEnabled(true);
+            settings.setDatabaseEnabled(true);
+            // 启用硬件加速渲染
+            webView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null);
         }
     }
 }
