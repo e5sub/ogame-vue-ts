@@ -1226,3 +1226,11 @@ export interface QuestNotification {
   rewards?: QuestReward
   read?: boolean
 }
+
+// WebDAV 配置
+export interface WebDAVConfig {
+  serverUrl: string // WebDAV 服务器地址
+  username: string // 用户名
+  password: string // 密码或应用专用密码
+  basePath: string // 存档存放路径
+}

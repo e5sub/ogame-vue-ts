@@ -1,17 +1,55 @@
 package games.wenzi.ogame;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import androidx.core.splashscreen.SplashScreen;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
+    private boolean isWebViewReady = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // 安装 SplashScreen，必须在 super.onCreate 之前调用
+        SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
+
+        // 保持 SplashScreen 直到 WebView 加载完成
+        splashScreen.setKeepOnScreenCondition(() -> !isWebViewReady);
+
+        // 设置淡出退出动画
+        splashScreen.setOnExitAnimationListener(splashScreenView -> {
+            // 创建淡出动画
+            ObjectAnimator fadeOut = ObjectAnimator.ofFloat(
+                splashScreenView.getView(),
+                View.ALPHA,
+                1f,
+                0f
+            );
+            fadeOut.setInterpolator(new AccelerateDecelerateInterpolator());
+            fadeOut.setDuration(300);
+
+            // 动画结束后移除 SplashScreen
+            fadeOut.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    splashScreenView.remove();
+                }
+            });
+
+            fadeOut.start();
+        });
+
         super.onCreate(savedInstanceState);
 
         Window window = getWindow();
@@ -34,11 +72,29 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onStart() {
         super.onStart();
-        // 禁用 WebView 文本缩放，防止系统字体大小设置影响布局
         WebView webView = getBridge().getWebView();
         if (webView != null) {
             WebSettings settings = webView.getSettings();
-            settings.setTextZoom(100); // 固定为 100%，忽略系统字体缩放设置
+            // 禁用 WebView 文本缩放，防止系统字体大小设置影响布局
+            settings.setTextZoom(100);
+            // 优化 WebView 性能
+            settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+            settings.setDomStorageEnabled(true);
+            settings.setDatabaseEnabled(true);
+            // 启用硬件加速渲染
+            webView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null);
+
+            // 监听页面加载进度，加载完成后隐藏 SplashScreen
+            webView.setWebChromeClient(new WebChromeClient() {
+                @Override
+                public void onProgressChanged(WebView view, int newProgress) {
+                    super.onProgressChanged(view, newProgress);
+                    // 当页面加载达到 80% 时认为可以显示
+                    if (newProgress >= 80) {
+                        isWebViewReady = true;
+                    }
+                }
+            });
         }
     }
 }

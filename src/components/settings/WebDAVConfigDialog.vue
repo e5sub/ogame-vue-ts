@@ -81,6 +81,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useI18n } from '@/composables/useI18n'
+import { useGameStore } from '@/stores/gameStore'
 import {
   Dialog,
   DialogContent,
@@ -95,13 +96,11 @@ import { Label } from '@/components/ui/label'
 import { Loader2 } from 'lucide-vue-next'
 import {
   type WebDAVConfig,
-  getWebDAVConfig,
-  saveWebDAVConfig,
-  clearWebDAVConfig,
   testWebDAVConnection
 } from '@/services/webdavService'
 
 const { t } = useI18n()
+const gameStore = useGameStore()
 
 const isOpen = defineModel<boolean>('open', { default: false })
 
@@ -130,7 +129,7 @@ const isConfigValid = computed(() => {
 // 加载已保存的配置
 watch(isOpen, (open) => {
   if (open) {
-    const saved = getWebDAVConfig()
+    const saved = gameStore.webdavConfig
     if (saved) {
       config.value = { ...saved }
       hasExistingConfig.value = true
@@ -152,21 +151,25 @@ const handleTest = async () => {
   testResult.value = null
 
   try {
-    testResult.value = await testWebDAVConnection(config.value)
+    const result = await testWebDAVConnection(config.value)
+    testResult.value = {
+      success: result.success,
+      message: t(result.messageKey)
+    }
   } finally {
     isTesting.value = false
   }
 }
 
 const handleSave = () => {
-  saveWebDAVConfig(config.value)
+  gameStore.webdavConfig = { ...config.value }
   hasExistingConfig.value = true
   emit('saved', config.value)
   isOpen.value = false
 }
 
 const handleClear = () => {
-  clearWebDAVConfig()
+  gameStore.webdavConfig = null
   hasExistingConfig.value = false
   config.value = {
     serverUrl: '',

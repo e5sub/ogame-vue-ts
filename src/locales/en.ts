@@ -532,6 +532,8 @@ export default {
     },
     recycle: 'Recycle',
     destroy: 'Planet Destruction',
+    harvestDarkMatter: 'Harvest Dark Matter',
+    station: 'Station',
     transportResources: 'Transport Resources',
     totalCargoCapacity: 'Total Cargo Capacity',
     used: 'Used',
@@ -1781,6 +1783,8 @@ export default {
       branchUnlocked: 'New story branch unlocked!'
     },
     dialogue: {
+      title: 'Story Dialogue',
+      description: 'Campaign story dialogue content',
       skip: 'Skip',
       continue: 'Continue',
       finish: 'Finish',
@@ -1968,25 +1972,42 @@ export default {
       spyAnyNPC: 'Spy on any NPC planet',
       sendGiftToNPC: 'Send a gift to any NPC',
       researchAstrophysics: 'Research Astrophysics to level 1',
+      researchAstrophysicsHigher: 'Research Astrophysics to level 3',
       buildColonyShip: 'Build a Colony Ship',
       colonizeNewPlanet: 'Colonize a new planet',
-      completeExpedition: 'Complete an expedition mission',
+      colonizeMultiple: 'Colonize 5 planets',
+      completeExpedition: 'Complete 3 expedition missions',
+      expeditionDeepSpace: 'Complete 2 deep space expeditions',
+      expeditionUncharted: 'Explore 1 uncharted region',
+      expeditionDangerous: 'Complete 3 dangerous nebula expeditions',
       discoverRuins: 'Discover ancient ruins',
       researchComputer: 'Research Computer Technology to level 4',
+      researchImpulse: 'Research Impulse Drive to level 3',
+      researchLaser: 'Research Laser Technology to level 5',
+      researchIntergalactic: 'Research Computer Technology to level 10',
+      researchGraviton: 'Research Graviton Technology to level 1',
       improveRelation: 'Improve relations with an NPC',
       reachFriendly: 'Reach friendly status with an NPC',
-      spyHostileNPC: 'Spy on a hostile NPC',
+      reachFriendlyRelation: 'Reach friendly status with any NPC',
+      sendMultipleGifts: 'Send 3 gifts to NPCs',
+      spyHostileNPC: 'Spy on 2 hostile NPCs',
       formAlliance: 'Form alliance with a friendly NPC',
       buildDefenses: 'Build defense facilities',
+      buildMissileSilo: 'Build Missile Silo to level 2',
+      buildCruisers: 'Build 10 Cruisers',
       winDefenseBattle: 'Win a defensive battle',
+      defendAgainstAttack: 'Successfully defend against 1 attack',
       spyEnemyPlanet: 'Spy on enemy planet',
+      spyEnemyPlanets: 'Spy on 5 enemy planets',
+      winAttackBattles: 'Win 3 attack battles',
       attackEnemy: 'Attack the enemy',
-      recycleDebris: 'Recycle debris',
-      buildBattleships: 'Build 10 Battleships',
+      recycleDebris: 'Recycle debris 5 times',
+      buildBattleships: 'Build 20 Battleships',
       exploreDeepRuins: 'Explore deep ruins',
-      researchHyperspace: 'Research Hyperspace Technology',
-      defeatBoss: 'Defeat the mysterious enemy',
+      researchHyperspace: 'Research Hyperspace Drive to level 3',
+      defeatBoss: 'Defeat the Ancient Guardian',
       colonizeSpecial: 'Colonize special location',
+      accumulateWealth: 'Accumulate 1 million total resources',
       continueDevelopment: 'Continue development'
     },
     dialogues: {
@@ -2190,5 +2211,31 @@ export default {
       reputationBonus: 'Reputation Bonus',
       reputationBonusDesc: 'Your ally {npcName} speaks well of you to {targetNpc}'
     }
+  },
+  webdav: {
+    // Connection
+    connectionSuccess: 'WebDAV connection successful',
+    connectionSuccessDirectoryCreated: 'WebDAV connection successful, save directory created',
+    authFailed: 'Authentication failed, please check username and password',
+    directoryNotExist: 'Directory does not exist and cannot be created',
+    connectionFailedHttp: 'Connection failed: HTTP {status}',
+    networkError: 'Network error, possibly CORS restriction. Try using a CORS-enabled WebDAV service or proxy.',
+    connectionError: 'Connection error: {error}',
+    // Upload
+    uploadSuccess: 'Upload successful',
+    noWritePermission: 'No write permission',
+    insufficientStorage: 'Insufficient storage space',
+    uploadFailedHttp: 'Upload failed: HTTP {status}',
+    uploadError: 'Upload error: {error}',
+    // Download
+    fileNotExist: 'File does not exist',
+    downloadFailedHttp: 'Download failed: HTTP {status}',
+    downloadError: 'Download error: {error}',
+    // List
+    listFailedHttp: 'Failed to get file list: HTTP {status}',
+    listError: 'Error getting file list: {error}',
+    // Delete
+    deleteFailedHttp: 'Delete failed: HTTP {status}',
+    deleteError: 'Delete error: {error}'
   }
 }

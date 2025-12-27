@@ -5,16 +5,17 @@ const config: CapacitorConfig = {
   appName: 'OGame Vue Ts',
   webDir: 'docs',
   server: {
-    androidScheme: 'https'
+    androidScheme: 'https',
+    cacheControl: 'max-age=31536000'
   },
   android: {
     buildOptions: {
       keystorePath: undefined,
       keystoreAlias: undefined
     },
-    // 禁用 WebView 文本缩放，防止系统字体设置影响布局
     webContentsDebuggingEnabled: false,
-    allowMixedContent: false
+    allowMixedContent: false,
+    hardwareAcceleration: true
   },
   plugins: {
     // 禁用键盘自动调整视口

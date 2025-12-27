@@ -32,7 +32,8 @@ export default {
     exitConfirmTitle: '退出游戏',
     exitConfirmMessage: '确定要退出游戏吗？游戏进度会自动保存。',
     points: '积分',
-    retry: '重试'
+    retry: '重试',
+    playerName: '玩家名称'
   },
   errors: {
     requirementsNotMet: '不满足前置条件',
@@ -525,6 +526,8 @@ export default {
     },
     recycle: '回收',
     destroy: '行星毁灭',
+    harvestDarkMatter: '暗物质采集',
+    station: '驻守协防',
     transportResources: '运输资源',
     totalCargoCapacity: '总载货量',
     used: '已用',
@@ -1796,6 +1799,8 @@ export default {
       branchUnlocked: '新的故事分支已解锁！'
     },
     dialogue: {
+      title: '剧情对话',
+      description: '战役剧情对话内容',
       skip: '跳过',
       continue: '继续',
       finish: '完成',
@@ -1980,25 +1985,42 @@ export default {
       spyAnyNPC: '侦查任意NPC星球',
       sendGiftToNPC: '向任意NPC送礼',
       researchAstrophysics: '研究天体物理学到1级',
+      researchAstrophysicsHigher: '研究天体物理学到3级',
       buildColonyShip: '建造殖民船',
       colonizeNewPlanet: '殖民新星球',
-      completeExpedition: '完成远征任务',
+      colonizeMultiple: '殖民5个星球',
+      completeExpedition: '完成3次远征任务',
+      expeditionDeepSpace: '完成2次深空远征',
+      expeditionUncharted: '探索1次未知区域',
+      expeditionDangerous: '完成3次危险星云远征',
       discoverRuins: '发现古代遗迹',
       researchComputer: '研究电脑技术到4级',
+      researchImpulse: '研究脉冲驱动到3级',
+      researchLaser: '研究激光技术到5级',
+      researchIntergalactic: '研究电脑技术到10级',
+      researchGraviton: '研究引力子技术到1级',
       improveRelation: '提升与NPC的关系',
       reachFriendly: '与NPC达到友好关系',
-      spyHostileNPC: '侦查敌对NPC',
+      reachFriendlyRelation: '与任意NPC达到友好关系',
+      sendMultipleGifts: '向NPC发送3次礼物',
+      spyHostileNPC: '侦查2个敌对NPC',
       formAlliance: '与友好NPC结盟',
       buildDefenses: '建造防御设施',
+      buildMissileSilo: '建造导弹发射井到2级',
+      buildCruisers: '建造10艘巡洋舰',
       winDefenseBattle: '赢得防御战斗',
+      defendAgainstAttack: '成功防御1次攻击',
       spyEnemyPlanet: '侦查敌方星球',
+      spyEnemyPlanets: '侦查5个敌方星球',
+      winAttackBattles: '赢得3次进攻战斗',
       attackEnemy: '攻击敌方',
-      recycleDebris: '回收残骸',
-      buildBattleships: '建造10艘战列舰',
+      recycleDebris: '回收5次残骸场',
+      buildBattleships: '建造20艘战列舰',
       exploreDeepRuins: '探索遗迹深处',
-      researchHyperspace: '研究超空间技术',
-      defeatBoss: '击败神秘敌人',
+      researchHyperspace: '研究超空间驱动到3级',
+      defeatBoss: '击败古代守护者',
       colonizeSpecial: '殖民特殊位置',
+      accumulateWealth: '积累总资源达到100万',
       continueDevelopment: '继续发展'
     },
     dialogues: {
@@ -2089,5 +2111,31 @@ export default {
         epilogue_1: '银河系广阔无垠，还有无数秘密等待你去发现...'
       }
     }
+  },
+  webdav: {
+    // 连接相关
+    connectionSuccess: 'WebDAV 连接成功',
+    connectionSuccessDirectoryCreated: 'WebDAV 连接成功，已创建存档目录',
+    authFailed: '认证失败，请检查用户名和密码',
+    directoryNotExist: '目录不存在且无法创建',
+    connectionFailedHttp: '连接失败: HTTP {status}',
+    networkError: '网络错误，可能是 CORS 限制。建议使用支持 CORS 的 WebDAV 服务或通过代理访问。',
+    connectionError: '连接错误: {error}',
+    // 上传相关
+    uploadSuccess: '上传成功',
+    noWritePermission: '没有写入权限',
+    insufficientStorage: '存储空间不足',
+    uploadFailedHttp: '上传失败: HTTP {status}',
+    uploadError: '上传错误: {error}',
+    // 下载相关
+    fileNotExist: '文件不存在',
+    downloadFailedHttp: '下载失败: HTTP {status}',
+    downloadError: '下载错误: {error}',
+    // 列表相关
+    listFailedHttp: '获取文件列表失败: HTTP {status}',
+    listError: '获取文件列表错误: {error}',
+    // 删除相关
+    deleteFailedHttp: '删除失败: HTTP {status}',
+    deleteError: '删除错误: {error}'
   }
 }
