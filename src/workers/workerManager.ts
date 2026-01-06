@@ -2,8 +2,8 @@
  * Worker 管理器
  * 统一管理所有 Worker 的创建、通信和销毁
  */
-import type { WorkerRequestMessage, WorkerResponseMessage, WorkerMessageType } from '@/types/worker'
-import { WorkerMessageType as MsgType } from '@/types/worker'
+import type { WorkerRequest, WorkerResponse, WorkerMessageType } from './types'
+import { WorkerMessageType as MsgType } from './types'
 import { toRaw } from 'vue'
 import BattleWorker from './battle.worker?worker'
 
@@ -53,7 +53,7 @@ class WorkerManager {
   private battleWorker: Worker | null = null
   private pendingTasks: Map<string, WorkerTask> = new Map()
   private messageIdCounter = 0
-  private readonly defaultTimeout = 10000 // 30秒超时
+  private readonly defaultTimeout = 10000 // 10秒超时
 
   /**
    * 初始化战斗 Worker
@@ -69,8 +69,8 @@ class WorkerManager {
    * 设置 Worker 消息处理器
    */
   private setupWorkerHandlers(worker: Worker, workerName: string): void {
-    worker.onmessage = (event: MessageEvent<WorkerResponseMessage>) => {
-      const { id, success, data, error } = event.data
+    worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
+      const { id, ok, payload, error } = event.data
 
       const task = this.pendingTasks.get(id)
       if (!task) {
@@ -87,8 +87,8 @@ class WorkerManager {
       this.pendingTasks.delete(id)
 
       // 处理响应
-      if (success) {
-        task.resolve(data)
+      if (ok) {
+        task.resolve(payload)
       } else {
         task.reject(new Error(error || 'Worker task failed'))
       }
@@ -157,7 +157,7 @@ class WorkerManager {
       })
 
       // 发送消息（使用 toPlainObject 转换 Vue Proxy 对象，然后使用浏览器内置的 structured clone）
-      const message: WorkerRequestMessage = { id, type, payload: toPlainObject(payload) }
+      const message: WorkerRequest = { id, type, payload: toPlainObject(payload) }
       worker.postMessage(message)
     })
   }

@@ -5,8 +5,9 @@
 import type { Fleet, Resources } from '@/types/game'
 import { ShipType, DefenseType } from '@/types/game'
 import { SHIPS, DEFENSES } from '@/config/gameConfig'
-import type { WorkerRequestMessage, WorkerResponseMessage, BattleSideData, BattleSimulationResult } from '@/types/worker'
-import { WorkerMessageType } from '@/types/worker'
+import type { BattleSideData, BattleSimulationResult } from '@/types/worker'
+import type { WorkerRequest, WorkerResponse } from './types'
+import { WorkerMessageType } from './types'
 
 // 战斗单位接口
 interface CombatUnit {
@@ -420,7 +421,7 @@ const calculateDebrisField = (
 // Worker 消息处理
 // ============================================================================
 
-self.onmessage = (event: MessageEvent<WorkerRequestMessage>) => {
+self.onmessage = (event: MessageEvent<WorkerRequest>) => {
   const { id, type, payload } = event.data
 
   try {
@@ -467,19 +468,17 @@ self.onmessage = (event: MessageEvent<WorkerRequestMessage>) => {
     }
 
     // 发送成功响应
-    const response: WorkerResponseMessage = {
+    const response: WorkerResponse = {
       id,
-      type: WorkerMessageType.SUCCESS,
-      success: true,
-      data: result
+      ok: true,
+      payload: result
     }
     self.postMessage(response)
   } catch (error) {
     // 发送错误响应
-    const response: WorkerResponseMessage = {
+    const response: WorkerResponse = {
       id,
-      type: WorkerMessageType.ERROR,
-      success: false,
+      ok: false,
       error: error instanceof Error ? error.message : String(error)
     }
     self.postMessage(response)
