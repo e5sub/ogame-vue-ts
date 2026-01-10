@@ -71,10 +71,16 @@
 </template>
 
 <script setup lang="ts">
-  import type { SpringOptions, Transition } from 'motion-v'
   import { cn } from '@/lib/utils'
   import { motion, useMotionValue, useSpring } from 'motion-v'
   import { computed, onMounted, ref, watch } from 'vue'
+
+  // 本地定义类型，因为 motion-v 不导出这些类型
+  interface SpringOptions {
+    stiffness?: number
+    damping?: number
+    mass?: number
+  }
 
   interface StarsBackgroundProps {
     factor?: number
@@ -139,19 +145,19 @@
     }
   )
 
-  const starLayer1Transition = computed<Transition>(() => ({
+  const starLayer1Transition = computed(() => ({
     repeat: Infinity,
     duration: props.speed,
     ease: 'linear' as const
   }))
 
-  const starLayer2Transition = computed<Transition>(() => ({
+  const starLayer2Transition = computed(() => ({
     repeat: Infinity,
     duration: props.speed * 2,
     ease: 'linear' as const
   }))
 
-  const starLayer3Transition = computed<Transition>(() => ({
+  const starLayer3Transition = computed(() => ({
     repeat: Infinity,
     duration: props.speed * 3,
     ease: 'linear' as const
