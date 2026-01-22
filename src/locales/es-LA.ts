@@ -969,6 +969,7 @@ export default {
     exporting: 'Exportando...',
     exportSuccess: 'Exportación exitosa',
     exportSuccessWithPath: 'Exportación exitosa, archivo guardado en: {path}',
+    exportCopiedToClipboard: 'Exportación exitosa, datos copiados al portapapeles',
     storagePermissionDenied: 'Permiso de almacenamiento denegado, no se puede exportar el archivo',
     exportFailed: 'Exportación fallida, por favor intenta de nuevo',
     importData: 'Importar Datos',

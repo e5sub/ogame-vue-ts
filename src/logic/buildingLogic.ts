@@ -23,44 +23,30 @@ export const calculateBuildingCost = (buildingType: BuildingType, targetLevel: n
 
 /**
  * 计算建筑升级时间
- * 使用 2moons 公式（调整版）：
- * 1. 成本系数 = Σ (资源^0.3 / 0.003)
- * 2. 时间(秒) = 成本系数 / ((1 + 机器人工厂) × 2^纳米工厂 × 游戏速度)
  * @param buildingType 建筑类型
  * @param targetLevel 目标等级
  * @param buildingSpeedBonus 指挥官等提供的速度加成百分比
  * @param roboticsFactoryLevel 机器人工厂等级
  * @param naniteFactoryLevel 纳米工厂等级
- * @param gameSpeed 游戏速度（默认1）
  */
 export const calculateBuildingTime = (
   buildingType: BuildingType,
   targetLevel: number,
   buildingSpeedBonus: number = 0,
   roboticsFactoryLevel: number = 0,
-  naniteFactoryLevel: number = 0,
-  gameSpeed: number = 1
+  naniteFactoryLevel: number = 0
 ): number => {
-  // 计算该等级的成本
-  const cost = calculateBuildingCost(buildingType, targetLevel)
+  const config = BUILDINGS[buildingType]
+  const multiplier = Math.pow(config.costMultiplier, targetLevel - 1)
+  const baseTime = config.baseTime * multiplier
 
-  // 2moons 公式：成本系数 = Σ (资源^0.3 / 0.003)
-  let elementCost = 0
-  if (cost.metal > 0) elementCost += Math.pow(cost.metal, 0.3) / 0.003
-  if (cost.crystal > 0) elementCost += Math.pow(cost.crystal, 0.3) / 0.003
-  if (cost.deuterium > 0) elementCost += Math.pow(cost.deuterium, 0.3) / 0.003
-
-  // 机器人工厂和纳米工厂的加速
-  const factoryBonus = (1 + roboticsFactoryLevel) * Math.pow(2, naniteFactoryLevel)
-
-  // 简化公式：时间(秒) = 成本系数 / (工厂加成 × 游戏速度)
-  const timeInSeconds = elementCost / (factoryBonus * gameSpeed)
+  // 机器人工厂和纳米工厂的加速：建造时间 / (1 + 机器人工厂等级 + 纳米工厂等级 × 2)
+  const factorySpeedDivisor = 1 + roboticsFactoryLevel + naniteFactoryLevel * 2
 
   // 指挥官等的百分比加成
   const speedMultiplier = 1 - buildingSpeedBonus / 100
 
-  // 确保最小时间为5秒
-  return Math.max(5, Math.floor(timeInSeconds * speedMultiplier))
+  return Math.floor((baseTime / factorySpeedDivisor) * speedMultiplier)
 }
 
 /**
@@ -78,38 +64,80 @@ export const calculateUsedSpace = (planet: Planet): number => {
 }
 
 /**
- * 检查建筑升级条件
+ * 检查建筑升级条件（包括基础要求和等级门槛要求）
  */
 export const checkBuildingRequirements = (
   buildingType: BuildingType,
   planet: Planet,
-  technologies: Partial<Record<TechnologyType, number>>
+  technologies: Partial<Record<TechnologyType, number>>,
+  targetLevel?: number
 ): boolean => {
   const config = BUILDINGS[buildingType]
+  const currentLevel = planet.buildings[buildingType] || 0
+  const level = targetLevel ?? currentLevel + 1
+
+  // 检查基础 requirements
   const requirements = (config as any).requirements
-  if (!requirements) return true
+  if (requirements) {
+    for (const [key, reqLevel] of Object.entries(requirements)) {
+      const requiredLevel = reqLevel as number
+      if (Object.values(BuildingType).includes(key as BuildingType)) {
+        const requiredBuildingType = key as BuildingType
+        const requiredBuildingConfig = BUILDINGS[requiredBuildingType]
 
-  for (const [key, level] of Object.entries(requirements)) {
-    const requiredLevel = level as number
-    if (Object.values(BuildingType).includes(key as BuildingType)) {
-      const requiredBuildingType = key as BuildingType
-      const requiredBuildingConfig = BUILDINGS[requiredBuildingType]
+        // 如果当前是月球，且所需建筑是星球专属建筑（planetOnly），则跳过此前置条件
+        // 这允许在月球上建造机器人工厂等建筑，即使它们的前置条件是无法在月球建造的矿场
+        if (planet.isMoon && requiredBuildingConfig?.planetOnly) {
+          continue
+        }
 
-      // 如果当前是月球，且所需建筑是星球专属建筑（planetOnly），则跳过此前置条件
-      // 这允许在月球上建造机器人工厂等建筑，即使它们的前置条件是无法在月球建造的矿场
-      if (planet.isMoon && requiredBuildingConfig?.planetOnly) {
-        continue
-      }
-
-      if ((planet.buildings[requiredBuildingType] || 0) < requiredLevel) {
-        return false
-      }
-    } else if (Object.values(TechnologyType).includes(key as TechnologyType)) {
-      if ((technologies[key as TechnologyType] || 0) < requiredLevel) {
-        return false
+        if ((planet.buildings[requiredBuildingType] || 0) < requiredLevel) {
+          return false
+        }
+      } else if (Object.values(TechnologyType).includes(key as TechnologyType)) {
+        if ((technologies[key as TechnologyType] || 0) < requiredLevel) {
+          return false
+        }
       }
     }
   }
+
+  // 检查等级门槛 levelRequirements
+  const levelRequirements = (config as any).levelRequirements
+  if (levelRequirements) {
+    // 找出所有小于等于目标等级的门槛
+    const applicableLevels = Object.keys(levelRequirements)
+      .map(Number)
+      .filter(l => l <= level)
+      .sort((a, b) => a - b)
+
+    for (const threshold of applicableLevels) {
+      const reqs = levelRequirements[threshold]
+      if (!reqs) continue
+
+      for (const [key, reqLevel] of Object.entries(reqs)) {
+        const requiredLevel = reqLevel as number
+        if (Object.values(BuildingType).includes(key as BuildingType)) {
+          const requiredBuildingType = key as BuildingType
+          const requiredBuildingConfig = BUILDINGS[requiredBuildingType]
+
+          // 如果当前是月球，且所需建筑是星球专属建筑（planetOnly），则跳过此前置条件
+          if (planet.isMoon && requiredBuildingConfig?.planetOnly) {
+            continue
+          }
+
+          if ((planet.buildings[requiredBuildingType] || 0) < requiredLevel) {
+            return false
+          }
+        } else if (Object.values(TechnologyType).includes(key as TechnologyType)) {
+          if ((technologies[key as TechnologyType] || 0) < requiredLevel) {
+            return false
+          }
+        }
+      }
+    }
+  }
+
   return true
 }
 

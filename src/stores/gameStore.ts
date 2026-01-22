@@ -46,6 +46,7 @@ export const useGameStore = defineStore('game', {
       giftNotifications: [],
       giftRejectedNotifications: [],
       points: 0,
+      bonusPoints: 0,
       isGMEnabled: false, // 明确设置 GM 模式默认为 false
       lastVersionCheckTime: 0, // 最后一次检查版本的时间戳，默认为0
       achievementStats: initializeAchievementStats() as AchievementStats,

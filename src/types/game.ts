@@ -799,6 +799,7 @@ export interface Player {
   allyDefenseNotifications?: AllyDefenseNotification[] // 友好NPC协防通知
   attitudeChangeNotifications?: AttitudeChangeNotification[] // NPC态度变化通知
   points: number // 总积分（每1000资源=1分）
+  bonusPoints?: number // 奖励积分（战役、成就等奖励的积分，不会被重新计算覆盖）
   isGMEnabled?: boolean // GM模式开关（默认false，通过秘籍激活）
   lastVersionCheckTime?: number // 最后一次自动检查版本的时间戳（被动检测）
   lastManualUpdateCheck?: number // 最后一次手动检查更新的时间戳（主动检测）

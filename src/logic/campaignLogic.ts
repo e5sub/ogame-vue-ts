@@ -364,7 +364,8 @@ export const claimQuestRewards = (
   }
 
   if (rewards.points) {
-    player.points += rewards.points
+    // 奖励积分存入 bonusPoints，不会被 calculatePlayerPoints 覆盖
+    player.bonusPoints = (player.bonusPoints || 0) + rewards.points
   }
 
   if (rewards.ships && currentPlanet) {

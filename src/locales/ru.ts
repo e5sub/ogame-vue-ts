@@ -961,6 +961,7 @@ export default {
     exporting: 'Экспорт...',
     exportSuccess: 'Экспорт успешен',
     exportSuccessWithPath: 'Экспорт успешен, файл сохранен в: {path}',
+    exportCopiedToClipboard: 'Экспорт успешен, данные скопированы в буфер обмена',
     storagePermissionDenied: 'Разрешение на хранение отклонено, невозможно экспортировать файл',
     exportFailed: 'Экспорт не удался, попробуйте еще раз',
     importData: 'Импорт данных',

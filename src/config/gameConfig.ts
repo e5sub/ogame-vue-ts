@@ -538,12 +538,13 @@ export const TECHNOLOGIES: Record<TechnologyType, TechnologyConfig> = {
     baseTime: 60,
     costMultiplier: 2,
     fleetStorageBonus: 500, // 每级全局增加500舰队仓储
-    maxLevel: 10, // 最多10级（最多11个研究队列和11个舰队槽位）
+    maxLevel: 10, // 最多15级（最多16个研究队列和16个舰队槽位）
     requirements: { [BuildingType.ResearchLab]: 1 },
     levelRequirements: {
       3: { [BuildingType.ResearchLab]: 5 },
       5: { [BuildingType.ResearchLab]: 8, [BuildingType.RoboticsFactory]: 5 },
-      8: { [BuildingType.ResearchLab]: 10, [BuildingType.NaniteFactory]: 2 }
+      8: { [BuildingType.ResearchLab]: 10, [BuildingType.NaniteFactory]: 2 },
+      12: { [BuildingType.ResearchLab]: 12, [BuildingType.NaniteFactory]: 5 }
     }
   },
   [TechnologyType.EspionageTechnology]: {
@@ -777,7 +778,7 @@ export const TECHNOLOGIES: Record<TechnologyType, TechnologyConfig> = {
       },
       8: {
         [BuildingType.ResearchLab]: 14,
-        [TechnologyType.ComputerTechnology]: 12,
+        [TechnologyType.ComputerTechnology]: 10,
         [BuildingType.NaniteFactory]: 5
       }
     }

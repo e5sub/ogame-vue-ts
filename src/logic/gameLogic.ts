@@ -149,7 +149,33 @@ export const processGameUpdate = (
     }
   }
 
-  // 更新所有星球资源（直接同步计算，避免 Worker 通信开销）
+  // 收集所有新解锁的内容
+  const allUnlockedItems: UnlockedItem[] = []
+
+  // 先完成所有星球的建造队列（升级建筑），确保资源更新时使用新的建筑等级
+  player.planets.forEach(planet => {
+    // 保存完成前的建筑状态
+    const previousBuildings = { ...planet.buildings }
+
+    // 检查建造队列
+    buildingLogic.completeBuildQueue(planet, now, onPointsEarned, onCompleted)
+
+    // 检查新解锁（只在主星球上检查，避免重复通知）
+    if (!planet.isMoon && onUnlock) {
+      const unlockedItems = unlockLogic.checkAllNewlyUnlocked(planet, player.technologies, previousBuildings, previousTechnologies)
+      allUnlockedItems.push(...unlockedItems)
+    }
+
+    // 更新星球最大空间
+    if (planet.isMoon) {
+      planet.maxSpace = planetLogic.calculateMoonMaxSpace(planet)
+    } else {
+      const terraformingTechLevel = player.technologies[TechnologyType.TerraformingTechnology] || 0
+      planet.maxSpace = planetLogic.calculatePlanetMaxSpace(planet, terraformingTechLevel)
+    }
+  })
+
+  // 然后更新所有星球资源（使用新的建筑等级计算生产）
   // 获取采矿技术等级（用于矿脉恢复上限计算）
   const miningTechLevel = player.technologies[TechnologyType.MiningTechnology] || 0
   // 获取资源研究科技等级
@@ -180,32 +206,6 @@ export const processGameUpdate = (
           darkMatter: darkMatterProduced
         })
       }
-    }
-  })
-
-  // 收集所有新解锁的内容
-  const allUnlockedItems: UnlockedItem[] = []
-
-  // 更新所有星球其他状态
-  player.planets.forEach(planet => {
-    // 保存完成前的建筑状态
-    const previousBuildings = { ...planet.buildings }
-
-    // 检查建造队列
-    buildingLogic.completeBuildQueue(planet, now, onPointsEarned, onCompleted)
-
-    // 检查新解锁（只在主星球上检查，避免重复通知）
-    if (!planet.isMoon && onUnlock) {
-      const unlockedItems = unlockLogic.checkAllNewlyUnlocked(planet, player.technologies, previousBuildings, previousTechnologies)
-      allUnlockedItems.push(...unlockedItems)
-    }
-
-    // 更新星球最大空间
-    if (planet.isMoon) {
-      planet.maxSpace = planetLogic.calculateMoonMaxSpace(planet)
-    } else {
-      const terraformingTechLevel = player.technologies[TechnologyType.TerraformingTechnology] || 0
-      planet.maxSpace = planetLogic.calculatePlanetMaxSpace(planet, terraformingTechLevel)
     }
   })
 
