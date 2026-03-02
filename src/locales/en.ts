@@ -978,6 +978,7 @@ export default {
     exporting: 'Exporting...',
     exportSuccess: 'Export successful',
     exportSuccessWithPath: 'Export successful, file saved to: {path}',
+    exportCopiedToClipboard: 'Export successful, data copied to clipboard',
     storagePermissionDenied: 'Storage permission denied, cannot export file',
     exportFailed: 'Export failed, please try again',
     importData: 'Import Data',

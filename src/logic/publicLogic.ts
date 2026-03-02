@@ -72,7 +72,16 @@ export const checkRequirements = (
   for (const [key, requiredLevel] of Object.entries(requirements)) {
     // 检查是否为建筑类型
     if (Object.values(BuildingType).includes(key as BuildingType)) {
-      const currentLevel = planet.buildings[key as BuildingType] || 0
+      const requiredBuildingType = key as BuildingType
+      const requiredBuildingConfig = BUILDINGS[requiredBuildingType]
+
+      // 如果当前是月球，且所需建筑是星球专属建筑（planetOnly），则跳过此前置条件
+      // 这允许在月球上建造机器人工厂等建筑，即使它们的前置条件是无法在月球建造的矿场
+      if (planet.isMoon && requiredBuildingConfig?.planetOnly) {
+        continue
+      }
+
+      const currentLevel = planet.buildings[requiredBuildingType] || 0
       if (currentLevel < requiredLevel) {
         return false
       }
@@ -164,7 +173,7 @@ export const getMaxFleetMissions = (additionalFleetSlots: number = 0, computerTe
  * @param level 目标等级
  * @returns 总资源成本（金属+水晶+重氢）
  */
-const calculateBuildingTotalCost = (buildingType: BuildingType, level: number): number => {
+export const calculateBuildingTotalCost = (buildingType: BuildingType, level: number): number => {
   if (level <= 0) return 0
 
   const config = BUILDINGS[buildingType]
@@ -192,7 +201,7 @@ const calculateBuildingTotalCost = (buildingType: BuildingType, level: number): 
  * @param level 目标等级
  * @returns 总资源成本（金属+水晶+重氢）
  */
-const calculateTechnologyTotalCost = (techType: TechnologyType, level: number): number => {
+export const calculateTechnologyTotalCost = (techType: TechnologyType, level: number): number => {
   if (level <= 0) return 0
 
   const config = TECHNOLOGIES[techType]
@@ -219,7 +228,7 @@ const calculateTechnologyTotalCost = (techType: TechnologyType, level: number): 
  * @param shipType 舰船类型
  * @returns 单个舰船的资源成本（金属+水晶+重氢）
  */
-const calculateShipUnitCost = (shipType: ShipType): number => {
+export const calculateShipUnitCost = (shipType: ShipType): number => {
   const config = SHIPS[shipType]
   if (!config) return 0
 
@@ -231,7 +240,7 @@ const calculateShipUnitCost = (shipType: ShipType): number => {
  * @param defenseType 防御类型
  * @returns 单个防御的资源成本（金属+水晶+重氢）
  */
-const calculateDefenseUnitCost = (defenseType: DefenseType): number => {
+export const calculateDefenseUnitCost = (defenseType: DefenseType): number => {
   const config = DEFENSES[defenseType]
   if (!config) return 0
 
@@ -273,6 +282,11 @@ export const calculatePlayerPoints = (player: Player): number => {
     })
   })
 
-  // 每1000资源 = 1积分
-  return Math.floor(totalCost / 1000)
+  // 每1000资源 = 1积分（基础积分）
+  const basePoints = Math.floor(totalCost / 1000)
+
+  // 加上奖励积分（战役、成就等奖励的积分）
+  const bonusPoints = player.bonusPoints || 0
+
+  return basePoints + bonusPoints
 }

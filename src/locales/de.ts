@@ -960,6 +960,7 @@ export default {
     exporting: 'Exportieren...',
     exportSuccess: 'Export erfolgreich',
     exportSuccessWithPath: 'Export erfolgreich, Datei gespeichert unter: {path}',
+    exportCopiedToClipboard: 'Export erfolgreich, Daten in die Zwischenablage kopiert',
     storagePermissionDenied: 'Speicherberechtigung verweigert, Datei kann nicht exportiert werden',
     exportFailed: 'Export fehlgeschlagen, bitte erneut versuchen',
     importData: 'Daten importieren',

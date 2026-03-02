@@ -538,12 +538,13 @@ export const TECHNOLOGIES: Record<TechnologyType, TechnologyConfig> = {
     baseTime: 60,
     costMultiplier: 2,
     fleetStorageBonus: 500, // 每级全局增加500舰队仓储
-    maxLevel: 10, // 最多10级（最多11个研究队列和11个舰队槽位）
+    maxLevel: 10, // 最多15级（最多16个研究队列和16个舰队槽位）
     requirements: { [BuildingType.ResearchLab]: 1 },
     levelRequirements: {
       3: { [BuildingType.ResearchLab]: 5 },
       5: { [BuildingType.ResearchLab]: 8, [BuildingType.RoboticsFactory]: 5 },
-      8: { [BuildingType.ResearchLab]: 10, [BuildingType.NaniteFactory]: 2 }
+      8: { [BuildingType.ResearchLab]: 10, [BuildingType.NaniteFactory]: 2 },
+      12: { [BuildingType.ResearchLab]: 12, [BuildingType.NaniteFactory]: 5 }
     }
   },
   [TechnologyType.EspionageTechnology]: {
@@ -777,7 +778,7 @@ export const TECHNOLOGIES: Record<TechnologyType, TechnologyConfig> = {
       },
       8: {
         [BuildingType.ResearchLab]: 14,
-        [TechnologyType.ComputerTechnology]: 12,
+        [TechnologyType.ComputerTechnology]: 10,
         [BuildingType.NaniteFactory]: 5
       }
     }
@@ -1395,7 +1396,7 @@ export const MOON_CONFIG = {
   maxChance: 20, // 最大20%概率（需要2M残骸）
   chancePerDebris: 100000, // 每10万资源增加1%概率
   baseFields: 1, // 月球初始空间（OGame规则：初始只有1格）
-  lunarBaseFieldsBonus: 3, // 每级月球基地增加的空间（每级+3格，占用1格，净增2格）
+  lunarBaseFieldsBonus: 30, // 每级月球基地增加的空间（每级+30格，占用0格）
   minDiameter: 3476, // 最小月球直径(km)，1%概率时
   maxDiameter: 8944, // 最大月球直径(km)，20%概率时保证>8000km
   baseDiameter: 3000, // 基础直径(km)

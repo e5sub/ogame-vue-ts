@@ -498,11 +498,7 @@
 
     // 如果有星际研究网络，计算有效实验室等级
     if (intergalacticResearchNetworkLevel > 0) {
-      return researchLogic.calculateEffectiveLabLevel(
-        gameStore.player.planets,
-        currentPlanet.value.id,
-        intergalacticResearchNetworkLevel
-      )
+      return researchLogic.calculateEffectiveLabLevel(gameStore.player.planets, currentPlanet.value.id, intergalacticResearchNetworkLevel)
     }
 
     return currentPlanet.value.buildings['researchLab'] || 0
@@ -599,11 +595,7 @@
     const miningTechLevel = gameStore.player?.technologies?.[TechnologyType.MiningTechnology] || 0
 
     // 使用增强版计算函数获取带加成的储量上限
-    const enhancedDeposits = oreDepositLogic.calculateEnhancedDeposits(
-      deposits.position,
-      deepDrillingLevel,
-      miningTechLevel
-    )
+    const enhancedDeposits = oreDepositLogic.calculateEnhancedDeposits(deposits.position, deepDrillingLevel, miningTechLevel)
     const initial = enhancedDeposits[resourceType]
 
     // 百分比基于增强后的上限计算

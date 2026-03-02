@@ -938,6 +938,7 @@ export default {
     exporting: '내보내는 중...',
     exportSuccess: '내보내기 성공',
     exportSuccessWithPath: '내보내기 성공, 파일 저장 위치: {path}',
+    exportCopiedToClipboard: '내보내기 성공, 데이터가 클립보드에 복사됨',
     storagePermissionDenied: '저장소 권한이 거부되어 파일을 내보낼 수 없습니다',
     exportFailed: '내보내기 실패, 다시 시도해주세요',
     importData: '데이터 가져오기',

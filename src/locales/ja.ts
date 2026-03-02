@@ -983,6 +983,7 @@ export default {
     exporting: 'エクスポート中...',
     exportSuccess: 'エクスポート成功',
     exportSuccessWithPath: 'エクスポート成功、ファイルの保存先：{path}',
+    exportCopiedToClipboard: 'エクスポート成功、データがクリップボードにコピーされました',
     storagePermissionDenied: 'ストレージ権限が拒否されました。ファイルをエクスポートできません',
     exportFailed: 'エクスポートに失敗しました。もう一度お試しください',
     importData: 'データインポート',

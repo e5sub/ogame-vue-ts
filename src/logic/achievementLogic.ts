@@ -15,25 +15,37 @@ import { ACHIEVEMENTS, ACHIEVEMENT_MAP, getNextTier, getTierIndex } from '@/conf
 
 // 初始化空的成就统计数据
 export const initializeAchievementStats = (): AchievementStats => {
-  const emptyShipRecord = Object.values(ShipType).reduce((acc, type) => {
-    acc[type] = 0
-    return acc
-  }, {} as Record<ShipType, number>)
+  const emptyShipRecord = Object.values(ShipType).reduce(
+    (acc, type) => {
+      acc[type] = 0
+      return acc
+    },
+    {} as Record<ShipType, number>
+  )
 
-  const emptyDefenseRecord = Object.values(DefenseType).reduce((acc, type) => {
-    acc[type] = 0
-    return acc
-  }, {} as Record<DefenseType, number>)
+  const emptyDefenseRecord = Object.values(DefenseType).reduce(
+    (acc, type) => {
+      acc[type] = 0
+      return acc
+    },
+    {} as Record<DefenseType, number>
+  )
 
-  const emptyBuildingRecord = Object.values(BuildingType).reduce((acc, type) => {
-    acc[type] = 0
-    return acc
-  }, {} as Record<BuildingType, number>)
+  const emptyBuildingRecord = Object.values(BuildingType).reduce(
+    (acc, type) => {
+      acc[type] = 0
+      return acc
+    },
+    {} as Record<BuildingType, number>
+  )
 
-  const emptyTechRecord = Object.values(TechnologyType).reduce((acc, type) => {
-    acc[type] = 0
-    return acc
-  }, {} as Record<TechnologyType, number>)
+  const emptyTechRecord = Object.values(TechnologyType).reduce(
+    (acc, type) => {
+      acc[type] = 0
+      return acc
+    },
+    {} as Record<TechnologyType, number>
+  )
 
   return {
     // 资源统计
@@ -221,7 +233,8 @@ export const applyAchievementReward = (player: Player, reward: AchievementReward
   }
 
   if (reward.points) {
-    player.points += reward.points
+    // 奖励积分存入 bonusPoints，不会被 calculatePlayerPoints 覆盖
+    player.bonusPoints = (player.bonusPoints || 0) + reward.points
   }
 }
 

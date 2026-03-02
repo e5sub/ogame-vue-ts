@@ -518,7 +518,7 @@
   import HintToast from '@/components/notifications/HintToast.vue'
   import BackToTop from '@/components/common/BackToTop.vue'
   import Sonner from '@/components/ui/sonner/Sonner.vue'
-  import { MissionType, BuildingType, TechnologyType, DiplomaticEventType, ShipType } from '@/types/game'
+  import { MissionType, BuildingType, TechnologyType, DiplomaticEventType, ShipType, DefenseType } from '@/types/game'
   import type { FleetMission, NPC, MissileAttack } from '@/types/game'
   import { DIPLOMATIC_CONFIG } from '@/config/gameConfig'
   import type { VersionInfo } from '@/utils/versionCheck'
@@ -765,7 +765,7 @@
       return
     }
 
-    if (!settings.types[typeKey]) return
+    if (!settings.types[typeKey as keyof typeof settings.types]) return
 
     // 浏览器通知
     if (settings.browser && 'Notification' in window && Notification.permission === 'granted') {
@@ -851,6 +851,29 @@
       // 只在没有NPC星球时才生成（首次加载已有玩家数据时）
       if (Object.keys(universeStore.planets).length === 0) {
         generateNPCPlanets()
+      }
+
+      // 数据迁移：为没有 bonusPoints 的玩家计算奖励积分
+      if (gameStore.player.bonusPoints === undefined) {
+        // 计算基础积分（建筑、科技、舰船、防御）
+        let totalCost = 0
+        gameStore.player.planets.forEach(planet => {
+          Object.entries(planet.buildings).forEach(([buildingType, level]) => {
+            totalCost += publicLogic.calculateBuildingTotalCost(buildingType as BuildingType, level)
+          })
+          Object.entries(planet.fleet).forEach(([shipType, count]) => {
+            totalCost += publicLogic.calculateShipUnitCost(shipType as ShipType) * count
+          })
+          Object.entries(planet.defense).forEach(([defenseType, count]) => {
+            totalCost += publicLogic.calculateDefenseUnitCost(defenseType as DefenseType) * count
+          })
+        })
+        Object.entries(gameStore.player.technologies).forEach(([techType, level]) => {
+          totalCost += publicLogic.calculateTechnologyTotalCost(techType as TechnologyType, level)
+        })
+        const basePoints = Math.floor(totalCost / 1000)
+        // bonusPoints = 当前积分 - 基础积分
+        gameStore.player.bonusPoints = Math.max(0, gameStore.player.points - basePoints)
       }
 
       // 初始化或更新玩家积分
@@ -1511,6 +1534,17 @@
         details: reportDetails,
         read: false
       })
+    }
+
+    // 更新任务状态为返回中
+    // Deploy任务不需要返回（舰队已经留在目标星球）
+    if (mission.missionType !== MissionType.Deploy) {
+      mission.status = 'returning'
+      // 确保returnTime已设置（如果还没设置的话）
+      if (!mission.returnTime) {
+        const flightTime = mission.arrivalTime - mission.departureTime
+        mission.returnTime = Date.now() + flightTime
+      }
     }
   }
 

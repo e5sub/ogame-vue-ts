@@ -948,6 +948,7 @@ export default {
     exporting: '导出中...',
     exportSuccess: '导出成功',
     exportSuccessWithPath: '导出成功，文件已保存到：{path}',
+    exportCopiedToClipboard: '导出成功，数据已复制到剪贴板',
     storagePermissionDenied: '存储权限被拒绝，无法导出文件',
     exportFailed: '导出失败，请重试',
     importData: '导入数据',

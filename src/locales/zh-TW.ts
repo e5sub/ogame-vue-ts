@@ -952,6 +952,7 @@ export default {
     exporting: '匯出中...',
     exportSuccess: '匯出成功',
     exportSuccessWithPath: '匯出成功，檔案已儲存到：{path}',
+    exportCopiedToClipboard: '匯出成功，資料已複製到剪貼簿',
     storagePermissionDenied: '儲存權限被拒絕，無法匯出檔案',
     exportFailed: '匯出失敗，請重試',
     importData: '匯入資料',
