@@ -287,6 +287,8 @@ const fixDuplicatePlanetIds = (data: MigratableGameData): boolean => {
     return false
   }
 
+  // buildDuplicatePlanetIdMap 已经在上一步直接修复了重复星球 ID，
+  // 只要 idMap 非空，就说明当前迁移已经发生了实际修改。
   let mutated = true
 
   player.planets.forEach(planet => {
