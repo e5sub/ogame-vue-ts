@@ -442,6 +442,8 @@
   } from 'lucide-vue-next'
   import { Empty, EmptyContent, EmptyDescription } from '@/components/ui/empty'
 
+  type NPCSortBy = 'reputation' | 'planets' | 'difficulty' | 'allies'
+
   const route = useRoute()
   const gameStore = useGameStore()
   const npcStore = useNPCStore()
@@ -471,8 +473,12 @@
   const searchQuery = ref('')
 
   // 排序状态
-  const sortBy = ref('reputation')
+  const sortBy = ref<NPCSortBy>('reputation')
   const sortOrder = ref<'asc' | 'desc'>('desc')
+
+  const assertNever = (value: never): never => {
+    throw new Error(`Unexpected NPC sort type: ${value}`)
+  }
 
   // 排序函数
   const sortNpcs = (npcs: typeof npcStore.npcs) => {
@@ -505,7 +511,7 @@
           valB = b.allies?.length || 0
           break
         default:
-          return 0
+          return assertNever(sortBy.value)
       }
 
       if (sortOrder.value === 'asc') {

@@ -62,7 +62,7 @@ export const createFleetMission = (
 ): FleetMission => {
   const now = Date.now()
   return {
-    id: generateId('mission', now),
+    id: generateId('mission'),
     playerId,
     originPlanetId,
     // 深拷贝targetPosition，避免多个任务共享同一个引用

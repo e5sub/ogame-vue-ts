@@ -349,6 +349,10 @@
     tabValue: GMPresetSectionKey
   }
 
+  type GMPresetNameMap = Record<GMPresetSectionKey, string>
+  type GMSelectedPresetMap = Record<GMPresetSectionKey, string>
+  type GMCustomPresetMap = Record<GMPresetSectionKey, GMPreset[]>
+
   interface PendingPresetOverwrite {
     section: GMPresetSection
     name: string
@@ -406,21 +410,21 @@
     localStorage.setItem(`gm_presets_${type}`, JSON.stringify(presets))
   }
 
-  const presetNames = ref<Record<string, string>>({
+  const presetNames = ref<GMPresetNameMap>({
     buildings: '',
     research: '',
     ships: '',
     defense: ''
   })
 
-  const selectedPresets = ref<Record<string, string>>({
+  const selectedPresets = ref<GMSelectedPresetMap>({
     buildings: 'default',
     research: 'default',
     ships: 'default',
     defense: 'default'
   })
 
-  const customPresets = ref<Record<string, GMPreset[]>>({
+  const customPresets = ref<GMCustomPresetMap>({
     buildings: getPresets('buildings'),
     research: getPresets('research'),
     ships: getPresets('ships'),
@@ -442,7 +446,8 @@
     })
 
     // 检查是否存在同名预设
-    const existingIndex = customPresets.value[section.tabValue]?.findIndex(p => p.name === name) ?? -1
+    const presets = customPresets.value[section.tabValue]
+    const existingIndex = presets.findIndex(p => p.name === name)
     
     if (existingIndex !== -1) {
       pendingPresetToOverwrite.value = {
@@ -461,11 +466,8 @@
       values
     }
     
-    if (!customPresets.value[section.tabValue]) {
-      customPresets.value[section.tabValue] = []
-    }
-    customPresets.value[section.tabValue]!.push(newPreset)
-    savePresets(section.tabValue, customPresets.value[section.tabValue]!)
+    presets.push(newPreset)
+    savePresets(section.tabValue, presets)
     presetNames.value[section.tabValue] = ''
     selectedPresets.value[section.tabValue] = newPreset.id
     toast.success(t('gmView.presetSaved') || '预设保存成功')
@@ -476,20 +478,18 @@
     
     const { section, values, existingIndex } = pendingPresetToOverwrite.value
     
-    if (customPresets.value[section.tabValue]) {
-      const presets = customPresets.value[section.tabValue]!
-      
-      if (presets[existingIndex]) {
-        // 更新现有预设的值，保持ID不变
-        presets[existingIndex].values = values
-        
-        savePresets(section.tabValue, presets)
-        
-        presetNames.value[section.tabValue] = ''
-        selectedPresets.value[section.tabValue] = presets[existingIndex].id
-        
-        toast.success(t('gmView.presetSaved') || '预设保存成功')
-      }
+    const presets = customPresets.value[section.tabValue]
+
+    if (presets[existingIndex]) {
+      // 更新现有预设的值，保持ID不变
+      presets[existingIndex].values = values
+
+      savePresets(section.tabValue, presets)
+
+      presetNames.value[section.tabValue] = ''
+      selectedPresets.value[section.tabValue] = presets[existingIndex].id
+
+      toast.success(t('gmView.presetSaved') || '预设保存成功')
     }
     
     presetOverwriteDialogOpen.value = false
@@ -505,7 +505,7 @@
       return
     }
     
-    const presets = customPresets.value[section.tabValue] || []
+    const presets = customPresets.value[section.tabValue]
     const index = presets.findIndex(p => p.id === presetId)
     
     if (index !== -1) {
@@ -586,14 +586,12 @@
       }
       toast.success(t('gmView.presetApplied') || '默认预设应用成功')
     } else {
-      if (customPresets.value[section.tabValue]) {
-        const customPreset = customPresets.value[section.tabValue]!.find((p: GMPreset) => p.id === presetId)
-        if (customPreset) {
-          Object.entries(customPreset.values).forEach(([k, v]) => {
-            section.setValue(k, v as number)
-          })
-          toast.success(t('gmView.presetApplied') || '预设应用成功')
-        }
+      const customPreset = customPresets.value[section.tabValue].find((p: GMPreset) => p.id === presetId)
+      if (customPreset) {
+        Object.entries(customPreset.values).forEach(([k, v]) => {
+          section.setValue(k, v as number)
+        })
+        toast.success(t('gmView.presetApplied') || '预设应用成功')
       }
     }
   }
