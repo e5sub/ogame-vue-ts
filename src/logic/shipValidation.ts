@@ -1,6 +1,7 @@
 import type { Planet, Resources, BuildQueueItem, Fleet, Officer } from '@/types/game'
 import { ShipType, DefenseType, TechnologyType, OfficerType, BuildingType } from '@/types/game'
 import * as shipLogic from './shipLogic'
+import * as missileLogic from './missileLogic'
 import * as resourceLogic from './resourceLogic'
 import * as officerLogic from './officerLogic'
 import * as publicLogic from './publicLogic'
@@ -101,7 +102,7 @@ export const validateDefenseBuild = (
   }
 
   // 导弹发射井容量限制
-  if (!shipLogic.checkMissileSiloLimit(defenseType, planet.defense, planet.buildings, quantity, planet.buildQueue)) {
+  if (!missileLogic.checkMissileSiloLimit(defenseType, planet.defense, planet.buildings, quantity, planet.buildQueue)) {
     return { valid: false, reason: 'errors.missileSiloLimit' }
   }
 

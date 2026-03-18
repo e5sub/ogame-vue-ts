@@ -318,7 +318,7 @@
   import * as npcBehaviorLogic from '@/logic/npcBehaviorLogic'
   import * as publicLogic from '@/logic/publicLogic'
   import { calculateMaxFleetStorage } from '@/logic/fleetStorageLogic'
-  import { calculateMissileSiloCapacity } from '@/logic/shipLogic'
+  import { calculateMissileSiloCapacity } from '@/logic/missileLogic'
   import { Home, Trash2 } from 'lucide-vue-next'
 
   // --- 预设系统 ---
