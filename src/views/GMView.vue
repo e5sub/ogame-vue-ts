@@ -99,6 +99,15 @@
                   </SelectContent>
                 </Select>
                 <Button @click="handleApplyPreset(section)">{{ t('gmView.applyPreset') || 'Apply' }}</Button>
+                <Button 
+                  v-if="selectedPresets[section.tabValue] !== 'default'"
+                  @click="handleDeletePreset(section)"
+                  variant="destructive"
+                  size="icon"
+                  :title="t('gmView.deletePreset') || 'Delete Preset'"
+                >
+                  <Trash2 class="h-4 w-4" />
+                </Button>
               </div>
               <div class="flex gap-2 w-full sm:w-auto ml-auto">
                 <Input v-model="presetNames[section.tabValue]" :placeholder="t('gmView.presetName') || 'Preset Name'" class="w-[150px]" />
@@ -242,6 +251,22 @@
       </AlertDialogContent>
     </AlertDialog>
 
+    <!-- 预设覆盖确认对话框 -->
+    <AlertDialog :open="presetOverwriteDialogOpen" @update:open="presetOverwriteDialogOpen = $event">
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{{ t('gmView.confirmOverwriteTitle') || 'Preset Already Exists' }}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {{ t('gmView.confirmOverwriteMessage', { name: pendingPresetToOverwrite?.name || '' }) || `Preset with name "${pendingPresetToOverwrite?.name}" already exists. Overwrite?` }}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel @click="presetOverwriteDialogOpen = false">{{ t('common.cancel') }}</AlertDialogCancel>
+          <AlertDialogAction @click="handleConfirmOverwrite">{{ t('common.confirm') }}</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
     <!-- AlertDialog 提示对话框 -->
     <AlertDialog :open="alertDialogOpen" @update:open="alertDialogOpen = $event">
       <AlertDialogContent>
@@ -293,7 +318,7 @@
   import * as npcBehaviorLogic from '@/logic/npcBehaviorLogic'
   import * as publicLogic from '@/logic/publicLogic'
   import { calculateMaxFleetStorage } from '@/logic/fleetStorageLogic'
-  import { Home } from 'lucide-vue-next'
+  import { Home, Trash2 } from 'lucide-vue-next'
 
   // --- 预设系统 ---
   interface GMPreset {
@@ -301,6 +326,14 @@
     name: string
     values: Record<string, number>
   }
+
+  const presetOverwriteDialogOpen = ref(false)
+  const pendingPresetToOverwrite = ref<{
+    section: any
+    name: string
+    values: Record<string, number>
+    existingIndex: number
+  } | null>(null)
 
   const getPresets = (type: string): GMPreset[] => {
     const data = localStorage.getItem(`gm_presets_${type}`)
@@ -343,6 +376,20 @@
     section.items.forEach((item: string) => {
       values[item] = section.getValue(item)
     })
+
+    // 检查是否存在同名预设
+    const existingIndex = customPresets.value[section.tabValue]?.findIndex(p => p.name === name) ?? -1
+    
+    if (existingIndex !== -1) {
+      pendingPresetToOverwrite.value = {
+        section,
+        name,
+        values,
+        existingIndex
+      }
+      presetOverwriteDialogOpen.value = true
+      return
+    }
     
     const newPreset: GMPreset = {
       id: Date.now().toString(),
@@ -358,6 +405,49 @@
     presetNames.value[section.tabValue] = ''
     selectedPresets.value[section.tabValue] = newPreset.id
     toast.success(t('gmView.presetSaved') || '预设保存成功')
+  }
+
+  const handleConfirmOverwrite = () => {
+    if (!pendingPresetToOverwrite.value) return
+    
+    const { section, values, existingIndex } = pendingPresetToOverwrite.value
+    
+    if (customPresets.value[section.tabValue]) {
+      const presets = customPresets.value[section.tabValue]!
+      
+      if (presets[existingIndex]) {
+        // 更新现有预设的值，保持ID不变
+        presets[existingIndex].values = values
+        
+        savePresets(section.tabValue, presets)
+        
+        presetNames.value[section.tabValue] = ''
+        selectedPresets.value[section.tabValue] = presets[existingIndex].id
+        
+        toast.success(t('gmView.presetSaved') || '预设保存成功')
+      }
+    }
+    
+    presetOverwriteDialogOpen.value = false
+    pendingPresetToOverwrite.value = null
+  }
+
+  const handleDeletePreset = (section: any) => {
+    const presetId = selectedPresets.value[section.tabValue]
+    if (!presetId || presetId === 'default') {
+      toast.error(t('gmView.cannotDeleteDefault') || '无法删除默认预设')
+      return
+    }
+    
+    const presets = customPresets.value[section.tabValue] || []
+    const index = presets.findIndex(p => p.id === presetId)
+    
+    if (index !== -1) {
+      presets.splice(index, 1)
+      savePresets(section.tabValue, presets)
+      selectedPresets.value[section.tabValue] = 'default'
+      toast.success(t('gmView.presetDeleted') || '预设已删除')
+    }
   }
 
   const handleApplyPreset = (section: any) => {
