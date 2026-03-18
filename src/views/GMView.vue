@@ -350,13 +350,14 @@
       values
     }
     
-    if (customPresets.value[section.tabValue]) {
-      customPresets.value[section.tabValue]!.push(newPreset)
-      savePresets(section.tabValue, customPresets.value[section.tabValue]!)
-      presetNames.value[section.tabValue] = ''
-      selectedPresets.value[section.tabValue] = newPreset.id
-      toast.success(t('gmView.presetSaved') || '预设保存成功')
+    if (!customPresets.value[section.tabValue]) {
+      customPresets.value[section.tabValue] = []
     }
+    customPresets.value[section.tabValue]!.push(newPreset)
+    savePresets(section.tabValue, customPresets.value[section.tabValue]!)
+    presetNames.value[section.tabValue] = ''
+    selectedPresets.value[section.tabValue] = newPreset.id
+    toast.success(t('gmView.presetSaved') || '预设保存成功')
   }
 
   const handleApplyPreset = (section: any) => {

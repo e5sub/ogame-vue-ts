@@ -102,31 +102,51 @@ export const migrateGameData = (): void => {
 
     // 修复重复的星球ID
     if (oldData.player?.planets && Array.isArray(oldData.player.planets)) {
-      const idCounts = new Map<string, number>()
-      const idMap = new Map<string, string>() // 映射：原始ID + 坐标 -> 新ID
+      const planetsByOriginalId = new Map<string, Planet[]>()
       
+      // 第一步：按ID分组
       oldData.player.planets.forEach((planet: Planet) => {
-        const count = idCounts.get(planet.id) || 0
-        if (count > 0) {
-          // 发现重复ID
-          const newId = `${planet.id}_${Math.random().toString(36).substring(2, 9)}`
-          const posKey = `${planet.position.galaxy}:${planet.position.system}:${planet.position.position}`
-          idMap.set(`${planet.id}_${posKey}`, newId)
-          planet.id = newId
-          needsSave = true
+        if (!planetsByOriginalId.has(planet.id)) {
+          planetsByOriginalId.set(planet.id, [])
         }
-        idCounts.set(planet.id, count + 1)
+        planetsByOriginalId.get(planet.id)!.push(planet)
+      })
+
+      // 第二步：处理重复ID并建立映射
+      const idMap = new Map<string, string>() // Key: oldId_galaxy:system:position -> Value: newId
+      
+      planetsByOriginalId.forEach((planets, originalId) => {
+        if (planets.length > 1) {
+          // 对重复组中的星球，保留第一个，修改后续的
+          planets.forEach((planet, index) => {
+            if (index > 0) {
+              const newId = `${originalId}_${Math.random().toString(36).substring(2, 9)}`
+              const posKey = `${planet.position.galaxy}:${planet.position.system}:${planet.position.position}`
+              // 记录映射：原始ID + 坐标 -> 新ID
+              idMap.set(`${originalId}_${posKey}`, newId)
+              
+              // 修改星球ID
+              planet.id = newId
+              needsSave = true
+            }
+          })
+        }
       })
       
-      // 如果有ID被修改，需要更新月球的 parentPlanetId
+      // 第三步：更新月球的 parentPlanetId
       if (idMap.size > 0) {
         oldData.player.planets.forEach((planet: Planet) => {
           if (planet.isMoon && planet.parentPlanetId) {
+            // 假设月球和母星坐标一致，通过月球坐标查找母星的新ID
             const posKey = `${planet.position.galaxy}:${planet.position.system}:${planet.position.position}`
-            const newParentId = idMap.get(`${planet.parentPlanetId}_${posKey}`)
-            if (newParentId) {
-              planet.parentPlanetId = newParentId
-              needsSave = true
+            const mapKey = `${planet.parentPlanetId}_${posKey}`
+            
+            if (idMap.has(mapKey)) {
+              const newParentId = idMap.get(mapKey)
+              if (newParentId) {
+                planet.parentPlanetId = newParentId
+                needsSave = true
+              }
             }
           }
         })
