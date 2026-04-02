@@ -2,6 +2,7 @@ import type { Fleet, Resources, BattleResult, Officer, TechnologyType } from '@/
 import { DefenseType, OfficerType } from '@/types/game'
 import { workerManager } from '@/workers/workerManager'
 import { MOON_CONFIG } from '@/config/gameConfig'
+import { generateId } from '@/utils/id'
 
 /**
  * 执行战斗模拟
@@ -66,7 +67,7 @@ export const simulateBattle = async (
 
   // 生成战斗报告
   const battleResult: BattleResult = {
-    id: `battle_${Date.now()}`,
+    id: generateId('battle'),
     timestamp: Date.now(),
     attackerId: '',
     defenderId: '',

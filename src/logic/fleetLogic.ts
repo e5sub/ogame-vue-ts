@@ -3,6 +3,7 @@ import type { Locale } from '@/locales'
 import { ShipType, DefenseType, MissionType, BuildingType, OfficerType, TechnologyType, ExpeditionZone } from '@/types/game'
 import { FLEET_STORAGE_CONFIG, EXPEDITION_ZONES } from '@/config/gameConfig'
 import { useGameStore } from '@/stores/gameStore'
+import { generateId } from '@/utils/id'
 import * as battleLogic from './battleLogic'
 import * as moonLogic from './moonLogic'
 import * as moonValidation from './moonValidation'
@@ -61,7 +62,7 @@ export const createFleetMission = (
 ): FleetMission => {
   const now = Date.now()
   return {
-    id: `mission_${now}`,
+    id: generateId('mission'),
     playerId,
     originPlanetId,
     // 深拷贝targetPosition，避免多个任务共享同一个引用
@@ -171,7 +172,7 @@ export const processAttackArrival = async (
   )
 
   // 更新战斗报告ID
-  battleResult.id = `battle_${Date.now()}`
+  battleResult.id = generateId('battle')
   battleResult.attackerId = attacker.id
   battleResult.defenderId = targetPlanet.ownerId || 'unknown'
   battleResult.attackerPlanetId = mission.originPlanetId
@@ -267,7 +268,7 @@ export const processNPCAttackArrival = async (
   )
 
   // 更新战斗报告ID和参与者信息
-  battleResult.id = `battle_${Date.now()}`
+  battleResult.id = generateId('battle')
   battleResult.attackerId = npc.id
   battleResult.defenderId = defender.id
   battleResult.attackerPlanetId = mission.originPlanetId
@@ -414,7 +415,7 @@ export const processColonizeArrival = (
 
   // 创建新殖民地
   const newPlanet: Planet = {
-    id: `planet_${Date.now()}`,
+    id: generateId('planet'),
     name: `${colonyNameTemplate} ${mission.targetPosition.galaxy}:${mission.targetPosition.system}:${mission.targetPosition.position}`,
     ownerId: player.id,
     position: mission.targetPosition,
@@ -564,7 +565,7 @@ export const processSpyArrival = (
   const wasDetected = Math.random() < detectionChance
 
   const spyReport: SpyReport = {
-    id: `spy_${Date.now()}`,
+    id: generateId('spy'),
     timestamp: Date.now(),
     spyId: attacker.id,
     targetPlanetId: targetPlanet.id,
@@ -1050,7 +1051,7 @@ export const processDestroyArrival = async (
     )
 
     // 更新战斗报告
-    battleResult.id = `battle_${Date.now()}`
+    battleResult.id = generateId('battle')
     battleResult.attackerId = attacker.id
     battleResult.defenderId = targetPlanet.ownerId || 'unknown'
     battleResult.attackerPlanetId = mission.originPlanetId

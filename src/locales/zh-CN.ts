@@ -1095,6 +1095,20 @@ export default {
     modifyOfficers: '修改军官',
     officersDesc: '快速设置军官到期时间',
     days: '天',
+    presets: '预设',
+    choosePreset: '选择预设',
+    defaultPreset: '默认预设',
+    applyPreset: '应用预设',
+    presetName: '预设名称',
+    savePreset: '保存预设',
+    presetNameRequired: '请输入预设名称',
+    presetSaved: '预设保存成功',
+    presetApplied: '预设应用成功',
+    deletePreset: '删除预设',
+    presetDeleted: '预设已删除',
+    confirmOverwriteTitle: '预设已存在',
+    confirmOverwriteMessage: '名为 "{name}" 的预设已存在，是否覆盖？',
+    cannotDeleteDefault: '无法删除默认预设',
     npcTesting: 'NPC 测试',
     npcTestingDesc: '测试NPC侦查和攻击行为',
     selectNPC: '选择NPC',
@@ -1259,6 +1273,15 @@ export default {
       npcEliminatedMessage: '你消灭了{npcName}的所有星球！该势力已被彻底摧毁。'
     },
     searchPlaceholder: '搜索NPC名称...',
+    sort: {
+      label: '排序',
+      ascending: '升序',
+      descending: '降序',
+      reputation: '好感度',
+      planets: '星球数量',
+      difficulty: '难度',
+      allies: '盟友数量'
+    },
     // 通知类型
     notificationType: {
       tradeOffer: '贸易提议',

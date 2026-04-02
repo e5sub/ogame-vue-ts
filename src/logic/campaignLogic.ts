@@ -19,6 +19,7 @@ import {
   type ShipType
 } from '@/types/game'
 import { MAIN_CAMPAIGN, getAllQuests, getQuestById, getQuestsByChapter } from '@/config/campaignConfig'
+import { generateId } from '@/utils/id'
 import * as resourceLogic from './resourceLogic'
 
 /**
@@ -515,7 +516,7 @@ export const createQuestNotification = (
 ): QuestNotification => {
   const quest = getQuestById(questId)
   return {
-    id: `quest_notification_${Date.now()}`,
+    id: generateId('quest_notification'),
     timestamp: Date.now(),
     questId,
     questTitleKey: quest?.titleKey || '',

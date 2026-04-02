@@ -3,8 +3,66 @@
  * 处理星际导弹攻击、射程计算、拦截等
  */
 
-import type { Planet, MissileAttack, DefenseType, TechnologyType, Position } from '@/types/game'
-import { DefenseType as DefenseTypes } from '@/types/game'
+import type { Planet, MissileAttack, DefenseType, TechnologyType, Position, BuildQueueItem } from '@/types/game'
+import { DefenseType as DefenseTypes, BuildingType } from '@/types/game'
+
+/**
+ * 计算导弹发射井容量
+ */
+export const calculateMissileSiloCapacity = (buildings: Partial<Record<BuildingType, number>>): number => {
+  const siloLevel = buildings[BuildingType.MissileSilo] || 0
+  return siloLevel * 10 // 每级存储10枚导弹
+}
+
+/**
+ * 计算当前导弹总数
+ */
+export const calculateCurrentMissileCount = (defense: Partial<Record<DefenseType, number>>): number => {
+  const interplanetaryMissiles = defense[DefenseTypes.InterplanetaryMissile] || 0
+  const antiBallisticMissiles = defense[DefenseTypes.AntiBallisticMissile] || 0
+  return interplanetaryMissiles + antiBallisticMissiles
+}
+
+/**
+ * 计算建造队列中的导弹总数
+ */
+export const calculateQueueMissileCount = (buildQueue: BuildQueueItem[]): number => {
+  let queueMissileCount = 0
+
+  for (const item of buildQueue) {
+    if (item.type === 'defense') {
+      const defenseType = item.itemType as DefenseType
+      if (defenseType === DefenseTypes.InterplanetaryMissile || defenseType === DefenseTypes.AntiBallisticMissile) {
+        queueMissileCount += item.quantity || 0
+      }
+    }
+  }
+
+  return queueMissileCount
+}
+
+/**
+ * 检查导弹容量限制
+ */
+export const checkMissileSiloLimit = (
+  defenseType: DefenseType,
+  currentDefense: Partial<Record<DefenseType, number>>,
+  buildings: Partial<Record<BuildingType, number>>,
+  quantity: number,
+  buildQueue?: BuildQueueItem[]
+): boolean => {
+  // 只对导弹类型进行检查
+  if (defenseType !== DefenseTypes.InterplanetaryMissile && defenseType !== DefenseTypes.AntiBallisticMissile) {
+    return true
+  }
+
+  const maxCapacity = calculateMissileSiloCapacity(buildings)
+  const currentCount = calculateCurrentMissileCount(currentDefense)
+  const queueCount = buildQueue ? calculateQueueMissileCount(buildQueue) : 0
+  const newCount = currentCount + queueCount + quantity
+
+  return newCount <= maxCapacity
+}
 
 /**
  * 计算导弹射程（基于脉冲引擎等级）

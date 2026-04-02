@@ -79,6 +79,44 @@
 
       <!-- 建筑/科技/舰船/防御/军官 - 统一配置渲染 -->
       <TabsContent v-for="section in gmSections" :key="section.tabValue" :value="section.tabValue" class="space-y-4">
+        <!-- 预设操作区 -->
+        <Card v-if="isPresettableSection(section)" class="mb-4">
+          <CardHeader class="pb-3">
+            <CardTitle class="text-lg">{{ t('gmView.presets') || 'Presets' }}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="flex flex-col sm:flex-row gap-4 items-end sm:items-center">
+              <div class="flex gap-2 w-full sm:w-auto">
+                <Select v-model="selectedPresets[section.tabValue]">
+                  <SelectTrigger class="w-[200px]">
+                    <SelectValue :placeholder="t('gmView.choosePreset') || 'Choose Preset'" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="default">{{ t('gmView.defaultPreset') || 'Default Preset' }}</SelectItem>
+                    <SelectItem v-for="p in customPresets[section.tabValue]" :key="p.id" :value="p.id">
+                      {{ p.name }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button @click="handleApplyPreset(section)">{{ t('gmView.applyPreset') || 'Apply' }}</Button>
+                <Button 
+                  v-if="selectedPresets[section.tabValue] !== 'default'"
+                  @click="handleDeletePreset(section)"
+                  variant="destructive"
+                  size="icon"
+                  :title="t('gmView.deletePreset') || 'Delete Preset'"
+                >
+                  <Trash2 class="h-4 w-4" />
+                </Button>
+              </div>
+              <div class="flex gap-2 w-full sm:w-auto ml-auto">
+                <Input v-model="presetNames[section.tabValue]" :placeholder="t('gmView.presetName') || 'Preset Name'" class="w-[150px]" />
+                <Button @click="handleSavePreset(section)" variant="outline">{{ t('gmView.savePreset') || 'Save' }}</Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>{{ t(section.titleKey) }}</CardTitle>
@@ -213,6 +251,22 @@
       </AlertDialogContent>
     </AlertDialog>
 
+    <!-- 预设覆盖确认对话框 -->
+    <AlertDialog :open="presetOverwriteDialogOpen" @update:open="presetOverwriteDialogOpen = $event">
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{{ t('gmView.confirmOverwriteTitle') || 'Preset Already Exists' }}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {{ t('gmView.confirmOverwriteMessage', { name: pendingPresetToOverwrite?.name || '' }) || `Preset with name "${pendingPresetToOverwrite?.name}" already exists. Overwrite?` }}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel @click="presetOverwriteDialogOpen = false">{{ t('common.cancel') }}</AlertDialogCancel>
+          <AlertDialogAction @click="handleConfirmOverwrite">{{ t('common.confirm') }}</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
     <!-- AlertDialog 提示对话框 -->
     <AlertDialog :open="alertDialogOpen" @update:open="alertDialogOpen = $event">
       <AlertDialogContent>
@@ -263,7 +317,286 @@
   import { BuildingType, TechnologyType, ShipType, DefenseType, OfficerType } from '@/types/game'
   import * as npcBehaviorLogic from '@/logic/npcBehaviorLogic'
   import * as publicLogic from '@/logic/publicLogic'
-  import { Home } from 'lucide-vue-next'
+  import { calculateMaxFleetStorage } from '@/logic/fleetStorageLogic'
+  import { calculateMissileSiloCapacity } from '@/logic/missileLogic'
+  import { generateId } from '@/utils/id'
+  import { Home, Trash2 } from 'lucide-vue-next'
+
+  // --- 预设系统 ---
+  interface GMPreset {
+    id: string
+    name: string
+    values: Record<string, number>
+  }
+
+  type GMSectionTabValue = 'buildings' | 'research' | 'ships' | 'defense' | 'officers'
+  type GMPresetSectionKey = Exclude<GMSectionTabValue, 'officers'>
+
+  type GMSection = {
+    tabValue: GMSectionTabValue
+    titleKey: string
+    descKey: string
+    items: string[]
+    max?: number
+    placeholder?: string
+    buttons: { label: string; value: number }[]
+    getItemName: (item: string) => string
+    getValue: (item: string) => number
+    setValue: (item: string, val: number) => void
+    onButtonClick: (item: string, val: number) => void
+  }
+
+  type GMPresetSection = GMSection & {
+    tabValue: GMPresetSectionKey
+  }
+
+  type GMPresetNameMap = Record<GMPresetSectionKey, string>
+  type GMSelectedPresetMap = Record<GMPresetSectionKey, string>
+  type GMCustomPresetMap = Record<GMPresetSectionKey, GMPreset[]>
+
+  interface PendingPresetOverwrite {
+    section: GMPresetSection
+    name: string
+    values: Record<string, number>
+    existingIndex: number
+  }
+
+  // 校验预设结构，避免历史脏数据污染当前视图
+  const isGMPreset = (value: unknown): value is GMPreset => {
+    if (typeof value !== 'object' || value === null) {
+      return false
+    }
+
+    const preset = value as Partial<GMPreset>
+    return typeof preset.id === 'string' && typeof preset.name === 'string' && typeof preset.values === 'object' && preset.values !== null
+  }
+
+  // 只有建筑/科技/舰船/防御页支持预设
+  const isPresettableSection = (section: GMSection): section is GMPresetSection => {
+    return section.tabValue !== 'officers'
+  }
+
+  const presetOverwriteDialogOpen = ref(false)
+  const pendingPresetToOverwrite = ref<PendingPresetOverwrite | null>(null)
+
+  const getPresets = (type: GMPresetSectionKey): GMPreset[] => {
+    const key = `gm_presets_${type}`
+    const data = localStorage.getItem(key)
+    if (!data) {
+      return []
+    }
+
+    try {
+      // 兼容旧版本或手动修改导致的损坏数据，避免页面因解析失败崩溃
+      const parsed = JSON.parse(data)
+      if (!Array.isArray(parsed)) {
+        localStorage.removeItem(key)
+        return []
+      }
+
+      const presets = parsed.filter(isGMPreset)
+      // 过滤掉结构不完整的预设，并顺手回写清理后的结果
+      if (presets.length !== parsed.length) {
+        localStorage.setItem(key, JSON.stringify(presets))
+      }
+
+      return presets
+    } catch {
+      localStorage.removeItem(key)
+      return []
+    }
+  }
+
+  const savePresets = (type: GMPresetSectionKey, presets: GMPreset[]) => {
+    localStorage.setItem(`gm_presets_${type}`, JSON.stringify(presets))
+  }
+
+  const presetNames = ref<GMPresetNameMap>({
+    buildings: '',
+    research: '',
+    ships: '',
+    defense: ''
+  })
+
+  const selectedPresets = ref<GMSelectedPresetMap>({
+    buildings: 'default',
+    research: 'default',
+    ships: 'default',
+    defense: 'default'
+  })
+
+  const customPresets = ref<GMCustomPresetMap>({
+    buildings: getPresets('buildings'),
+    research: getPresets('research'),
+    ships: getPresets('ships'),
+    defense: getPresets('defense')
+  })
+
+  const handleSavePreset = (section: GMSection) => {
+    if (!isPresettableSection(section)) return
+
+    const name = presetNames.value[section.tabValue]?.trim()
+    if (!name) {
+      toast.error(t('gmView.presetNameRequired') || '请输入预设名称')
+      return
+    }
+    
+    const values: Record<string, number> = {}
+    section.items.forEach((item: string) => {
+      values[item] = section.getValue(item)
+    })
+
+    // 检查是否存在同名预设
+    const presets = customPresets.value[section.tabValue]
+    const existingIndex = presets.findIndex(p => p.name === name)
+    
+    if (existingIndex !== -1) {
+      pendingPresetToOverwrite.value = {
+        section,
+        name,
+        values,
+        existingIndex
+      }
+      presetOverwriteDialogOpen.value = true
+      return
+    }
+    
+    const newPreset: GMPreset = {
+      id: generateId('gm_preset'),
+      name,
+      values
+    }
+    
+    presets.push(newPreset)
+    savePresets(section.tabValue, presets)
+    presetNames.value[section.tabValue] = ''
+    selectedPresets.value[section.tabValue] = newPreset.id
+    toast.success(t('gmView.presetSaved') || '预设保存成功')
+  }
+
+  const handleConfirmOverwrite = () => {
+    if (!pendingPresetToOverwrite.value) return
+    
+    const { section, values, existingIndex } = pendingPresetToOverwrite.value
+    
+    const presets = customPresets.value[section.tabValue]
+
+    if (presets[existingIndex]) {
+      // 更新现有预设的值，保持ID不变
+      presets[existingIndex].values = values
+
+      savePresets(section.tabValue, presets)
+
+      presetNames.value[section.tabValue] = ''
+      selectedPresets.value[section.tabValue] = presets[existingIndex].id
+
+      toast.success(t('gmView.presetSaved') || '预设保存成功')
+    }
+    
+    presetOverwriteDialogOpen.value = false
+    pendingPresetToOverwrite.value = null
+  }
+
+  const handleDeletePreset = (section: GMSection) => {
+    if (!isPresettableSection(section)) return
+
+    const presetId = selectedPresets.value[section.tabValue]
+    if (!presetId || presetId === 'default') {
+      toast.error(t('gmView.cannotDeleteDefault') || '无法删除默认预设')
+      return
+    }
+    
+    const presets = customPresets.value[section.tabValue]
+    const index = presets.findIndex(p => p.id === presetId)
+    
+    if (index !== -1) {
+      presets.splice(index, 1)
+      savePresets(section.tabValue, presets)
+      selectedPresets.value[section.tabValue] = 'default'
+      toast.success(t('gmView.presetDeleted') || '预设已删除')
+    }
+  }
+
+  const handleApplyPreset = (section: GMSection) => {
+    if (!isPresettableSection(section)) return
+
+    const presetId = selectedPresets.value[section.tabValue]
+    if (!presetId) return
+
+    if (presetId === 'default') {
+      if (section.tabValue === 'buildings') {
+        const explicitMax: Record<string, number> = {
+          [BuildingType.NaniteFactory]: 10,
+          [BuildingType.MissileSilo]: 10,
+          [BuildingType.JumpGate]: 5,
+          [BuildingType.PlanetDestroyerFactory]: 3,
+          [BuildingType.GeoResearchStation]: 10,
+          [BuildingType.DeepDrillingFacility]: 10,
+          [BuildingType.University]: 10
+        }
+        section.items.forEach((item: string) => {
+          section.setValue(item, explicitMax[item] || 50)
+        })
+      } else if (section.tabValue === 'research') {
+        const explicitMax: Record<string, number> = {
+          [TechnologyType.ComputerTechnology]: 10,
+          [TechnologyType.GravitonTechnology]: 1,
+          [TechnologyType.PlanetDestructionTech]: 10,
+          [TechnologyType.MiningTechnology]: 15,
+          [TechnologyType.IntergalacticResearchNetwork]: 10,
+          [TechnologyType.MineralResearch]: 20,
+          [TechnologyType.CrystalResearch]: 20,
+          [TechnologyType.FuelResearch]: 20
+        }
+        section.items.forEach((item: string) => {
+          section.setValue(item, explicitMax[item] || 100)
+        })
+      } else if (section.tabValue === 'ships') {
+        if (!selectedPlanet.value) return
+        // 某些过滤场景下舰船列表可能为空，避免平均分配时除以 0
+        if (!section.items.length) return
+        
+        // 重新计算最大舰队仓储，确保数据是最新的
+        const maxStorage = calculateMaxFleetStorage(selectedPlanet.value, gameStore.player.technologies)
+
+        // 将总容量平均分配给每种舰船
+        const storagePerShip = maxStorage / section.items.length
+
+        section.items.forEach(item => {
+          const usage = SHIPS.value[item as ShipType]?.storageUsage || 1
+          // 如果 usage 为 0 (如某些特殊单位)，则给予一个默认数量，或者跳过
+          if (usage <= 0) {
+             section.setValue(item, 100) // 防止除以0，给予固定值
+          } else {
+             section.setValue(item, Math.floor(storagePerShip / usage))
+          }
+        })
+      } else if (section.tabValue === 'defense') {
+        if (!selectedPlanet.value) return
+        const missileCapacity = calculateMissileSiloCapacity(selectedPlanet.value.buildings)
+        const defaultMissileCount = Math.floor(missileCapacity / 2)
+
+        section.items.forEach((item: string) => {
+          // 两种导弹都占用1格空间，默认各分配一半容量
+          if (item === DefenseType.AntiBallisticMissile || item === DefenseType.InterplanetaryMissile) {
+            section.setValue(item, defaultMissileCount)
+          } else {
+            section.setValue(item, 10000)
+          }
+        })
+      }
+      toast.success(t('gmView.presetApplied') || '默认预设应用成功')
+    } else {
+      const customPreset = customPresets.value[section.tabValue].find((p: GMPreset) => p.id === presetId)
+      if (customPreset) {
+        Object.entries(customPreset.values).forEach(([k, v]) => {
+          section.setValue(k, v as number)
+        })
+        toast.success(t('gmView.presetApplied') || '预设应用成功')
+      }
+    }
+  }
+  // --- 预设系统结束 ---
 
   const router = useRouter()
   const gameStore = useGameStore()
@@ -281,7 +614,8 @@
     router.push('/')
   }
 
-  const selectedPlanetId = ref<string>(gameStore.player.planets[0]?.id || '')
+  // 默认选中当前正在游玩的星球
+  const selectedPlanetId = ref<string>(gameStore.currentPlanetId || gameStore.player.planets[0]?.id || '')
   const officerDays = ref<Record<OfficerType, number>>({} as Record<OfficerType, number>)
   const selectedNPCId = ref<string>(npcStore.npcs[0]?.id || '')
   const targetPlanetIndex = ref<string>('0')
@@ -336,22 +670,6 @@
     }
   }
 
-  // GM编辑区块配置 - 统一管理建筑/科技/舰船/防御/军官
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  type GMSection = {
-    tabValue: string
-    titleKey: string
-    descKey: string
-    items: string[]
-    max?: number
-    placeholder?: string
-    buttons: { label: string; value: number }[]
-    getItemName: (item: any) => string
-    getValue: (item: any) => number
-    setValue: (item: any, val: number) => void
-    onButtonClick: (item: any, val: number) => void
-  }
-
   const gmSections = computed<GMSection[]>(() => [
     {
       tabValue: 'buildings',
@@ -364,17 +682,17 @@
         { label: 'Lv 10', value: 10 },
         { label: 'Lv 30', value: 30 }
       ],
-      getItemName: (item: BuildingType) => BUILDINGS.value[item].name,
-      getValue: (item: BuildingType) => selectedPlanet.value?.buildings[item] || 0,
-      setValue: (item: BuildingType, val: number) => {
+      getItemName: item => BUILDINGS.value[item as BuildingType].name,
+      getValue: item => selectedPlanet.value?.buildings[item as BuildingType] || 0,
+      setValue: (item, val) => {
         if (selectedPlanet.value) {
-          selectedPlanet.value.buildings[item] = val
+          selectedPlanet.value.buildings[item as BuildingType] = val
           updatePlayerPoints()
         }
       },
-      onButtonClick: (item: BuildingType, val: number) => {
+      onButtonClick: (item, val) => {
         if (selectedPlanet.value) {
-          selectedPlanet.value.buildings[item] = val
+          selectedPlanet.value.buildings[item as BuildingType] = val
           updatePlayerPoints()
         }
       }
@@ -390,14 +708,14 @@
         { label: 'Lv 10', value: 10 },
         { label: 'Lv 20', value: 20 }
       ],
-      getItemName: (item: TechnologyType) => TECHNOLOGIES.value[item].name,
-      getValue: (item: TechnologyType) => gameStore.player.technologies[item] || 0,
-      setValue: (item: TechnologyType, val: number) => {
-        gameStore.player.technologies[item] = val
+      getItemName: item => TECHNOLOGIES.value[item as TechnologyType].name,
+      getValue: item => gameStore.player.technologies[item as TechnologyType] || 0,
+      setValue: (item, val) => {
+        gameStore.player.technologies[item as TechnologyType] = val
         updatePlayerPoints()
       },
-      onButtonClick: (item: TechnologyType, val: number) => {
-        gameStore.player.technologies[item] = val
+      onButtonClick: (item, val) => {
+        gameStore.player.technologies[item as TechnologyType] = val
         updatePlayerPoints()
       }
     },
@@ -412,17 +730,17 @@
         { label: '+100', value: 100 },
         { label: '+1K', value: 1000 }
       ],
-      getItemName: (item: ShipType) => SHIPS.value[item].name,
-      getValue: (item: ShipType) => selectedPlanet.value?.fleet[item] || 0,
-      setValue: (item: ShipType, val: number) => {
+      getItemName: item => SHIPS.value[item as ShipType].name,
+      getValue: item => selectedPlanet.value?.fleet[item as ShipType] || 0,
+      setValue: (item, val) => {
         if (selectedPlanet.value) {
-          selectedPlanet.value.fleet[item] = val
+          selectedPlanet.value.fleet[item as ShipType] = val
           updatePlayerPoints()
         }
       },
-      onButtonClick: (item: ShipType, val: number) => {
+      onButtonClick: (item, val) => {
         if (selectedPlanet.value) {
-          selectedPlanet.value.fleet[item] = (selectedPlanet.value.fleet[item] || 0) + val
+          selectedPlanet.value.fleet[item as ShipType] = (selectedPlanet.value.fleet[item as ShipType] || 0) + val
           updatePlayerPoints()
         }
       }
@@ -438,17 +756,17 @@
         { label: '+100', value: 100 },
         { label: '+1K', value: 1000 }
       ],
-      getItemName: (item: DefenseType) => DEFENSES.value[item].name,
-      getValue: (item: DefenseType) => selectedPlanet.value?.defense[item] || 0,
-      setValue: (item: DefenseType, val: number) => {
+      getItemName: item => DEFENSES.value[item as DefenseType].name,
+      getValue: item => selectedPlanet.value?.defense[item as DefenseType] || 0,
+      setValue: (item, val) => {
         if (selectedPlanet.value) {
-          selectedPlanet.value.defense[item] = val
+          selectedPlanet.value.defense[item as DefenseType] = val
           updatePlayerPoints()
         }
       },
-      onButtonClick: (item: DefenseType, val: number) => {
+      onButtonClick: (item, val) => {
         if (selectedPlanet.value) {
-          selectedPlanet.value.defense[item] = (selectedPlanet.value.defense[item] || 0) + val
+          selectedPlanet.value.defense[item as DefenseType] = (selectedPlanet.value.defense[item as DefenseType] || 0) + val
           updatePlayerPoints()
         }
       }
@@ -465,27 +783,28 @@
         { label: `30${t('gmView.days')}`, value: 30 },
         { label: `365${t('gmView.days')}`, value: 365 }
       ],
-      getItemName: (item: OfficerType) => OFFICERS.value[item].name,
-      getValue: (item: OfficerType) => officerDays.value[item] || 0,
-      setValue: (item: OfficerType, val: number) => {
-        officerDays.value[item] = val
+      getItemName: item => OFFICERS.value[item as OfficerType].name,
+      getValue: item => officerDays.value[item as OfficerType] || 0,
+      setValue: (item, val) => {
+        officerDays.value[item as OfficerType] = val
       },
-      onButtonClick: (item: OfficerType, days: number) => {
-        officerDays.value[item] = days
+      onButtonClick: (item, days) => {
+        const officerType = item as OfficerType
+        officerDays.value[officerType] = days
         const now = Date.now()
         const expiresAt = now + days * 24 * 60 * 60 * 1000
-        if (!gameStore.player.officers[item]) {
-          gameStore.player.officers[item] = {
-            type: item,
+        if (!gameStore.player.officers[officerType]) {
+          gameStore.player.officers[officerType] = {
+            type: officerType,
             active: true,
             hiredAt: now,
             expiresAt: expiresAt
           }
         } else {
-          gameStore.player.officers[item].expiresAt = expiresAt
-          gameStore.player.officers[item].active = true
-          if (!gameStore.player.officers[item].hiredAt) {
-            gameStore.player.officers[item].hiredAt = now
+          gameStore.player.officers[officerType].expiresAt = expiresAt
+          gameStore.player.officers[officerType].active = true
+          if (!gameStore.player.officers[officerType].hiredAt) {
+            gameStore.player.officers[officerType].hiredAt = now
           }
         }
       }
@@ -659,11 +978,13 @@
   const maxAllResources = () => {
     if (!selectedPlanet.value) return
 
-    const maxAmount = 1000000000000000000
-    selectedPlanet.value.resources.metal = maxAmount
-    selectedPlanet.value.resources.crystal = maxAmount
-    selectedPlanet.value.resources.deuterium = maxAmount
-    selectedPlanet.value.resources.darkMatter = maxAmount
+    // 计算当前星球的资源存储上限
+    const capacity = publicLogic.getResourceCapacity(selectedPlanet.value, gameStore.player.officers)
+
+    selectedPlanet.value.resources.metal = capacity.metal
+    selectedPlanet.value.resources.crystal = capacity.crystal
+    selectedPlanet.value.resources.deuterium = capacity.deuterium
+    selectedPlanet.value.resources.darkMatter = capacity.darkMatter
 
     toast.success(t('gmView.maxAllResourcesSuccess'))
   }

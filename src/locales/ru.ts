@@ -1087,6 +1087,20 @@ export default {
   },
   gmView: {
     title: 'Панель управления GM',
+    presets: 'Предустановки',
+    choosePreset: 'Выбрать предустановку',
+    defaultPreset: 'Стандартная',
+    applyPreset: 'Применить',
+    savePreset: 'Сохранить',
+    presetName: 'Название',
+    presetNameRequired: 'Введите название',
+    presetSaved: 'Сохранено',
+    presetApplied: 'Применено',
+    deletePreset: 'Удалить',
+    presetDeleted: 'Удалено',
+    confirmOverwriteTitle: 'Уже существует',
+    confirmOverwriteMessage: 'Предустановка с именем "{name}" уже существует. Перезаписать?',
+    cannotDeleteDefault: 'Нельзя удалить стандартную предустановку',
     adminOnly: 'Только для администратора',
     selectPlanet: 'Выбрать планету',
     choosePlanet: 'Выберите планету',
@@ -1186,6 +1200,15 @@ export default {
     }
   },
   diplomacy: {
+    sort: {
+      label: 'Сортировка',
+      ascending: 'По возрастанию',
+      descending: 'По убыванию',
+      reputation: 'Репутация',
+      planets: 'Планеты',
+      difficulty: 'Сложность',
+      allies: 'Союзники'
+    },
     title: 'Дипломатия',
     description: 'Управление дипломатическими отношениями с NPC',
     tabs: {

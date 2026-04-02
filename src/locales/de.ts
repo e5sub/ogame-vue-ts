@@ -1085,6 +1085,20 @@ export default {
   },
   gmView: {
     title: 'GM-Kontrollpanel',
+    presets: 'Vorlagen',
+    choosePreset: 'Vorlage wählen',
+    defaultPreset: 'Standardvorlage',
+    applyPreset: 'Vorlage anwenden',
+    savePreset: 'Vorlage speichern',
+    presetName: 'Vorlagenname',
+    presetNameRequired: 'Bitte geben Sie einen Namen ein',
+    presetSaved: 'Vorlage gespeichert',
+    presetApplied: 'Vorlage angewendet',
+    deletePreset: 'Vorlage löschen',
+    presetDeleted: 'Vorlage gelöscht',
+    confirmOverwriteTitle: 'Vorlage existiert bereits',
+    confirmOverwriteMessage: 'Eine Vorlage mit dem Namen "{name}" existiert bereits. Überschreiben?',
+    cannotDeleteDefault: 'Standardvorlage kann nicht gelöscht werden',
     adminOnly: 'Nur Admin',
     selectPlanet: 'Planet auswählen',
     choosePlanet: 'Einen Planeten auswählen',
@@ -1185,6 +1199,15 @@ export default {
     }
   },
   diplomacy: {
+    sort: {
+      label: 'Sortieren',
+      ascending: 'Aufsteigend',
+      descending: 'Absteigend',
+      reputation: 'Ruf',
+      planets: 'Planeten',
+      difficulty: 'Schwierigkeit',
+      allies: 'Verbündete'
+    },
     title: 'Diplomatie',
     description: 'Verwalte diplomatische Beziehungen mit NPCs',
     tabs: {

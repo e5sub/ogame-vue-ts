@@ -181,10 +181,37 @@
       </ScrollableDialogContent>
     </Dialog>
 
-    <!-- 搜索框 -->
-    <div class="relative">
-      <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-      <Input v-model="searchQuery" type="text" :placeholder="t('diplomacy.searchPlaceholder')" class="pl-10" />
+    <!-- 搜索和排序工具栏 -->
+    <div class="flex flex-col sm:flex-row gap-4">
+      <!-- 搜索框 -->
+      <div class="relative flex-1">
+        <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input v-model="searchQuery" type="text" :placeholder="t('diplomacy.searchPlaceholder')" class="pl-10" />
+      </div>
+
+      <!-- 排序控制 -->
+      <div class="flex gap-2">
+        <Select v-model="sortBy">
+          <SelectTrigger class="w-[140px]">
+            <SelectValue :placeholder="t('diplomacy.sort.label')" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="reputation">{{ t('diplomacy.sort.reputation') }}</SelectItem>
+            <SelectItem value="planets">{{ t('diplomacy.sort.planets') }}</SelectItem>
+            <SelectItem value="difficulty">{{ t('diplomacy.sort.difficulty') }}</SelectItem>
+            <SelectItem value="allies">{{ t('diplomacy.sort.allies') }}</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Button
+          variant="outline"
+          size="icon"
+          @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'"
+          :title="sortOrder === 'asc' ? t('diplomacy.sort.ascending') : t('diplomacy.sort.descending')"
+        >
+          <ArrowUpDown class="h-4 w-4" />
+        </Button>
+      </div>
     </div>
 
     <!-- 关系状态过滤标签 -->
@@ -379,6 +406,13 @@
   import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
   import { Badge } from '@/components/ui/badge'
   import { Button } from '@/components/ui/button'
+  import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+  } from '@/components/ui/select'
   import { Dialog, DialogDescription, DialogTitle } from '@/components/ui/dialog'
   import ScrollableDialogContent from '@/components/ui/dialog/ScrollableDialogContent.vue'
   import {
@@ -393,7 +427,7 @@
   import NpcRelationCard from '@/components/npc/NpcRelationCard.vue'
   import NpcRelationRow from '@/components/npc/NpcRelationRow.vue'
   import { RelationStatus } from '@/types/game'
-  import type { DiplomaticRelation } from '@/types/game'
+  import type { DiplomaticRelation, NPC } from '@/types/game'
   import * as npcBehaviorLogic from '@/logic/npcBehaviorLogic'
   import {
     Search,
@@ -403,9 +437,12 @@
     Swords,
     Activity,
     LayoutGrid,
-    List
+    List,
+    ArrowUpDown
   } from 'lucide-vue-next'
   import { Empty, EmptyContent, EmptyDescription } from '@/components/ui/empty'
+
+  type NPCSortBy = 'reputation' | 'planets' | 'difficulty' | 'allies'
 
   const route = useRoute()
   const gameStore = useGameStore()
@@ -434,6 +471,56 @@
 
   // 搜索功能
   const searchQuery = ref('')
+
+  // 排序状态
+  const sortBy = ref<NPCSortBy>('reputation')
+  const sortOrder = ref<'asc' | 'desc'>('desc')
+
+  const assertNever = (value: never): never => {
+    throw new Error(`Unexpected NPC sort type: ${value}`)
+  }
+
+  // 排序函数
+  const sortNpcs = (npcs: NPC[], predicate: (npc: NPC) => boolean = () => true) => {
+    return npcs.filter(predicate).sort((a, b) => {
+      let valA = 0
+      let valB = 0
+
+      switch (sortBy.value) {
+        case 'reputation':
+          valA = getRelation(a.id)?.reputation || 0
+          valB = getRelation(b.id)?.reputation || 0
+          break
+        case 'planets':
+          valA = a.planets.length
+          valB = b.planets.length
+          break
+        case 'difficulty':
+          // 简单=1, 普通=2, 困难=3
+          // eslint-disable-next-line no-case-declarations
+          const getDifficultyVal = (diff: string) => {
+            if (diff === 'hard') return 3
+            if (diff === 'medium') return 2
+            return 1
+          }
+          valA = a.difficultyLevel || getDifficultyVal(a.difficulty)
+          valB = b.difficultyLevel || getDifficultyVal(b.difficulty)
+          break
+        case 'allies':
+          valA = a.allies?.length || 0
+          valB = b.allies?.length || 0
+          break
+        default:
+          return assertNever(sortBy.value)
+      }
+
+      if (sortOrder.value === 'asc') {
+        return valA - valB
+      } else {
+        return valB - valA
+      }
+    })
+  }
 
   // NPC诊断功能
   const npcDiagnosticOpen = ref(false)
@@ -620,34 +707,34 @@
   }
 
   // 搜索过滤函数
-  const matchesSearch = (npc: (typeof npcStore.npcs)[0]) => {
+  const matchesSearch = (npc: NPC) => {
     if (!searchQuery.value.trim()) return true
     const query = searchQuery.value.toLowerCase().trim()
     return npc.name.toLowerCase().includes(query) || npc.id.toLowerCase().includes(query)
   }
 
   // 按关系状态分类NPC（同时应用搜索过滤）
-  const allNpcs = computed(() => npcStore.npcs.filter(matchesSearch))
+  // 先统一排序一次，避免不同标签页在同一批数据上重复排序
+  const sortedNpcs = computed(() => sortNpcs(npcStore.npcs, matchesSearch))
+
+  const allNpcs = computed(() => sortedNpcs.value)
 
   const friendlyNpcs = computed(() => {
-    return npcStore.npcs.filter(npc => {
-      if (!matchesSearch(npc)) return false
+    return sortedNpcs.value.filter(npc => {
       const relation = getRelation(npc.id)
       return relation?.status === RelationStatus.Friendly
     })
   })
 
   const neutralNpcs = computed(() => {
-    return npcStore.npcs.filter(npc => {
-      if (!matchesSearch(npc)) return false
+    return sortedNpcs.value.filter(npc => {
       const relation = getRelation(npc.id)
       return !relation || relation.status === RelationStatus.Neutral
     })
   })
 
   const hostileNpcs = computed(() => {
-    return npcStore.npcs.filter(npc => {
-      if (!matchesSearch(npc)) return false
+    return sortedNpcs.value.filter(npc => {
       const relation = getRelation(npc.id)
       return relation?.status === RelationStatus.Hostile
     })
