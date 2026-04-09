@@ -1111,6 +1111,20 @@ export default {
   },
   gmView: {
     title: 'GMコントロールパネル',
+    presets: 'プリセット',
+    choosePreset: 'プリセット選択',
+    defaultPreset: 'デフォルト',
+    applyPreset: '適用',
+    savePreset: '保存',
+    presetName: 'プリセット名',
+    presetNameRequired: 'プリセット名を入力してください',
+    presetSaved: '保存しました',
+    presetApplied: '適用しました',
+    deletePreset: 'プリセット削除',
+    presetDeleted: 'プリセットを削除しました',
+    confirmOverwriteTitle: 'プリセットは既に存在します',
+    confirmOverwriteMessage: 'プリセット名 "{name}" は既に存在します。上書きしますか？',
+    cannotDeleteDefault: 'デフォルトプリセットは削除できません',
     adminOnly: '管理者専用',
     selectPlanet: '惑星を選択',
     choosePlanet: '惑星を選択してください',
@@ -1210,6 +1224,15 @@ export default {
     }
   },
   diplomacy: {
+    sort: {
+      label: '並び替え',
+      ascending: '昇順',
+      descending: '降順',
+      reputation: '評判',
+      planets: '惑星',
+      difficulty: '難易度',
+      allies: '同盟'
+    },
     title: '外交',
     description: 'NPCとの外交関係を管理',
     tabs: {

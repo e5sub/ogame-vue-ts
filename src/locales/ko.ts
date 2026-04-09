@@ -1061,6 +1061,20 @@ export default {
   },
   gmView: {
     title: 'GM 제어판',
+    presets: '프리셋',
+    choosePreset: '프리셋 선택',
+    defaultPreset: '기본 프리셋',
+    applyPreset: '프리셋 적용',
+    savePreset: '프리셋 저장',
+    presetName: '프리셋 이름',
+    presetNameRequired: '프리셋 이름을 입력하세요',
+    presetSaved: '프리셋 저장됨',
+    presetApplied: '프리셋 적용됨',
+    deletePreset: '프리셋 삭제',
+    presetDeleted: '프리셋 삭제됨',
+    confirmOverwriteTitle: '프리셋이 이미 존재함',
+    confirmOverwriteMessage: '"{name}" 이름의 프리셋이 이미 존재합니다. 덮어쓰시겠습니까?',
+    cannotDeleteDefault: '기본 프리셋은 삭제할 수 없습니다',
     adminOnly: '관리자 전용',
     selectPlanet: '행성 선택',
     choosePlanet: '행성을 선택하세요',
@@ -1160,6 +1174,15 @@ export default {
     }
   },
   diplomacy: {
+    sort: {
+      label: '정렬',
+      ascending: '오름차순',
+      descending: '내림차순',
+      reputation: '평판',
+      planets: '행성',
+      difficulty: '난이도',
+      allies: '동맹'
+    },
     title: '외교',
     description: 'NPC와의 외교 관계 관리',
     tabs: {

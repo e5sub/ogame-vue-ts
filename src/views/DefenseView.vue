@@ -190,6 +190,7 @@
   import * as publicLogic from '@/logic/publicLogic'
   import * as shipValidation from '@/logic/shipValidation'
   import * as shipLogic from '@/logic/shipLogic'
+  import * as missileLogic from '@/logic/missileLogic'
   import * as gameLogic from '@/logic/gameLogic'
   import * as waitingQueueLogic from '@/logic/waitingQueueLogic'
   import * as officerLogic from '@/logic/officerLogic'
@@ -204,12 +205,12 @@
   // 导弹容量相关计算
   const missileSiloCapacity = computed(() => {
     if (!planet.value) return 0
-    return shipLogic.calculateMissileSiloCapacity(planet.value.buildings)
+    return missileLogic.calculateMissileSiloCapacity(planet.value.buildings)
   })
 
   const currentMissileCount = computed(() => {
     if (!planet.value) return 0
-    return shipLogic.calculateCurrentMissileCount(planet.value.defense)
+    return missileLogic.calculateCurrentMissileCount(planet.value.defense)
   })
 
   // AlertDialog 状态

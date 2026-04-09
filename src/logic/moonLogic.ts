@@ -1,6 +1,7 @@
 import type { Planet, Resources } from '@/types/game'
 import { BuildingType, ShipType, DefenseType } from '@/types/game'
 import { MOON_CONFIG, FLEET_STORAGE_CONFIG } from '@/config/gameConfig'
+import { generateId } from '@/utils/id'
 
 /**
  * 计算月球生成概率
@@ -79,7 +80,7 @@ export const tryGenerateMoon = (
 
   // 生成月球
   const moon: Planet = {
-    id: `moon_${Date.now()}`,
+    id: generateId('moon'),
     name: `Moon [${planetPosition.galaxy}:${planetPosition.system}:${planetPosition.position}]`,
     ownerId: playerId,
     position: planetPosition,

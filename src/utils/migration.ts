@@ -1,4 +1,18 @@
-import type { Planet, DebrisField, NPC } from '@/types/game'
+import type {
+  AllyDefenseNotification,
+  DebrisField,
+  FleetMission,
+  IncomingFleetAlert,
+  JointAttackInvite,
+  MissionReport,
+  NPC,
+  NPCActivityNotification,
+  Planet,
+  Player,
+  Position,
+  SpiedNotification,
+  SpyReport
+} from '@/types/game'
 import { decryptData, encryptData } from './crypto'
 import { generatePlanetTemperature } from '@/logic/planetLogic'
 import pkg from '../../package.json'
@@ -7,6 +21,514 @@ import pkg from '../../package.json'
  * 数据迁移工具
  * 用于从旧版本数据结构迁移到新版本
  */
+
+type PlanetKind = 'planet' | 'moon'
+type RemappedPlanetEntry = { newId: string; name: string }
+type DuplicatePlanetKindMap = Map<PlanetKind, RemappedPlanetEntry>
+type DuplicatePlanetPositionMap = Map<string, DuplicatePlanetKindMap>
+
+// oldPlanetId -> position -> planet/moon -> remapped target
+type DuplicatePlanetIdMap = Map<string, DuplicatePlanetPositionMap>
+
+interface MigratablePlayer extends Player {
+  diplomaticRelations?: Record<string, unknown>
+}
+
+interface MigratableGameData {
+  currentPlanetId?: string
+  player?: MigratablePlayer
+  npcs?: NPC[]
+  universePlanets?: Record<string, Planet>
+  debrisFields?: Record<string, DebrisField>
+}
+
+interface PlanetReferenceContext {
+  position?: Position
+  isMoon?: boolean
+  planetName?: string
+}
+
+interface HasTargetPlanetId {
+  targetPlanetId?: string
+}
+
+interface HasOriginPlanetId {
+  originPlanetId?: string
+}
+
+interface HasParentPlanetId {
+  parentPlanetId?: string
+}
+
+interface HasCurrentPlanetId {
+  currentPlanetId?: string
+}
+
+const getPlanetPositionKey = (position: Position): string => {
+  return `${position.galaxy}:${position.system}:${position.position}`
+}
+
+const getPlanetKindKey = (isMoon?: boolean): PlanetKind => {
+  return isMoon ? 'moon' : 'planet'
+}
+
+const getPlanetEntriesFor = (
+  planetId: string,
+  idMap: DuplicatePlanetIdMap,
+  position?: Position
+): DuplicatePlanetKindMap | undefined => {
+  if (!position) return undefined
+
+  return idMap.get(planetId)?.get(getPlanetPositionKey(position))
+}
+
+const getEntriesByName = (entries: Iterable<RemappedPlanetEntry>, planetName?: string): RemappedPlanetEntry[] => {
+  if (!planetName) {
+    return []
+  }
+
+  return Array.from(entries).filter(entry => entry.name === planetName)
+}
+
+const getUniqueEntryByName = (entries: Iterable<RemappedPlanetEntry>, planetName?: string): RemappedPlanetEntry | undefined => {
+  const matchedEntries = getEntriesByName(entries, planetName)
+  if (matchedEntries.length !== 1) {
+    return undefined
+  }
+
+  return matchedEntries[0]
+}
+
+const getOnlyEntry = (entries: DuplicatePlanetKindMap): RemappedPlanetEntry | undefined => {
+  if (entries.size !== 1) {
+    return undefined
+  }
+
+  return Array.from(entries.values())[0]
+}
+
+const getEntriesAcrossPositions = (byPosition: DuplicatePlanetPositionMap): RemappedPlanetEntry[] => {
+  const entries: RemappedPlanetEntry[] = []
+
+  byPosition.forEach(byKind => {
+    byKind.forEach(entry => {
+      entries.push(entry)
+    })
+  })
+
+  return entries
+}
+
+const buildDuplicatePlanetIdMap = (player: Player): DuplicatePlanetIdMap => {
+  const planetsByOriginalId = new Map<string, Planet[]>()
+
+  player.planets.forEach(planet => {
+    let group = planetsByOriginalId.get(planet.id)
+    if (!group) {
+      group = []
+      planetsByOriginalId.set(planet.id, group)
+    }
+    group.push(planet)
+  })
+
+  const idMap: DuplicatePlanetIdMap = new Map()
+
+  planetsByOriginalId.forEach((planets, originalId) => {
+    if (planets.length <= 1) return
+
+    planets.forEach((planet, index) => {
+      if (index === 0) return
+
+      const newId = `${originalId}_${Math.random().toString(36).substring(2, 9)}`
+      const positionKey = getPlanetPositionKey(planet.position)
+
+      let byPosition = idMap.get(originalId)
+      if (!byPosition) {
+        byPosition = new Map()
+        idMap.set(originalId, byPosition)
+      }
+
+      let byKind = byPosition.get(positionKey)
+      if (!byKind) {
+        byKind = new Map()
+        byPosition.set(positionKey, byKind)
+      }
+
+      byKind.set(getPlanetKindKey(planet.isMoon), {
+        newId,
+        name: planet.name
+      })
+
+      planet.id = newId
+    })
+  })
+
+  return idMap
+}
+
+const resolveRemappedPlanetId = (
+  planetId: string | undefined,
+  idMap: DuplicatePlanetIdMap,
+  context: PlanetReferenceContext = {}
+): string | undefined => {
+  if (!planetId) return undefined
+
+  const byPosition = idMap.get(planetId)
+  if (!byPosition) return undefined
+
+  if (context.position) {
+    const byKind = getPlanetEntriesFor(planetId, idMap, context.position)
+    if (!byKind) return undefined
+
+    // 只有在位置或名称足够区分目标时才重写引用，避免把旧引用误指到错误星球
+    if (context.isMoon !== undefined) {
+      return byKind.get(getPlanetKindKey(context.isMoon))?.newId
+    }
+
+    const matchedByName = getUniqueEntryByName(byKind.values(), context.planetName)
+    if (matchedByName) {
+      return matchedByName.newId
+    }
+
+    return getOnlyEntry(byKind)?.newId
+  }
+
+  if (context.planetName) {
+    return getUniqueEntryByName(getEntriesAcrossPositions(byPosition), context.planetName)?.newId
+  }
+
+  return undefined
+}
+
+const getUpdatedPlanetId = (
+  currentPlanetId: string | undefined,
+  idMap: DuplicatePlanetIdMap,
+  context: PlanetReferenceContext = {}
+): string | undefined => {
+  const remappedPlanetId = resolveRemappedPlanetId(currentPlanetId, idMap, context)
+  if (!remappedPlanetId || remappedPlanetId === currentPlanetId) {
+    return undefined
+  }
+
+  return remappedPlanetId
+}
+
+const updateTargetPlanetId = (
+  target: HasTargetPlanetId,
+  idMap: DuplicatePlanetIdMap,
+  context: PlanetReferenceContext = {}
+): boolean => {
+  const remappedPlanetId = getUpdatedPlanetId(target.targetPlanetId, idMap, context)
+  if (!remappedPlanetId) {
+    return false
+  }
+
+  target.targetPlanetId = remappedPlanetId
+  return true
+}
+
+const updateOriginPlanetId = (
+  target: HasOriginPlanetId,
+  idMap: DuplicatePlanetIdMap,
+  context: PlanetReferenceContext = {}
+): boolean => {
+  const remappedPlanetId = getUpdatedPlanetId(target.originPlanetId, idMap, context)
+  if (!remappedPlanetId) {
+    return false
+  }
+
+  target.originPlanetId = remappedPlanetId
+  return true
+}
+
+const updateParentPlanetId = (
+  target: HasParentPlanetId,
+  idMap: DuplicatePlanetIdMap,
+  context: PlanetReferenceContext = {}
+): boolean => {
+  const remappedPlanetId = getUpdatedPlanetId(target.parentPlanetId, idMap, context)
+  if (!remappedPlanetId) {
+    return false
+  }
+
+  target.parentPlanetId = remappedPlanetId
+  return true
+}
+
+const updateCurrentPlanetId = (
+  target: HasCurrentPlanetId,
+  idMap: DuplicatePlanetIdMap,
+  context: PlanetReferenceContext = {}
+): boolean => {
+  const remappedPlanetId = getUpdatedPlanetId(target.currentPlanetId, idMap, context)
+  if (!remappedPlanetId) {
+    return false
+  }
+
+  target.currentPlanetId = remappedPlanetId
+  return true
+}
+
+const updateMissionTargetPlanetId = (mission: FleetMission, idMap: DuplicatePlanetIdMap): boolean => {
+  return updateTargetPlanetId(mission, idMap, {
+    position: mission.targetPosition,
+    isMoon: mission.targetIsMoon
+  })
+}
+
+const updateSpyReportTargetPlanetId = (report: SpyReport, idMap: DuplicatePlanetIdMap): boolean => {
+  return updateTargetPlanetId(report, idMap, {
+    position: report.targetPosition,
+    planetName: report.targetPlanetName
+  })
+}
+
+const updateSpiedNotificationTargetPlanetId = (
+  notification: SpiedNotification,
+  idMap: DuplicatePlanetIdMap
+): boolean => {
+  return updateTargetPlanetId(notification, idMap, {
+    planetName: notification.targetPlanetName
+  })
+}
+
+const updateNPCActivityTargetPlanetId = (
+  notification: NPCActivityNotification,
+  idMap: DuplicatePlanetIdMap
+): boolean => {
+  return updateTargetPlanetId(notification, idMap, {
+    position: notification.targetPosition,
+    planetName: notification.targetPlanetName
+  })
+}
+
+const updateIncomingAlertTargetPlanetId = (
+  alert: IncomingFleetAlert,
+  idMap: DuplicatePlanetIdMap
+): boolean => {
+  return updateTargetPlanetId(alert, idMap, {
+    planetName: alert.targetPlanetName
+  })
+}
+
+const updateJointAttackTargetPlanetId = (
+  invite: JointAttackInvite,
+  idMap: DuplicatePlanetIdMap
+): boolean => {
+  return updateTargetPlanetId(invite, idMap, {
+    position: invite.targetPosition
+  })
+}
+
+const updateAllyDefenseTargetPlanetId = (
+  notification: AllyDefenseNotification,
+  idMap: DuplicatePlanetIdMap
+): boolean => {
+  return updateTargetPlanetId(notification, idMap, {
+    planetName: notification.targetPlanetName
+  })
+}
+
+const updateMissionReportPlanetIds = (report: MissionReport, idMap: DuplicatePlanetIdMap): boolean => {
+  let mutated = false
+
+  if (updateOriginPlanetId(report, idMap, {
+    planetName: report.originPlanetName
+  })) {
+    mutated = true
+  }
+
+  if (updateTargetPlanetId(report, idMap, {
+    position: report.targetPosition,
+    planetName: report.targetPlanetName
+  })) {
+    mutated = true
+  }
+
+  if (report.details?.newPlanetId) {
+    const remappedNewPlanetId = getUpdatedPlanetId(report.details.newPlanetId, idMap, {
+      position: report.targetPosition,
+      planetName: report.details.newPlanetName || report.targetPlanetName
+    })
+
+    if (remappedNewPlanetId) {
+      report.details.newPlanetId = remappedNewPlanetId
+      mutated = true
+    }
+  }
+
+  return mutated
+}
+
+const fixPlayerPlanetsAndQueues = (player: Player, idMap: DuplicatePlanetIdMap): boolean => {
+  let mutated = false
+
+  player.planets.forEach(planet => {
+    if (planet.isMoon && updateParentPlanetId(planet, idMap, {
+      position: planet.position,
+      isMoon: false
+    })) {
+      mutated = true
+    }
+
+    // 等待队列里的 planetId 应始终与所属星球保持一致
+    planet.waitingBuildQueue?.forEach(item => {
+      if (item.planetId && item.planetId !== planet.id) {
+        item.planetId = planet.id
+        mutated = true
+      }
+    })
+  })
+
+  return mutated
+}
+
+const fixPlayerReferences = (
+  player: Player,
+  data: MigratableGameData,
+  idMap: DuplicatePlanetIdMap
+): boolean => {
+  let mutated = false
+
+  if (updateCurrentPlanetId(data, idMap)) {
+    mutated = true
+  }
+
+  player.fleetMissions?.forEach(mission => {
+    if (updateMissionTargetPlanetId(mission, idMap)) {
+      mutated = true
+    }
+  })
+
+  player.spyReports?.forEach(report => {
+    if (updateSpyReportTargetPlanetId(report, idMap)) {
+      mutated = true
+    }
+  })
+
+  player.spiedNotifications?.forEach(notification => {
+    if (updateSpiedNotificationTargetPlanetId(notification, idMap)) {
+      mutated = true
+    }
+  })
+
+  player.npcActivityNotifications?.forEach(notification => {
+    if (updateNPCActivityTargetPlanetId(notification, idMap)) {
+      mutated = true
+    }
+  })
+
+  player.missionReports?.forEach(report => {
+    if (updateMissionReportPlanetIds(report, idMap)) {
+      mutated = true
+    }
+  })
+
+  player.incomingFleetAlerts?.forEach(alert => {
+    if (updateIncomingAlertTargetPlanetId(alert, idMap)) {
+      mutated = true
+    }
+  })
+
+  player.jointAttackInvites?.forEach(invite => {
+    if (updateJointAttackTargetPlanetId(invite, idMap)) {
+      mutated = true
+    }
+  })
+
+  player.allyDefenseNotifications?.forEach(notification => {
+    if (updateAllyDefenseTargetPlanetId(notification, idMap)) {
+      mutated = true
+    }
+  })
+
+  return mutated
+}
+
+const fixNpcPlayerSpyReports = (npc: NPC, idMap: DuplicatePlanetIdMap): boolean => {
+  if (!npc.playerSpyReports) {
+    return false
+  }
+
+  let mutated = false
+  const remappedPlayerSpyReports: Record<string, SpyReport> = {}
+
+  // playerSpyReports 的 key 就是玩家星球 ID，需要和报告内容一起迁移
+  Object.entries(npc.playerSpyReports).forEach(([planetId, report]) => {
+    if (updateSpyReportTargetPlanetId(report, idMap)) {
+      mutated = true
+    }
+
+    const remappedPlanetId = getUpdatedPlanetId(planetId, idMap, {
+      position: report.targetPosition,
+      planetName: report.targetPlanetName
+    })
+
+    if (remappedPlanetId) {
+      remappedPlayerSpyReports[remappedPlanetId] = report
+      mutated = true
+      return
+    }
+
+    remappedPlayerSpyReports[planetId] = report
+  })
+
+  npc.playerSpyReports = remappedPlayerSpyReports
+  return mutated
+}
+
+const fixNpcReferences = (npcs: NPC[], idMap: DuplicatePlanetIdMap): boolean => {
+  let mutated = false
+
+  npcs.forEach(npc => {
+    if (fixNpcPlayerSpyReports(npc, idMap)) {
+      mutated = true
+    }
+
+    npc.fleetMissions?.forEach(mission => {
+      if (updateMissionTargetPlanetId(mission, idMap)) {
+        mutated = true
+      }
+    })
+  })
+
+  return mutated
+}
+
+/**
+ * 修复玩家星球的重复ID，并同步更新可被可靠识别的旧引用。
+ * 缺少位置或名称上下文、无法安全判定归属的旧引用会保留原ID，
+ * 继续指向保留下来的首个星球，避免把数据误指到错误目标。
+ */
+const fixDuplicatePlanetIds = (data: MigratableGameData): boolean => {
+  const player = data.player
+  if (!player || !Array.isArray(player.planets) || player.planets.length === 0) {
+    return false
+  }
+
+  const idMap = buildDuplicatePlanetIdMap(player)
+  if (idMap.size === 0) {
+    return false
+  }
+
+  // buildDuplicatePlanetIdMap 已经在上一步直接修复了重复星球 ID，
+  // 只要 idMap 非空，就说明当前迁移已经发生了实际修改。
+  let mutated = true
+
+  if (fixPlayerPlanetsAndQueues(player, idMap)) {
+    mutated = true
+  }
+
+  if (fixPlayerReferences(player, data, idMap)) {
+    mutated = true
+  }
+
+  if (data.npcs && fixNpcReferences(data.npcs, idMap)) {
+    mutated = true
+  }
+
+  return mutated
+}
 
 /**
  * 执行数据迁移
@@ -22,13 +544,13 @@ export const migrateGameData = (): void => {
     if (!oldEncryptedData) return
 
     // 尝试解密（如果是加密格式）
-    let oldData: any
+    let oldData: MigratableGameData
     try {
-      oldData = decryptData(oldEncryptedData)
+      oldData = decryptData(oldEncryptedData) as MigratableGameData
     } catch {
       // 解密失败，可能是新格式（未加密），直接解析
       try {
-        oldData = JSON.parse(oldEncryptedData)
+        oldData = JSON.parse(oldEncryptedData) as MigratableGameData
       } catch {
         return // 无法解析，放弃迁移
       }
@@ -100,6 +622,11 @@ export const migrateGameData = (): void => {
       needsSave = true
     }
 
+    // 修复重复的星球ID
+    if (fixDuplicatePlanetIds(oldData)) {
+      needsSave = true
+    }
+
     // 迁移温度数据：为没有温度的星球生成温度
     // 玩家星球
     if (oldData.player?.planets && Array.isArray(oldData.player.planets)) {
@@ -164,10 +691,11 @@ export const migrateGameData = (): void => {
     // 新版本统一使用 npc.relations[playerId] 存储NPC对玩家的关系
     if (oldData.player?.diplomaticRelations && oldData.npcs && Array.isArray(oldData.npcs)) {
       const playerId = oldData.player.id
+      const npcs = oldData.npcs
       const playerRelations = oldData.player.diplomaticRelations as Record<string, any>
 
       Object.entries(playerRelations).forEach(([npcId, relation]) => {
-        const npc = oldData.npcs.find((n: NPC) => n.id === npcId)
+        const npc = npcs.find((n: NPC) => n.id === npcId)
         if (npc) {
           if (!npc.relations) {
             npc.relations = {}

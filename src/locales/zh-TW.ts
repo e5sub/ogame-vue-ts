@@ -1080,6 +1080,20 @@ export default {
   },
   gmView: {
     title: 'GM 管理面板',
+    presets: '預設',
+    choosePreset: '選擇預設',
+    defaultPreset: '預設範本',
+    applyPreset: '套用預設',
+    savePreset: '儲存預設',
+    presetName: '預設名稱',
+    presetNameRequired: '請輸入預設名稱',
+    presetSaved: '預設已儲存',
+    presetApplied: '預設已套用',
+    deletePreset: '刪除預設',
+    presetDeleted: '預設已刪除',
+    confirmOverwriteTitle: '預設已存在',
+    confirmOverwriteMessage: '名為 "{name}" 的預設已存在，是否覆蓋？',
+    cannotDeleteDefault: '無法刪除預設範本',
     adminOnly: '僅管理員',
     selectPlanet: '選擇星球',
     choosePlanet: '選擇一個星球',
@@ -1179,6 +1193,15 @@ export default {
     }
   },
   diplomacy: {
+    sort: {
+      label: '排序',
+      ascending: '升序',
+      descending: '降序',
+      reputation: '聲望',
+      planets: '星球',
+      difficulty: '難度',
+      allies: '盟友'
+    },
     title: '外交',
     description: '管理與NPC的外交關係',
     tabs: {

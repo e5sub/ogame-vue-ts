@@ -1093,6 +1093,20 @@ export default {
   },
   gmView: {
     title: 'Panel de Control GM',
+    presets: 'Preajustes',
+    choosePreset: 'Elegir preajuste',
+    defaultPreset: 'Preajuste predeterminado',
+    applyPreset: 'Aplicar preajuste',
+    savePreset: 'Guardar preajuste',
+    presetName: 'Nombre del preajuste',
+    presetNameRequired: 'Ingrese el nombre del preajuste',
+    presetSaved: 'Preajuste guardado',
+    presetApplied: 'Preajuste aplicado',
+    deletePreset: 'Eliminar preajuste',
+    presetDeleted: 'Preajuste eliminado',
+    confirmOverwriteTitle: 'El preajuste ya existe',
+    confirmOverwriteMessage: 'El preajuste con el nombre "{name}" ya existe. ¿Sobrescribir?',
+    cannotDeleteDefault: 'No se puede eliminar el preajuste predeterminado',
     adminOnly: 'Solo Administrador',
     selectPlanet: 'Seleccionar Planeta',
     choosePlanet: 'Elige un planeta',
@@ -1193,6 +1207,15 @@ export default {
     }
   },
   diplomacy: {
+    sort: {
+      label: 'Ordenar',
+      ascending: 'Ascendente',
+      descending: 'Descendente',
+      reputation: 'Reputación',
+      planets: 'Planetas',
+      difficulty: 'Dificultad',
+      allies: 'Aliados'
+    },
     title: 'Diplomacia',
     description: 'Gestionar relaciones diplomáticas con NPCs',
     tabs: {

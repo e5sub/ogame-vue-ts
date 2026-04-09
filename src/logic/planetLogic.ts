@@ -1,6 +1,7 @@
 import type { Planet, Resources } from '@/types/game'
 import { ShipType, DefenseType, BuildingType } from '@/types/game'
 import { MOON_CONFIG, PLANET_CONFIG, FLEET_STORAGE_CONFIG } from '@/config/gameConfig'
+import { generateId } from '@/utils/id'
 import * as oreDepositLogic from './oreDepositLogic'
 
 /**
@@ -173,7 +174,7 @@ export const createMoon = (
   moonSuffix: string = "'s Moon",
   diameter?: number
 ): Planet => {
-  const moonId = `moon_${Date.now()}`
+  const moonId = generateId('moon')
   const moon: Planet = {
     id: moonId,
     name: `${parentPlanet.name}${moonSuffix}`,

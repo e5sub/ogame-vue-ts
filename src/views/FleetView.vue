@@ -642,6 +642,7 @@
   import * as diplomaticLogic from '@/logic/diplomaticLogic'
   import * as gameLogic from '@/logic/gameLogic'
   import * as moonLogic from '@/logic/moonLogic'
+  import { generateId } from '@/utils/id'
 
   const route = useRoute()
   const gameStore = useGameStore()
@@ -934,7 +935,7 @@
 
   // 生成唯一ID
   const generatePresetId = (): string => {
-    return `preset_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return generateId('fleet_preset')
   }
 
   // 保存当前配置为预设
