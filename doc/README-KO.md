@@ -9,7 +9,7 @@
   [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0)
   [![Tap Tap](https://img.shields.io/badge/TapTap-OGame%20Vue%20Ts-18d6e0)](https://www.taptap.cn/app/801190)
 
-  [简体中文](README.md) | [繁體中文](README-zh-TW.md) | [English](README-EN.md) | [Deutsch](README-DE.md) | [Русский](README-RU.md) | [Español](README-ES.md) | 한국어 | [日本語](README-JA.md)
+  [简体中文](../README.md) | [繁體中文](README-zh-TW.md) | [English](README-EN.md) | [Deutsch](README-DE.md) | [Русский](README-RU.md) | [Español](README-ES.md) | 한국어 | [日本語](README-JA.md)
 
 </div>
 
@@ -91,6 +91,11 @@ pnpm preview
 ## 커스터마이징
 
 애플리케이션은 `src/style.css`에 정의된 Tailwind CSS 변수를 통해 완전한 테마 커스터마이징을 지원합니다. 라이트 모드와 다크 모드 간에 쉽게 전환할 수 있습니다.
+
+## 문서
+
+- [Docker 배포 가이드](DOCKER.md)
+- [게임 참조 설명서](ogame-reference.md) - 건물, 기술, 함선, 방어, 장교 등 전체 데이터
 
 ## 기여
 

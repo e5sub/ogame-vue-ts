@@ -9,7 +9,7 @@
   [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0)
   [![Tap Tap](https://img.shields.io/badge/TapTap-OGame%20Vue%20Ts-18d6e0)](https://www.taptap.cn/app/801190)
   
-  [简体中文](README.md) | 繁體中文 | [English](README-EN.md) | [Deutsch](README-DE.md) | [Русский](README-RU.md) | [Español](README-ES.md) | [한국어](README-KO.md) | [日本語](README-JA.md)
+  [简体中文](../README.md) | 繁體中文 | [English](README-EN.md) | [Deutsch](README-DE.md) | [Русский](README-RU.md) | [Español](README-ES.md) | [한국어](README-KO.md) | [日本語](README-JA.md)
 
 </div>
 
@@ -91,6 +91,11 @@ pnpm preview
 ## 自定義
 
 應用支援通過 `src/style.css` 中定義的 Tailwind CSS 變數進行完整的主題自定義。您可以輕鬆地在淺色和深色模式之間切換。
+
+## 文件
+
+- [Docker 部署指南](DOCKER.md)
+- [遊戲參考手冊](ogame-reference.md) - 建築、科技、艦船、防禦、軍官等完整資料
 
 ## 貢獻
 

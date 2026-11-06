@@ -9,7 +9,7 @@
   [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0)
   [![Tap Tap](https://img.shields.io/badge/TapTap-OGame%20Vue%20Ts-18d6e0)](https://www.taptap.cn/app/801190)
 
-  [简体中文](README.md) | [繁體中文](README-zh-TW.md) | [English](README-EN.md) | [Deutsch](README-DE.md) | [Русский](README-RU.md) | Español | [한국어](README-KO.md) | [日本語](README-JA.md)
+  [简体中文](../README.md) | [繁體中文](README-zh-TW.md) | [English](README-EN.md) | [Deutsch](README-DE.md) | [Русский](README-RU.md) | Español | [한국어](README-KO.md) | [日本語](README-JA.md)
 
 </div>
 
@@ -91,6 +91,11 @@ Todos los datos del juego se encriptan automáticamente usando AES antes de alma
 ## Personalización
 
 La aplicación soporta personalización completa de temas a través de variables CSS de Tailwind definidas en `src/style.css`. Puedes cambiar fácilmente entre modo claro y oscuro.
+
+## Documentación
+
+- [Guía de despliegue Docker](DOCKER.md)
+- [Manual de referencia del juego](ogame-reference.md) - Datos completos de edificios, tecnologías, naves, defensa, oficiales, etc.
 
 ## Contribuciones
 

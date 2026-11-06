@@ -9,7 +9,7 @@
   [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0)
   [![Tap Tap](https://img.shields.io/badge/TapTap-OGame%20Vue%20Ts-18d6e0)](https://www.taptap.cn/app/801190)
   
-  简体中文 | [繁體中文](README-zh-TW.md) | [English](README-EN.md) | [Deutsch](README-DE.md) | [Русский](README-RU.md) | [Español](README-ES.md) | [한국어](README-KO.md) | [日本語](README-JA.md)
+  简体中文 | [繁體中文](doc/README-zh-TW.md) | [English](doc/README-EN.md) | [Deutsch](doc/README-DE.md) | [Русский](doc/README-RU.md) | [Español](doc/README-ES.md) | [한국어](doc/README-KO.md) | [日本語](doc/README-JA.md)
 
 </div>
 
@@ -95,6 +95,11 @@ pnpm preview
 ## 贡献
 
 欢迎贡献！请随时提交 issue 或 pull request。
+
+## 文档
+
+- [Docker 部署指南](doc/DOCKER.md)
+- [游戏参考手册](doc/ogame-reference.md) - 建筑、科技、舰船、防御、军官等完整数据
 
 ## 许可证
 

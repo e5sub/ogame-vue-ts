@@ -9,7 +9,7 @@
   [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0)
   [![Tap Tap](https://img.shields.io/badge/TapTap-OGame%20Vue%20Ts-18d6e0)](https://www.taptap.cn/app/801190)
 
-  [简体中文](README.md)| [繁體中文](README-zh-TW.md) | [English](README-EN.md)  | Deutsch | [Русский](README-RU.md) | [Español](README-ES.md) | [한국어](README-KO.md) | [日本語](README-JA.md)
+  [简体中文](../README.md)| [繁體中文](README-zh-TW.md) | [English](README-EN.md)  | Deutsch | [Русский](README-RU.md) | [Español](README-ES.md) | [한국어](README-KO.md) | [日本語](README-JA.md)
 
 </div>
 
@@ -91,6 +91,11 @@ Alle Spieldaten werden automatisch mit AES-Verschlüsselung verschlüsselt, bevo
 ## Anpassung
 
 Die Anwendung unterstützt vollständige Theme-Anpassung durch Tailwind CSS-Variablen, die in `src/style.css` definiert sind. Du kannst einfach zwischen hellem und dunklem Modus wechseln.
+
+## Dokumentation
+
+- [Docker-Bereitstellungsanleitung](DOCKER.md)
+- [Spielreferenzhandbuch](ogame-reference.md) - Vollständige Daten zu Gebäuden, Technologien, Schiffen, Verteidigung, Offizieren usw.
 
 ## Mitwirken
 

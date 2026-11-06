@@ -9,7 +9,7 @@
   [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0)
   [![Tap Tap](https://img.shields.io/badge/TapTap-OGame%20Vue%20Ts-18d6e0)](https://www.taptap.cn/app/801190)
 
-  [简体中文](README.md) | [繁體中文](README-zh-TW.md) | [English](README-EN.md) | [Deutsch](README-DE.md) | Русский | [Español](README-ES.md) | [한국어](README-KO.md) | [日本語](README-JA.md)
+  [简体中文](../README.md) | [繁體中文](README-zh-TW.md) | [English](README-EN.md) | [Deutsch](README-DE.md) | Русский | [Español](README-ES.md) | [한국어](README-KO.md) | [日本語](README-JA.md)
 
 </div>
 
@@ -91,6 +91,11 @@ pnpm preview
 ## Кастомизация
 
 Приложение поддерживает полную настройку темы через CSS-переменные Tailwind, определённые в `src/style.css`. Вы можете легко переключаться между светлым и тёмным режимами.
+
+## Документация
+
+- [Руководство по развертыванию Docker](DOCKER.md)
+- [Справочное руководство по игре](ogame-reference.md) - Полные данные о зданиях, технологиях, кораблях, обороне, офицерах и т.д.
 
 ## Участие в разработке
 

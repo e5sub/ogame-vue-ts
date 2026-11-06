@@ -9,7 +9,7 @@
   [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0)
   [![Tap Tap](https://img.shields.io/badge/TapTap-OGame%20Vue%20Ts-18d6e0)](https://www.taptap.cn/app/801190)
 
-  [简体中文](README.md) | [繁體中文](README-zh-TW.md) | [English](README-EN.md) | [Deutsch](README-DE.md) | [Русский](README-RU.md) | [Español](README-ES.md) | [한국어](README-KO.md) | 日本語
+  [简体中文](../README.md) | [繁體中文](README-zh-TW.md) | [English](README-EN.md) | [Deutsch](README-DE.md) | [Русский](README-RU.md) | [Español](README-ES.md) | [한국어](README-KO.md) | 日本語
 
 </div>
 
@@ -91,6 +91,11 @@ pnpm preview
 ## カスタマイズ
 
 アプリケーションは`src/style.css`で定義されたTailwind CSS変数による完全なテーマカスタマイズをサポートしています。ライトモードとダークモードを簡単に切り替えることができます。
+
+## ドキュメント
+
+- [Docker デプロイガイド](DOCKER.md)
+- [ゲームリファレンスマニュアル](ogame-reference.md) - 建物、技術、艦船、防衛、将校などの完全なデータ
 
 ## 貢献
 
